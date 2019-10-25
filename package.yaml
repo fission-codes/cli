@@ -1,0 +1,218 @@
+name: fission-cli
+version: '1.0.0'
+category: API
+author:
+  - Brooklyn Zelenka
+  - Daniel Holmgren
+  - Ben Church
+maintainer:
+  - brooklyn@fission.codes
+  - daniel@fission.codes
+  - ben@fission.codes
+copyright: © 2019 Fission Internet Software Services for Open Networks Inc.
+license: AGPL-3.0-or-later
+license-file: LICENSE
+github: fission-suite/cli
+tested-with: GHC==8.6.5
+extra-source-files:
+  - README.md
+
+ghc-options:
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  # Warn about too little
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wmissing-export-lists
+  - -Wpartial-fields
+  # Warn about too much
+  - -Wredundant-constraints
+  # Prettier Development
+  - -fhide-source-paths
+
+default-extensions:
+  - ApplicativeDo
+  - BangPatterns
+  - BinaryLiterals
+  - BlockArguments
+  - ConstraintKinds
+  - DataKinds
+  - DeriveAnyClass
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveLift
+  - DeriveTraversable
+  - DerivingStrategies
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - KindSignatures
+  - LambdaCase
+  - LiberalTypeSynonyms
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - NoImplicitPrelude
+  - NoMonomorphismRestriction
+  - OverloadedStrings
+  - OverloadedLabels
+  - OverloadedLists
+  - PostfixOperators
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - TupleSections
+  - TypeFamilies
+  - TypeSynonymInstances
+  - TemplateHaskell
+  - TypeOperators
+  - ViewPatterns
+
+dependencies:
+  - aeson
+  - aeson-casing
+  - ansi-terminal
+  - base
+  - bcrypt
+  - cryptonite
+  - bytestring
+  - data-default-class
+  - data-has
+  - envy
+  - filepath
+  - fission-web-api
+  - fsnotify
+  - haskeline
+  - http-client
+  - http-client-tls
+  - lens
+  - monad-logger
+  - mtl
+  - optparse-applicative
+  - optparse-simple
+  - random-bytestring
+  - resource-pool
+  - regex-compat
+  - rio
+  - rio-orphans
+  - scientific
+  - servant
+  - servant-client
+  - servant-server
+  - text
+  - time
+  - transformers
+  - unliftio
+  - uuid
+  - uuid-types
+  - word8
+  - yaml
+
+library:
+  source-dirs: library
+
+executables:
+  fission-cli:
+    main: Main.hs
+    source-dirs: app
+    dependencies:
+      - fission-web-api
+    ghc-options:
+      - -threaded
+      - -flate-specialise
+      - -rtsopts
+      - -with-rtsopts=-N
+      - -with-rtsopts=-T
+      - -optc-ffast-math
+      - -optc-O3
+      - -O2
+    # uncomment to build a static binary on Linux
+    # cc-options: -static
+    # ld-options: -static -pthread
+
+tests:
+  fission-doctest:
+    main: Main.hs
+    source-dirs: test/doctest
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - directory
+      - directory-tree
+      - doctest
+      - Glob
+      - lens-aeson
+      - QuickCheck
+      - yaml
+
+  fission-test:
+    main: Main.hs
+    source-dirs:
+      - library
+      - test
+      - test/testsuite
+    ghc-options:
+      - -fhpc
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - aeson
+      - hspec
+      - hspec-wai
+      - hspec-wai-json
+      - fission-web-api
+      - tasty
+      - tasty-hunit
+      - tasty-hspec
+      - tasty-smallcheck
+      - tasty-rerun
+      - transformers
+
+  # fission-coverage-code:
+  #   main: Main.hs
+  #   source-dirs: test/code-coverage
+  #   ghc-options:
+  #     - -fhpc
+  #   dependencies:
+  #     - base
+  #     - fission-web-api
+  #     - process
+  #     - regex-compat
+
+  # fission-coverage-docs:
+  #   main: Main.hs
+  #   source-dirs: test/doc-coverage
+  #   dependencies:
+  #     - doctest
+  #     - fission-web-api
+  #     - process
+  #     - regex-compat
+
+  fission-lint:
+    main: Main.hs
+    source-dirs: test/lint
+    dependencies:
+      - base
+      - hlint
+      - rio
+
+benchmarks:
+  fission-benchmark:
+    main: Main.hs
+    source-dirs: benchmark
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+      - -O2
+    dependencies:
+      - criterion
+      - fission-web-api
