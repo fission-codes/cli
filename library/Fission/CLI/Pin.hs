@@ -20,7 +20,7 @@ import qualified Fission.IPFS.Types   as IPFS
 import           Fission.IPFS.CID.Types
 
 import qualified Fission.Web.Client      as Client
-import qualified Fission.Web.IPFS.Client as Fission
+import qualified Fission.Web.Client.IPFS as Fission
 
 import           Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Loader  as CLI

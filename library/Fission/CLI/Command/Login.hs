@@ -14,7 +14,7 @@ import           System.Console.Haskeline
 import qualified Fission.Config as Config
 import           Fission.Internal.Constraint
 
-import           Fission.Web.User.Client  as User.Client
+import           Fission.Web.Client.Register as Register
 import qualified Fission.Web.Client.Types as Client
 
 import qualified Fission.CLI.Auth as Auth
@@ -61,7 +61,7 @@ login = do
                  . liftIO
                  . CLI.Wait.waitFor "Verifying your credentials"
                  . runner
-                 $ User.Client.verify auth
+                 $ Register.verify auth
 
       case authResult of
         Right _ok -> Auth.write auth >> CLI.Success.putOk "Logged in"
