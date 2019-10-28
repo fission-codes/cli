@@ -48,7 +48,7 @@ extra-deps:
 - ip-1.5.1
 - tasty-rerun-1.1.14
 - git: https://github.com/fission-suite/web-api.git
-  commit: 5a731fa00953e0b3b1248698082b3b81a95ad03b
+  commit: 3cc9971fbb294917379dec53833b54166084d511
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

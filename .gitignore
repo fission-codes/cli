@@ -12,6 +12,7 @@
 yesod-devel/*
 addon-manifest.json
 env.yaml
+.env
 domain-key.txt
 domain-crt.txt
 
