@@ -14,6 +14,7 @@ import qualified Fission.Internal.UTF8 as UTF8
 
 import qualified Fission.CLI.Auth as Auth
 import           Fission.CLI.Config.Types
+import           Fission.CLI.Environment.Types
 
 -- | The command to attach to the CLI tree
 command :: MonadIO m
@@ -30,15 +31,15 @@ command cfg =
 whoami :: MonadRIO   cfg m
        => HasLogFunc cfg
        => m ()
-whoami = do
+whoami =
   Auth.get >>= \case
     Left err -> do
       logError $ displayShow err
       Auth.couldNotRead
 
-    Right auth -> do
+    Right env -> do
+      let auth = userAuth env
       UTF8.putText "💻 Currently logged in as: "
-
       liftIO $ ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
       putStr $ basicAuthUsername auth <> "\n"
 

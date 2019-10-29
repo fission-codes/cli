@@ -8,6 +8,7 @@ import RIO
 import RIO.Process (HasProcessContext)
 
 import Data.Has
+import Data.List.NonEmpty
 
 import Servant
 import Servant.Client
@@ -32,14 +33,21 @@ run :: MonadRIO          cfg m
     => Has Client.Runner cfg
     => Has IPFS.BinPath  cfg
     => Has IPFS.Timeout  cfg
+    => Has (Maybe (NonEmpty IPFS.Peer)) cfg
     => CID
     -> BasicAuthData
     -> m (Either ClientError CID)
 run cid@(CID hash) auth = do
   logDebug $ "Remote pinning " <> display hash
-  IPFS.Peer.connect IPFS.Peer.fission
 
   Client.Runner runner <- Config.get
+  mayPeers <- Config.get
+
+  case mayPeers of
+    Just peers ->
+      IPFS.Peer.connect $ head $ peers
+
+
   liftIO (pin runner auth cid) >>= \case
     Right _ -> do
       CLI.Success.live hash

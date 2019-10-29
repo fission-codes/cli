@@ -43,6 +43,7 @@ command :: MonadIO m
         => HasProcessContext cfg
         => Has IPFS.BinPath  cfg
         => Has IPFS.Timeout  cfg
+        => Has (Maybe (NonEmpty IPFS.Peer)) cfg
         => cfg
         -> CommandM (m ())
 command cfg =
@@ -59,6 +60,7 @@ watcher :: MonadRIO          cfg m
         => HasProcessContext cfg
         => Has IPFS.BinPath  cfg
         => Has IPFS.Timeout  cfg
+        => Has (Maybe (NonEmpty IPFS.Peer)) cfg
         => Watch.Options
         -> m ()
 watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
@@ -84,6 +86,7 @@ handleTreeChanges :: HasLogFunc        cfg
                   => HasProcessContext cfg
                   => Has IPFS.BinPath  cfg
                   => Has IPFS.Timeout  cfg
+                  => Has (Maybe (NonEmpty IPFS.Peer)) cfg
                   => MVar UTCTime
                   -> MVar Text
                   -> WatchManager
@@ -117,6 +120,7 @@ pinAndUpdateDNS :: MonadRIO          cfg m
                 => HasProcessContext cfg
                 => Has IPFS.BinPath  cfg
                 => Has IPFS.Timeout  cfg
+                => Has (Maybe (NonEmpty IPFS.Peer)) cfg
                 => CID
                 -> m (Either SomeException AWS.DomainName)
 pinAndUpdateDNS cid =

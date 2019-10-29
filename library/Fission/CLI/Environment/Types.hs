@@ -2,10 +2,10 @@ module Fission.CLI.Environment.Types (Environment (..)) where
 
 import RIO
 
-import Data.Aeson
+import           Data.Aeson
 import           Servant.API
 
-import qualified Fission.IPFS.Types       as IPFS
+import qualified Fission.IPFS.Types as IPFS
 import           Fission.Internal.Orphanage.BasicAuthData ()
 
 data Environment = Environment
@@ -21,5 +21,5 @@ instance ToJSON Environment where
 
 instance FromJSON Environment where
   parseJSON = withObject "Environment" $ \obj ->
-    Environment <$> obj .: "userAuth"
+    Environment <$> obj .: "user_auth"
                 <*> obj .: "peers"

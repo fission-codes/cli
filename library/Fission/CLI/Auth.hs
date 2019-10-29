@@ -14,6 +14,7 @@ import           RIO.FilePath
 
 import qualified System.Console.ANSI as ANSI
 
+import           Data.Has
 import qualified Data.Yaml as YAML
 import           Servant
 import           Servant.Client
@@ -26,7 +27,7 @@ import           Fission.CLI.Environment.Types
 import           Data.List.NonEmpty as NonEmpty
 
 -- | Retrieve auth from the user's system
-get :: MonadIO m => m (Either YAML.ParseException BasicAuthData)
+get :: MonadIO m => m (Either YAML.ParseException Environment)
 get = liftIO . YAML.decodeFileEither =<< cachePath
 
 -- | Write user's auth to a local on-system path
@@ -66,8 +67,9 @@ withAuth :: MonadRIO   cfg m
          => (BasicAuthData -> m (Either ClientError a))
          -> m (Either SomeException a)
 withAuth action = get >>= \case
-  Right auth ->
-    action auth >>= pure . \case
+  Right env -> do
+    let basicAuth = userAuth env
+    action basicAuth >>= pure . \case
       Right result -> Right result
       Left err -> Left $ toException err
 

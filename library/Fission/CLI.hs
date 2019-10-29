@@ -28,6 +28,7 @@ cli :: MonadRIO    cfg m
     => Has Client.Runner cfg
     => Has IPFS.BinPath  cfg
     => Has IPFS.Timeout  cfg
+    => Has (Maybe (NonEmpty IPFS.Peer)) cfg
     => m ()
 cli = do
   cfg <- ask

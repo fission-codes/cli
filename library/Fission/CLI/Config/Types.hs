@@ -7,6 +7,7 @@ module Fission.CLI.Config.Types
 
 import RIO
 import RIO.Process (ProcessContext, HasProcessContext (..))
+import Servant.API
 
 import Data.Has
 import Control.Lens (makeLenses)
@@ -27,6 +28,8 @@ data Config = Config
   , _processCtx  :: !ProcessContext
   , _ipfsPath    :: !IPFS.BinPath
   , _ipfsTimeout :: !IPFS.Timeout
+  , _peers       :: Maybe (NonEmpty IPFS.Peer)
+  , _userAuth    :: Maybe BasicAuthData
   }
 
 makeLenses ''Config
@@ -45,3 +48,9 @@ instance Has IPFS.BinPath Config where
 
 instance Has IPFS.Timeout Config where
   hasLens = ipfsTimeout
+
+instance Has (Maybe (NonEmpty IPFS.Peer)) Config where
+  hasLens = peers
+
+instance Has (Maybe BasicAuthData) Config where
+  hasLens = userAuth

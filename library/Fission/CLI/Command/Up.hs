@@ -4,6 +4,7 @@ module Fission.CLI.Command.Up (command, up) where
 import           RIO
 import           RIO.Directory
 import           RIO.Process (HasProcessContext)
+import           Servant.API
 
 import           Data.Has
 import           Options.Applicative.Simple hiding (command)
@@ -29,6 +30,7 @@ command :: MonadIO m
         => Has IPFS.BinPath  cfg
         => Has IPFS.Timeout  cfg
         => Has Client.Runner cfg
+        => Has (Maybe (NonEmpty IPFS.Peer)) cfg
         => cfg
         -> CommandM (m ())
 command cfg =
@@ -45,6 +47,7 @@ up :: MonadRIO          cfg m
    => Has IPFS.Timeout  cfg
    => Has IPFS.BinPath  cfg
    => Has Client.Runner cfg
+   => Has (Maybe (NonEmpty IPFS.Peer)) cfg
    => Up.Options
    -> m ()
 up Up.Options {..} = handleWith_ Error.put' do
@@ -54,6 +57,7 @@ up Up.Options {..} = handleWith_ Error.put' do
   logDebug $ "Starting single IPFS add locally of " <> displayShow absPath
 
   unless dnsOnly do
+    -- TODO hoist auth further up
     void . liftE . Auth.withAuth $ CLI.Pin.run cid
 
   liftE . Auth.withAuth $ CLI.DNS.update cid
