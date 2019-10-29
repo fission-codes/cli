@@ -15,7 +15,7 @@ pool:
 steps:
 - script: |
     mkdir -p ~/.local/bin
-    sudo apt install libpq-dev
+    sudo apt install postgresql
     curl -L https://get.haskellstack.org/stable/linux-x86_64.tar.gz | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
   displayName: Install Stack
 - script: |
