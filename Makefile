@@ -1,9 +1,9 @@
-package = fission-cli
+	package = fission-cli
 
 stack_yaml = STACK_YAML="stack.yaml"
 stack = $(stack_yaml) stack
 
-dev:
+build:
 	$(stack) build --fast $(package):lib
 
 release:
@@ -30,8 +30,8 @@ test-ghci:
 bench:
 	$(stack) build --fast --bench $(package)
 
-watch:
-	$(stack) exec -- ghcid -c "stack ghci $(package):lib --test --main-is $(package):fission-cli"
+dev:
+	$(stack) exec -- ghcid -c "stack ghci $(package):lib --test --main-is $(package):fission-cli-exe"
 
 setup:
 	stack install ghcid && stack install yesod-bin
