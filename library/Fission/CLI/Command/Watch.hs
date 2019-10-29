@@ -35,6 +35,8 @@ import           Fission.CLI.Command.Watch.Types as Watch
 import           Fission.CLI.Config.Types
 import qualified Fission.CLI.Pin                 as CLI.Pin
 import qualified Fission.CLI.DNS                 as CLI.DNS
+import qualified Fission.CLI.Command.Guard.Peers    as Guard.Peers
+
 
 -- | The command to attach to the CLI tree
 command :: MonadIO m
@@ -50,17 +52,12 @@ command cfg =
   addCommand
     "watch"
     "Keep your working directory in sync with the IPFS network"
-    (\options -> runRIO cfg $ watcher options)
+    (\options -> runRIO cfg $ Guard.Peers.ensurePeers $ watcher options)
     parseOptions
 
 -- | Continuously sync the current working directory to the server over IPFS
 watcher :: MonadRIO          cfg m
-        => HasLogFunc        cfg
-        => Has Client.Runner cfg
-        => HasProcessContext cfg
-        => Has IPFS.BinPath  cfg
-        => Has IPFS.Timeout  cfg
-        => Has (Maybe (NonEmpty IPFS.Peer)) cfg
+        => Uppable  cfg
         => Watch.Options
         -> m ()
 watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
