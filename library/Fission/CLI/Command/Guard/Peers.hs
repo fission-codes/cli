@@ -25,7 +25,7 @@ ensurePeers
   , Has Client.Runner cfg
   , Has (Maybe (NonEmpty IPFS.Peer)) cfg
   )
-  => RIO upCfg a
+  => RIO UpConfig a
   -> m a
 ensurePeers handler = do
   maybePeers :: Maybe (NonEmpty IPFS.Peer) <- Config.get
@@ -37,10 +37,11 @@ ensurePeers handler = do
               Just peers ->
                 return peers
 
-  _logFunc' :: LogFunc <- Config.get
-  _processCtx' :: ProcessContext <- Config.get
-  _ipfsPath' :: IPFS.BinPath <- Config.get
-  _ipfsTimeout' :: IPFS.Timeout <- Config.get
+  _logFunc'     :: LogFunc        <- view logFuncL
+  _processCtx'  :: ProcessContext <- view processContextL
+  _fissionAPI' :: Client.Runner  <- Config.get
+  _ipfsPath'    :: IPFS.BinPath   <- Config.get
+  _ipfsTimeout' :: IPFS.Timeout   <- Config.get
   let newCfg = UpConfig {..}
 
   localRIO newCfg handler

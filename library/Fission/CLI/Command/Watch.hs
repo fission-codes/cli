@@ -83,7 +83,7 @@ handleTreeChanges :: HasLogFunc        cfg
                   => HasProcessContext cfg
                   => Has IPFS.BinPath  cfg
                   => Has IPFS.Timeout  cfg
-                  => Has (Maybe (NonEmpty IPFS.Peer)) cfg
+                  => Has (NonEmpty IPFS.Peer) cfg
                   => MVar UTCTime
                   -> MVar Text
                   -> WatchManager
@@ -117,7 +117,7 @@ pinAndUpdateDNS :: MonadRIO          cfg m
                 => HasProcessContext cfg
                 => Has IPFS.BinPath  cfg
                 => Has IPFS.Timeout  cfg
-                => Has (Maybe (NonEmpty IPFS.Peer)) cfg
+                => Has (NonEmpty IPFS.Peer) cfg
                 => CID
                 -> m (Either SomeException AWS.DomainName)
 pinAndUpdateDNS cid =

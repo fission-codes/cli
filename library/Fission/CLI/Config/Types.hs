@@ -71,8 +71,8 @@ type Uppable cfg
 
 -- | RENAME ME PLEASE! See note in Discord
 data UpConfig = UpConfig
-  { -- _fissionAPI'  :: !Client.Runner
-    _logFunc'     :: !LogFunc
+  { _fissionAPI'  :: !Client.Runner
+  , _logFunc'     :: !LogFunc
   , _processCtx'  :: !ProcessContext
   , _ipfsPath'    :: !IPFS.BinPath
   , _ipfsTimeout' :: !IPFS.Timeout
@@ -80,6 +80,9 @@ data UpConfig = UpConfig
   }
 
 makeLenses ''UpConfig
+
+instance Has Client.Runner UpConfig where
+  hasLens = fissionAPI'
 
 instance HasLogFunc UpConfig where
   logFuncL = logFunc'
