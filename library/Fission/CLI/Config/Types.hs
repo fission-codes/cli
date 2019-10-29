@@ -66,7 +66,7 @@ type Uppable cfg
     , Has IPFS.Timeout  cfg
     , Has IPFS.BinPath  cfg
     , Has Client.Runner cfg
-    , Has (NonEmpty IPFS.Peer) cfg
+    , Has IPFS.Peer cfg
     )
 
 -- | RENAME ME PLEASE! See note in Discord
@@ -76,7 +76,7 @@ data UpConfig = UpConfig
   , _processCtx'  :: !ProcessContext
   , _ipfsPath'    :: !IPFS.BinPath
   , _ipfsTimeout' :: !IPFS.Timeout
-  , _peers'       :: !(NonEmpty IPFS.Peer)
+  , _peer'        :: !IPFS.Peer
   }
 
 makeLenses ''UpConfig
@@ -96,5 +96,5 @@ instance Has IPFS.BinPath UpConfig where
 instance Has IPFS.Timeout UpConfig where
   hasLens = ipfsTimeout'
 
-instance Has (NonEmpty IPFS.Peer) UpConfig where
-  hasLens = peers'
+instance Has IPFS.Peer UpConfig where
+  hasLens = peer'

@@ -78,12 +78,7 @@ watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
     void $ handleTreeChanges timeCache hashCache watchMgr cfg absPath
     forever $ liftIO $ threadDelay 1000000 -- Sleep main thread
 
-handleTreeChanges :: HasLogFunc        cfg
-                  => Has Client.Runner cfg
-                  => HasProcessContext cfg
-                  => Has IPFS.BinPath  cfg
-                  => Has IPFS.Timeout  cfg
-                  => Has (NonEmpty IPFS.Peer) cfg
+handleTreeChanges :: Uppable  cfg
                   => MVar UTCTime
                   -> MVar Text
                   -> WatchManager
@@ -112,12 +107,7 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
             void $ pinAndUpdateDNS cid
 
 pinAndUpdateDNS :: MonadRIO          cfg m
-                => HasLogFunc        cfg
-                => Has Client.Runner cfg
-                => HasProcessContext cfg
-                => Has IPFS.BinPath  cfg
-                => Has IPFS.Timeout  cfg
-                => Has (NonEmpty IPFS.Peer) cfg
+                => Uppable  cfg
                 => CID
                 -> m (Either SomeException AWS.DomainName)
 pinAndUpdateDNS cid =

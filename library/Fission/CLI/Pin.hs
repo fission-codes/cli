@@ -26,14 +26,10 @@ import qualified Fission.Web.Client.IPFS as Fission
 import           Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Loader  as CLI
 import           Fission.CLI.Display.Success as CLI.Success
+import           Fission.CLI.Config.Types
 
 run :: MonadRIO          cfg m
-    => HasLogFunc        cfg
-    => HasProcessContext cfg
-    => Has Client.Runner cfg
-    => Has IPFS.BinPath  cfg
-    => Has IPFS.Timeout  cfg
-    => Has (NonEmpty IPFS.Peer) cfg
+    => Uppable  cfg
     => CID
     -> BasicAuthData
     -> m (Either ClientError CID)
@@ -41,8 +37,10 @@ run cid@(CID hash) auth = do
   logDebug $ "Remote pinning " <> display hash
 
   Client.Runner runner <- Config.get
-  peers <- Config.get
-  IPFS.Peer.connect $ head $ peers
+  peer <- Config.get
+  -- Question: What would be the best way to bring this up further?
+  -- like a HasSwarmConnection
+  IPFS.Peer.connect peer
 
 
   liftIO (pin runner auth cid) >>= \case

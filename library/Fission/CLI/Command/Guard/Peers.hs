@@ -5,6 +5,7 @@ import           RIO
 import           RIO.Process (ProcessContext, HasProcessContext (..))
 
 import           Data.Has
+import           Data.List.NonEmpty
 
 import           Fission.Internal.Constraint
 import           Fission.Internal.Exception
@@ -29,13 +30,13 @@ ensurePeers
   -> m a
 ensurePeers handler = do
   maybePeers :: Maybe (NonEmpty IPFS.Peer) <- Config.get
-  _peers' <- case maybePeers of
+  _peer' <- case maybePeers of
               Nothing -> do
                 -- get peers from API
                 return undefined
 
               Just peers ->
-                return peers
+                return $ head $ peers
 
   _logFunc'     :: LogFunc        <- view logFuncL
   _processCtx'  :: ProcessContext <- view processContextL
