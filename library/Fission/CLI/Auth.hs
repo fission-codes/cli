@@ -21,16 +21,18 @@ import           Servant.Client
 import           Fission.Internal.Constraint
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
+import qualified Fission.IPFS.Types    as IPFS
+import           Fission.CLI.Environment.Types
 
 -- | Retrieve auth from the user's system
 get :: MonadIO m => m (Either YAML.ParseException BasicAuthData)
 get = liftIO . YAML.decodeFileEither =<< cachePath
 
 -- | Write user's auth to a local on-system path
-write :: MonadUnliftIO m => BasicAuthData -> m ()
-write auth = do
+write :: MonadUnliftIO m => BasicAuthData -> [IPFS.Peer] -> m ()
+write auth peers = do
   path <- cachePath
-  writeBinaryFileDurable path $ YAML.encode auth
+  writeBinaryFileDurable path $ YAML.encode $ Environment {peers = peers, userAuth = auth}
 
 -- | Absolute path of the auth cache on disk
 cachePath :: MonadIO m => m FilePath

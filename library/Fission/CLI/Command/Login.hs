@@ -16,6 +16,7 @@ import           Fission.Internal.Constraint
 
 import           Fission.Web.Client.Register as Register
 import qualified Fission.Web.Client.Types as Client
+import qualified Fission.CLI.Environment as Environment
 
 import qualified Fission.CLI.Auth as Auth
 import           Fission.CLI.Config.Types
@@ -54,15 +55,19 @@ login = do
 
     Just password -> do
       logDebug "Attempting API verification"
-      Client.Runner runner <- Config.get
+      Client.Runner run <- Config.get
       let auth = BasicAuthData username $ BS.pack password
 
       authResult <- Cursor.withHidden
-                 . liftIO
-                 . CLI.Wait.waitFor "Verifying your credentials"
-                 . runner
-                 $ Register.verify auth
+                  . liftIO
+                  . CLI.Wait.waitFor "Verifying your credentials"
+                  . run $ Register.verify auth
 
       case authResult of
-        Right _ok -> Auth.write auth >> CLI.Success.putOk "Logged in"
-        Left  err -> CLI.Error.put err "Authorization failed"
+        Left  err ->
+          CLI.Error.put err "Authorization failed"
+
+        Right _ok ->
+          -- Environment.init auth
+          CLI.Success.putOk "Registered & logged in. Your credentials are in ~/.fission.yaml"
+

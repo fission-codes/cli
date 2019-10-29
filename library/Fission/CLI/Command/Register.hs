@@ -27,6 +27,7 @@ import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
+import qualified Fission.CLI.Environment     as Environment
 
 -- | The command to attach to the CLI tree
 command :: MonadUnliftIO m
@@ -94,5 +95,7 @@ register' = do
           CLI.Error.put err "Authorization failed"
 
         Right _ok -> do
-          Auth.write $ BasicAuthData username (BS.pack password)
+          let basicAuth = BasicAuthData username (BS.pack password)
+
+          Environment.init basicAuth
           CLI.Success.putOk "Registered & logged in. Your credentials are in ~/.fission.yaml"

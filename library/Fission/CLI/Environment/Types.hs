@@ -10,7 +10,7 @@ import           Fission.Internal.Orphanage.BasicAuthData ()
 
 data Environment = Environment
   { userAuth :: BasicAuthData
-  , peers    :: NonEmpty IPFS.Peer
+  , peers    :: [IPFS.Peer] -- TODO: Change to NonEmpty IPFS.Peer
   }
 
 instance ToJSON Environment where
