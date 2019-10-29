@@ -29,5 +29,5 @@ There is a `Makefile` filled with helpful commands. The most used in development
 make setup
 
 # Watch project for changes, validating types and syntax
-make watch
+make dev
 ```
