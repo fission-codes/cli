@@ -67,7 +67,7 @@ login = do
         Left  err ->
           CLI.Error.put err "Authorization failed"
 
-        Right _ok ->
-          -- Environment.init auth
+        Right _ok -> do
+          Environment.init auth
           CLI.Success.putOk "Registered & logged in. Your credentials are in ~/.fission.yaml"
 
