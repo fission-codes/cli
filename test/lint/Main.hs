@@ -4,10 +4,10 @@ import RIO
 
 import Language.Haskell.HLint (hlint)
 
-arguments :: [String]
+arguments :: [FilePath]
 arguments =
     [ "benchmark"
-    , "fission-web"
+    , "app"
     , "library"
     , "test/testsuite"
     ]
