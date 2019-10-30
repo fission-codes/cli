@@ -1,7 +1,6 @@
 module Fission.CLI.Auth
   ( cachePath
   , get
-  , withAuth
   , write
   , couldNotRead
   , removeConfigFile
@@ -61,19 +60,3 @@ removeConfigFile :: MonadUnliftIO m => m (Either IOException ())
 removeConfigFile = do
   path <- cachePath
   try $ removeFile path
-
-withAuth :: MonadRIO   cfg m
-         => HasLogFunc cfg
-         => (BasicAuthData -> m (Either ClientError a))
-         -> m (Either SomeException a)
-withAuth action = get >>= \case
-  Right env -> do
-    let basicAuth = userAuth env
-    action basicAuth >>= pure . \case
-      Right result -> Right result
-      Left err -> Left $ toException err
-
-  Left err -> do
-    logError $ displayShow err
-    couldNotRead
-    return . Left $ toException err

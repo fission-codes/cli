@@ -55,9 +55,9 @@ up Up.Options {..} = handleWith_ Error.put' do
 
   unless dnsOnly do
     -- TODO hoist auth further up
-    void . liftE . Auth.withAuth $ CLI.Pin.run cid
+    void . liftE $ CLI.Pin.run cid
 
-  liftE . Auth.withAuth $ CLI.DNS.update cid
+  liftE $ CLI.DNS.update cid
 
 parseOptions :: Parser Up.Options
 parseOptions = do

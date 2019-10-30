@@ -13,6 +13,8 @@ import           RIO.Time
 
 import           Data.Has
 
+import Servant.Client
+
 import           Options.Applicative.Simple hiding (command)
 import           System.FSNotify as FS
 
@@ -68,9 +70,9 @@ watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
   UTF8.putText $ "👀 Watching " <> Text.pack absPath <> " for changes...\n"
 
   when (not dnsOnly) do
-    void . liftE . Auth.withAuth $ CLI.Pin.run cid
+    void . liftE $ CLI.Pin.run cid
 
-  liftE . Auth.withAuth $ CLI.DNS.update cid
+  liftE $ CLI.DNS.update cid
 
   liftIO $ FS.withManager \watchMgr -> do
     hashCache <- newMVar hash
@@ -109,15 +111,15 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
 pinAndUpdateDNS :: MonadRIO          cfg m
                 => Uppable  cfg
                 => CID
-                -> m (Either SomeException AWS.DomainName)
+                -> m (Either ClientError AWS.DomainName)
 pinAndUpdateDNS cid =
-  Auth.withAuth (CLI.Pin.run cid) >>= \case
+  CLI.Pin.run cid >>= \case
     Left err -> do
       logError $ displayShow err
       return $ Left err
 
     Right _ ->
-      Auth.withAuth $ CLI.DNS.update cid
+      CLI.DNS.update cid
 
 parseOptions :: Parser Watch.Options
 parseOptions = do

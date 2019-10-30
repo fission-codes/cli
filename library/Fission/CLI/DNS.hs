@@ -19,16 +19,18 @@ import qualified Fission.Web.DNS.Client  as DNS.Client
 import           Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Loader  as CLI
 import           Fission.CLI.Display.Success as CLI.Success
+import qualified Fission.Config as Config
 
 import qualified Fission.AWS.Types as AWS
 
-update :: MonadRIO          cfg m
+update :: MonadRIO       cfg m
     => HasLogFunc        cfg
     => Has Client.Runner cfg
+    => Has BasicAuthData cfg
     => CID
-    -> BasicAuthData
     -> m (Either ClientError AWS.DomainName)
-update cid@(CID hash) auth = do
+update cid@(CID hash) = do
+  auth <- Config.get
   logDebug $ "Updating DNS to " <> display hash
 
   Client.Runner runner <- Config.get

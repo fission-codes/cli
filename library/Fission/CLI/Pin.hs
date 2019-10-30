@@ -31,13 +31,13 @@ import           Fission.CLI.Config.Types
 run :: MonadRIO          cfg m
     => Uppable  cfg
     => CID
-    -> BasicAuthData
     -> m (Either ClientError CID)
-run cid@(CID hash) auth = do
+run cid@(CID hash)  = do
   logDebug $ "Remote pinning " <> display hash
 
   Client.Runner runner <- Config.get
   peer <- Config.get
+  auth <- Config.get
   -- Question: What would be the best way to bring this up further?
   -- like a HasSwarmConnection
   IPFS.Peer.connect peer
