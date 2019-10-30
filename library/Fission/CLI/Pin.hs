@@ -26,10 +26,10 @@ import qualified Fission.Web.Client.IPFS as Fission
 import           Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Loader  as CLI
 import           Fission.CLI.Display.Success as CLI.Success
-import           Fission.CLI.Config.Types
+import           Fission.CLI.Config.Types.LoggedIn
 
 run :: MonadRIO          cfg m
-    => Uppable  cfg
+    => HasLoggedIn  cfg
     => CID
     -> m (Either ClientError CID)
 run cid@(CID hash)  = do

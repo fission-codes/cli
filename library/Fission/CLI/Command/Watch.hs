@@ -35,9 +35,10 @@ import           Fission.CLI.Display.Error as CLI.Error
 import qualified Fission.CLI.Auth                as Auth
 import           Fission.CLI.Command.Watch.Types as Watch
 import           Fission.CLI.Config.Types
+import           Fission.CLI.Config.Types.LoggedIn
 import qualified Fission.CLI.Pin                 as CLI.Pin
 import qualified Fission.CLI.DNS                 as CLI.DNS
-import qualified Fission.CLI.Command.Guard.Peers    as Guard.Peers
+import qualified Fission.CLI.Config.Guard    as Config.Guard
 
 
 -- | The command to attach to the CLI tree
@@ -53,12 +54,12 @@ command cfg =
   addCommand
     "watch"
     "Keep your working directory in sync with the IPFS network"
-    (\options -> runRIO cfg $ Guard.Peers.ensurePeers $ watcher options)
+    (\options -> runRIO cfg $ Config.Guard.ensureLocalConfig $ watcher options)
     parseOptions
 
 -- | Continuously sync the current working directory to the server over IPFS
 watcher :: MonadRIO          cfg m
-        => Uppable  cfg
+        => HasLoggedIn  cfg
         => Watch.Options
         -> m ()
 watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
@@ -79,7 +80,7 @@ watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
     void $ handleTreeChanges timeCache hashCache watchMgr cfg absPath
     forever $ liftIO $ threadDelay 1000000 -- Sleep main thread
 
-handleTreeChanges :: Uppable  cfg
+handleTreeChanges :: HasLoggedIn  cfg
                   => MVar UTCTime
                   -> MVar Text
                   -> WatchManager
@@ -108,7 +109,7 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
             void $ pinAndUpdateDNS cid
 
 pinAndUpdateDNS :: MonadRIO          cfg m
-                => Uppable  cfg
+                => HasLoggedIn  cfg
                 => CID
                 -> m (Either ClientError AWS.DomainName)
 pinAndUpdateDNS cid =

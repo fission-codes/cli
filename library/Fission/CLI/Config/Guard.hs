@@ -1,5 +1,5 @@
--- | Guards to ensure we have the appropriate peer data available to run an action
-module Fission.CLI.Command.Guard.Peers where
+-- | Guards to ensure we have the appropriate data available to run a protected action
+module Fission.CLI.Config.Guard where
 
 import           RIO
 import           RIO.Process (ProcessContext, HasProcessContext (..))
@@ -14,12 +14,13 @@ import qualified Fission.Storage.IPFS as IPFS
 import qualified Fission.IPFS.Types   as IPFS
 import qualified Fission.Web.Client   as Client
 
-import           Fission.CLI.Config.Types
+import           Fission.CLI.Config.Types.LoggedIn
 import qualified Fission.Config as Config
 import qualified Fission.CLI.Auth as Auth
 import           Fission.CLI.Environment.Types
 
-ensurePeers
+-- | Ensure we have a local config file with the appropriate data
+ensureLocalConfig
   :: ( MonadRIO          cfg  m
   , HasLogFunc        cfg
   , HasProcessContext cfg
@@ -27,9 +28,9 @@ ensurePeers
   , Has IPFS.Timeout  cfg
   , Has Client.Runner cfg
   )
-  => RIO UpConfig a
+  => RIO LoggedIn a
   -> m a
-ensurePeers handler = do
+ensureLocalConfig handler = do
   _logFunc'     :: LogFunc        <- view logFuncL
   _processCtx'  :: ProcessContext <- view processContextL
   _fissionAPI'  :: Client.Runner  <- Config.get
@@ -41,7 +42,7 @@ ensurePeers handler = do
       let _userAuth' = (userAuth config)
           _peer'     = head $ (peers config)
 
-      localRIO UpConfig {..} handler
+      localRIO LoggedIn {..} handler
 
     Left err -> do
       logError $ displayShow err
