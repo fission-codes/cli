@@ -14,7 +14,7 @@ import qualified Fission.Web.Client   as Client
 
 import           Fission.CLI.Config.Types
 import qualified Fission.Config as Config
-import qualified Fission.CLI.Auth as Auth
+import qualified Fission.CLI.Environment as Environment
 import           Fission.CLI.Environment.Types
 
 -- | Ensure we have a local config file with the appropriate data
@@ -35,7 +35,7 @@ ensureLocalConfig handler = do
   _ipfsPath'    :: IPFS.BinPath   <- Config.get
   _ipfsTimeout' :: IPFS.Timeout   <- Config.get
 
-  Auth.get >>= \case
+  Environment.get >>= \case
     Right config -> do
       let _userAuth' = (userAuth config)
           _peer'     = head $ (peers config)
@@ -44,7 +44,7 @@ ensureLocalConfig handler = do
 
     Left err -> do
       logError $ displayShow err
-      Auth.couldNotRead
+      Environment.couldNotRead
       return undefined
 
 localRIO :: MonadRIO oldCfg m => newCfg -> RIO newCfg a -> m a

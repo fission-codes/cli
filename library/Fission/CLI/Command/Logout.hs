@@ -7,7 +7,7 @@ import           Options.Applicative.Simple (addCommand)
 
 import           Fission.Internal.Constraint
 
-import qualified Fission.CLI.Auth as Auth
+import qualified Fission.CLI.Environment as Environment
 import           Fission.CLI.Config.Types
 
 import qualified Fission.CLI.Display.Success as CLI.Success
@@ -33,7 +33,7 @@ logout :: MonadRIO          cfg m
 logout = do
   logDebug "Starting logout sequence"
 
-  possibleSuccess <- Auth.removeConfigFile
+  possibleSuccess <- Environment.removeConfigFile
 
   case possibleSuccess of
     Right _ ->

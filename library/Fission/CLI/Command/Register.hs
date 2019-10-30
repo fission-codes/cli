@@ -20,7 +20,6 @@ import qualified Fission.Web.Client.Types as Client
 
 import qualified Fission.User.Registration.Types as User
 
-import qualified Fission.CLI.Auth as Auth
 import           Fission.CLI.Config.Types
 
 import qualified Fission.CLI.Display.Cursor  as Cursor
@@ -48,7 +47,7 @@ register :: MonadRIO       cfg m
         => HasLogFunc        cfg
         => Has Client.Runner cfg
         => m ()
-register = Auth.get >>= \case
+register = Environment.get >>= \case
   Right _auth ->
     CLI.Success.putOk "Already registered. Remove your credentials at ~/.fission.yaml if you want to re-register"
 

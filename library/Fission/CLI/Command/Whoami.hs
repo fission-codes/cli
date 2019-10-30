@@ -12,7 +12,7 @@ import qualified System.Console.ANSI as ANSI
 import           Fission.Internal.Constraint
 import qualified Fission.Internal.UTF8 as UTF8
 
-import qualified Fission.CLI.Auth as Auth
+import qualified Fission.CLI.Environment as Environment
 import           Fission.CLI.Config.Types
 import           Fission.CLI.Environment.Types
 
@@ -32,10 +32,10 @@ whoami :: MonadRIO   cfg m
        => HasLogFunc cfg
        => m ()
 whoami =
-  Auth.get >>= \case
+  Environment.get >>= \case
     Left err -> do
       logError $ displayShow err
-      Auth.couldNotRead
+      Environment.couldNotRead
 
     Right env -> do
       let auth = userAuth env
