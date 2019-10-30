@@ -43,15 +43,24 @@ ensureLocalConfig handler = do
       let _userAuth' = (userAuth config)
           _peer'     = head $ (peers config)
 
-      CLI.Wait.waitFor "Connecting to Fission nodes..."
-        $ IPFS.Peer.connect _peer' >>= \case
-          Right _ ->
-            localRIO LoggedIn {..} handler
+      Environment.swarmConnectWithRetry' >>= \case
+        Right _ ->
+          localRIO LoggedIn {..} handler
 
-          Left err -> do
-            logError $ displayShow err
-            Environment.couldNotSwarmConnect
-            return undefined
+        Left err -> do
+          logError $ displayShow err
+          Environment.couldNotSwarmConnect
+          return undefined
+
+      -- CLI.Wait.waitFor "Connecting to Fission nodes..."
+      --   $ IPFS.Peer.connect _peer' >>= \case
+      --     Right _ ->
+      --       localRIO LoggedIn {..} handler
+
+      --     Left err -> do
+      --       logError $ displayShow err
+      --       Environment.couldNotSwarmConnect
+      --       return undefined
 
     Left err -> do
       logError $ displayShow err

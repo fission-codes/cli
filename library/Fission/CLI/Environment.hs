@@ -29,6 +29,7 @@ import           Fission.CLI.Environment.Types
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 
+import qualified Fission.IPFS.Peer    as IPFS.Peer
 import qualified Fission.IPFS.Types    as IPFS
 
 -- | Initialize the Config file
@@ -40,19 +41,50 @@ init :: MonadRIO cfg m
 init auth = do
   Client.Runner run <- Config.get
 
-  res <- liftIO
+  peersResponse <- liftIO
         $ Cursor.withHidden
         $ CLI.Wait.waitFor "Retrieving Fission Peer List..."
         $ run
         $ Peers.get
 
-  case res of
+  case peersResponse of
     Left err ->
       CLI.Error.put err "Peer retrieval failed"
 
     Right peers -> do
       liftIO $ write auth peers
       CLI.Success.putOk "Logged in"
+
+swarmConnectWithRetry peer = CLI.Wait.waitFor "Connecting to Fission nodes..." $ swarmConnectWithRetry' peer 1
+
+swarmConnectWithRetry' :: MonadRIO cfg m
+          => HasLogFunc        cfg
+          => Has Client.Runner cfg
+          => IPFS.Peer
+          -> Int
+          -> m (Either SomeException ())
+swarmConnectWithRetry' peer (-1) = return $ Left "Failure"
+swarmConnectWithRetry' peer retries = do
+  Client.Runner run <- Config.get
+
+  IPFS.Peer.connect peer >>= \case
+    Right _ ->
+      return $ Right ()
+
+    Left _err -> do
+      peersResponse <- liftIO
+          $ Cursor.withHidden
+          $ CLI.Wait.waitFor "Retrieving Fission Peer List..."
+          $ run
+          $ Peers.get
+
+      case peersResponse of
+        Left err ->
+          return $ Left "Failure"
+
+        Right peers -> do
+          let peer = head $ NonEmpty.fromList peers
+          return $ swarmConnectWithRetry' peer (retries - 1)
 
 -- | Retrieve auth from the user's system
 get :: MonadIO m => m (Either YAML.ParseException Environment)
