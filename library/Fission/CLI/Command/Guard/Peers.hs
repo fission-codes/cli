@@ -16,6 +16,8 @@ import qualified Fission.Web.Client   as Client
 
 import           Fission.CLI.Config.Types
 import qualified Fission.Config as Config
+import qualified Fission.CLI.Auth as Auth
+import           Fission.CLI.Environment.Types
 
 ensurePeers
   :: ( MonadRIO          cfg  m
@@ -29,23 +31,34 @@ ensurePeers
   => RIO UpConfig a
   -> m a
 ensurePeers handler = do
-  maybePeers :: Maybe (NonEmpty IPFS.Peer) <- Config.get
-  _peer' <- case maybePeers of
-              Nothing -> do
-                -- get peers from API
-                return undefined
-
-              Just peers ->
-                return $ head $ peers
-
   _logFunc'     :: LogFunc        <- view logFuncL
   _processCtx'  :: ProcessContext <- view processContextL
-  _fissionAPI' :: Client.Runner  <- Config.get
+  _fissionAPI'  :: Client.Runner  <- Config.get
   _ipfsPath'    :: IPFS.BinPath   <- Config.get
   _ipfsTimeout' :: IPFS.Timeout   <- Config.get
-  let newCfg = UpConfig {..}
+  eitherConfig                    <- Auth.get
 
-  localRIO newCfg handler
+  _userAuth' <- case eitherConfig of
+    Right config ->
+      return $ (userAuth config)
+
+    Left _err ->
+      -- get peers from API
+      -- log error
+      -- terminate here...
+      return undefined
+
+  _peer' <- case eitherConfig of
+      Right config ->
+        return $ head $ (peers config)
+
+      Left _err ->
+        -- get peers from API
+        -- log error
+        -- terminate here...
+        return undefined
+
+  localRIO UpConfig {..} handler
 
 localRIO :: MonadRIO oldCfg m => newCfg -> RIO newCfg a -> m a
 localRIO newCfg action = liftIO $ runRIO newCfg action

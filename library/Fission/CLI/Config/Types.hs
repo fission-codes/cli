@@ -30,7 +30,7 @@ data Config = Config
   , _processCtx  :: !ProcessContext
   , _ipfsPath    :: !IPFS.BinPath
   , _ipfsTimeout :: !IPFS.Timeout
-  , _peers       :: Maybe (NonEmpty IPFS.Peer)
+  -- , _peers       :: Maybe (NonEmpty IPFS.Peer)
   , _userAuth    :: Maybe BasicAuthData
   }
 
@@ -51,11 +51,11 @@ instance Has IPFS.BinPath Config where
 instance Has IPFS.Timeout Config where
   hasLens = ipfsTimeout
 
-instance Has (Maybe (NonEmpty IPFS.Peer)) Config where
-  hasLens = peers
+-- instance Has (Maybe (NonEmpty IPFS.Peer)) Config where
+--   hasLens = peers
 
-instance Has (Maybe BasicAuthData) Config where
-  hasLens = userAuth
+-- instance Has (Maybe BasicAuthData) Config where
+--   hasLens = userAuth
 
 
 --- TODO: Move below into new files
@@ -63,10 +63,11 @@ instance Has (Maybe BasicAuthData) Config where
 type Uppable cfg
   = ( HasLogFunc        cfg
     , HasProcessContext cfg
+    , Has Client.Runner cfg
     , Has IPFS.Timeout  cfg
     , Has IPFS.BinPath  cfg
-    , Has Client.Runner cfg
-    , Has IPFS.Peer cfg
+    , Has IPFS.Peer     cfg
+    , Has BasicAuthData cfg
     )
 
 -- | RENAME ME PLEASE! See note in Discord
@@ -77,6 +78,7 @@ data UpConfig = UpConfig
   , _ipfsPath'    :: !IPFS.BinPath
   , _ipfsTimeout' :: !IPFS.Timeout
   , _peer'        :: !IPFS.Peer
+  , _userAuth'    :: !BasicAuthData
   }
 
 makeLenses ''UpConfig
@@ -98,3 +100,6 @@ instance Has IPFS.Timeout UpConfig where
 
 instance Has IPFS.Peer UpConfig where
   hasLens = peer'
+
+instance Has BasicAuthData UpConfig where
+  hasLens = userAuth'
