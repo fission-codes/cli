@@ -85,6 +85,17 @@ couldNotRead = do
 
   liftIO $ ANSI.setSGR [ANSI.Reset]
 
+-- | Create a could not connect to Fission peer message for the terminal
+couldNotSwarmConnect :: MonadIO m => m ()
+couldNotSwarmConnect = do
+  liftIO $ ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Red]
+  UTF8.putText "😭 We were unable to connect to the Fission IPFS peer!"
+
+  liftIO $ ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
+  UTF8.putText "Try checking your connection or logining in again"
+
+  liftIO $ ANSI.setSGR [ANSI.Reset]
+
 -- | Removes the users config file
 removeConfigFile :: MonadUnliftIO m => m (Either IOException ())
 removeConfigFile = do

@@ -31,11 +31,7 @@ run cid@(CID hash)  = do
   logDebug $ "Remote pinning " <> display hash
 
   Client.Runner runner <- Config.get
-  peer <- Config.get
   auth <- Config.get
-  -- Question: What would be the best way to bring this up further?
-  -- like a HasSwarmConnection
-  IPFS.Peer.connect peer
 
   liftIO (pin runner auth cid) >>= \case
     Right _ -> do
