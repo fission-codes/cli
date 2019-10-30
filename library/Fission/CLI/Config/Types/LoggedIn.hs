@@ -1,3 +1,4 @@
+-- | Configuration required to run any CLI function that interacts with the Fission service
 module Fission.CLI.Config.Types.LoggedIn where
 
 import RIO
@@ -19,7 +20,6 @@ type HasLoggedIn cfg
     , Has IPFS.Peer     cfg
     , Has BasicAuthData cfg
     )
-
 
 data LoggedIn = LoggedIn
   { _fissionAPI'  :: !Client.Runner

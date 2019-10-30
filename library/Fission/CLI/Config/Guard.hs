@@ -8,13 +8,11 @@ import           Data.Has
 import           Data.List.NonEmpty
 
 import           Fission.Internal.Constraint
-import           Fission.Internal.Exception
 
-import qualified Fission.Storage.IPFS as IPFS
 import qualified Fission.IPFS.Types   as IPFS
 import qualified Fission.Web.Client   as Client
 
-import           Fission.CLI.Config.Types.LoggedIn
+import           Fission.CLI.Config.Types
 import qualified Fission.Config as Config
 import qualified Fission.CLI.Auth as Auth
 import           Fission.CLI.Environment.Types
@@ -41,7 +39,7 @@ ensureLocalConfig handler = do
     Right config -> do
       let _userAuth' = (userAuth config)
           _peer'     = head $ (peers config)
-
+      -- TODO Attempt to get multiple peers
       localRIO LoggedIn {..} handler
 
     Left err -> do

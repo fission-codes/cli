@@ -32,10 +32,8 @@ import qualified Fission.AWS.Types  as AWS
 import           Fission.Internal.Exception
 import           Fission.CLI.Display.Error as CLI.Error
 
-import qualified Fission.CLI.Auth                as Auth
 import           Fission.CLI.Command.Watch.Types as Watch
 import           Fission.CLI.Config.Types
-import           Fission.CLI.Config.Types.LoggedIn
 import qualified Fission.CLI.Pin                 as CLI.Pin
 import qualified Fission.CLI.DNS                 as CLI.DNS
 import qualified Fission.CLI.Config.Guard    as Config.Guard

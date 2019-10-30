@@ -19,7 +19,6 @@ import qualified Fission.Web.DNS.Client  as DNS.Client
 import           Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Loader  as CLI
 import           Fission.CLI.Display.Success as CLI.Success
-import qualified Fission.Config as Config
 
 import qualified Fission.AWS.Types as AWS
 

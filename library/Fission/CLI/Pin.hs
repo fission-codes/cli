@@ -5,10 +5,6 @@ module Fission.CLI.Pin
   ) where
 
 import RIO
-import RIO.Process (HasProcessContext)
-
-import Data.Has
-import Data.List.NonEmpty
 
 import Servant
 import Servant.Client
@@ -17,7 +13,6 @@ import qualified Fission.Config as Config
 import           Fission.Internal.Constraint
 
 import qualified Fission.IPFS.Peer    as IPFS.Peer
-import qualified Fission.IPFS.Types   as IPFS
 import           Fission.IPFS.CID.Types
 
 import qualified Fission.Web.Client      as Client
@@ -26,7 +21,7 @@ import qualified Fission.Web.Client.IPFS as Fission
 import           Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Loader  as CLI
 import           Fission.CLI.Display.Success as CLI.Success
-import           Fission.CLI.Config.Types.LoggedIn
+import           Fission.CLI.Config.Types
 
 run :: MonadRIO          cfg m
     => HasLoggedIn  cfg
@@ -41,7 +36,6 @@ run cid@(CID hash)  = do
   -- Question: What would be the best way to bring this up further?
   -- like a HasSwarmConnection
   IPFS.Peer.connect peer
-
 
   liftIO (pin runner auth cid) >>= \case
     Right _ -> do

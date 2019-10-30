@@ -4,7 +4,6 @@ module Fission.CLI.Command.Up (command, up) where
 import           RIO
 import           RIO.Directory
 import           RIO.Process (HasProcessContext)
-import           Servant.API
 
 import           Data.Has
 import           Options.Applicative.Simple hiding (command)
@@ -18,12 +17,9 @@ import qualified Fission.Web.Client   as Client
 
 import           Fission.CLI.Command.Up.Types as Up
 import qualified Fission.CLI.Display.Error    as Error
-import qualified Fission.CLI.Auth             as Auth
 import qualified Fission.CLI.Pin              as CLI.Pin
 import qualified Fission.CLI.DNS              as CLI.DNS
 import           Fission.CLI.Config.Types
-import           Fission.CLI.Config.Types.LoggedIn
-import qualified Fission.Config as Config
 import qualified Fission.CLI.Config.Guard    as Config.Guard
 
 -- | The command to attach to the CLI tree
@@ -54,7 +50,6 @@ up Up.Options {..} = handleWith_ Error.put' do
   logDebug $ "Starting single IPFS add locally of " <> displayShow absPath
 
   unless dnsOnly do
-    -- TODO hoist auth further up
     void . liftE $ CLI.Pin.run cid
 
   liftE $ CLI.DNS.update cid

@@ -13,7 +13,6 @@ import           Fission.Web.Client.Peers as Peers
 import qualified Fission.Web.Client.Types as Client
 
 import qualified Fission.CLI.Auth as Auth
-import           Fission.CLI.Config.Types
 
 import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
@@ -21,7 +20,6 @@ import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
 
 init :: MonadRIO cfg m
-          => MonadUnliftIO         m
           => HasLogFunc        cfg
           => Has Client.Runner cfg
           => BasicAuthData
@@ -31,7 +29,7 @@ init auth = do
 
   res <- liftIO
         $ Cursor.withHidden
-        $ CLI.Wait.waitFor "ddddddd"
+        $ CLI.Wait.waitFor "Retrieving Fission Peer List..."
         $ run
         $ Peers.get
 
@@ -40,5 +38,5 @@ init auth = do
       CLI.Error.put err "Peer retrieval failed"
 
     Right peers -> do
-      liftIO $ Auth.write auth peers -- Environment.write
+      liftIO $ Auth.write auth peers
       CLI.Success.putOk "Logged in"

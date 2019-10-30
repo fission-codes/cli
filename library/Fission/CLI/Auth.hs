@@ -13,12 +13,9 @@ import           RIO.FilePath
 
 import qualified System.Console.ANSI as ANSI
 
-import           Data.Has
 import qualified Data.Yaml as YAML
 import           Servant
-import           Servant.Client
 
-import           Fission.Internal.Constraint
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 import qualified Fission.IPFS.Types    as IPFS

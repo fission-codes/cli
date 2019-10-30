@@ -18,7 +18,6 @@ import           Fission.Web.Client.Register as Register
 import qualified Fission.Web.Client.Types as Client
 import qualified Fission.CLI.Environment as Environment
 
-import qualified Fission.CLI.Auth as Auth
 import           Fission.CLI.Config.Types
 
 import qualified Fission.CLI.Display.Cursor  as Cursor
