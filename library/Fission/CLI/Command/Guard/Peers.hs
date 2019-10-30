@@ -26,7 +26,6 @@ ensurePeers
   , Has IPFS.BinPath  cfg
   , Has IPFS.Timeout  cfg
   , Has Client.Runner cfg
-  , Has (Maybe (NonEmpty IPFS.Peer)) cfg
   )
   => RIO UpConfig a
   -> m a
@@ -36,29 +35,18 @@ ensurePeers handler = do
   _fissionAPI'  :: Client.Runner  <- Config.get
   _ipfsPath'    :: IPFS.BinPath   <- Config.get
   _ipfsTimeout' :: IPFS.Timeout   <- Config.get
-  eitherConfig                    <- Auth.get
 
-  _userAuth' <- case eitherConfig of
-    Right config ->
-      return $ (userAuth config)
+  Auth.get >>= \case
+    Right config -> do
+      let _userAuth' = (userAuth config)
+          _peer'     = head $ (peers config)
 
-    Left _err ->
-      -- get peers from API
-      -- log error
-      -- terminate here...
+      localRIO UpConfig {..} handler
+
+    Left err -> do
+      logError $ displayShow err
+      Auth.couldNotRead
       return undefined
-
-  _peer' <- case eitherConfig of
-      Right config ->
-        return $ head $ (peers config)
-
-      Left _err ->
-        -- get peers from API
-        -- log error
-        -- terminate here...
-        return undefined
-
-  localRIO UpConfig {..} handler
 
 localRIO :: MonadRIO oldCfg m => newCfg -> RIO newCfg a -> m a
 localRIO newCfg action = liftIO $ runRIO newCfg action

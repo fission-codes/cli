@@ -47,7 +47,6 @@ command :: MonadIO m
         => HasProcessContext cfg
         => Has IPFS.BinPath  cfg
         => Has IPFS.Timeout  cfg
-        => Has (Maybe (NonEmpty IPFS.Peer)) cfg
         => cfg
         -> CommandM (m ())
 command cfg =
