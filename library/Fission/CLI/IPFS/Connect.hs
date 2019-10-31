@@ -31,7 +31,7 @@ swarmConnectWithRetry :: MonadRIO cfg m
           => Has IPFS.Timeout cfg
           => Has IPFS.BinPath cfg
           => IPFS.Peer
-          -> Natural
+          -> Int
           -> m (Either SomeException ())
 swarmConnectWithRetry _peer (-1) = return $ Left $ toException UnableToConnect
 swarmConnectWithRetry peer tries = IPFS.Peer.connect peer >>= \case
