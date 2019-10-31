@@ -5,19 +5,18 @@ import           RIO
 import           RIO.Process (ProcessContext, HasProcessContext (..))
 
 import           Data.Has
-import           Data.List.NonEmpty
 
 import           Fission.Internal.Constraint
 
 import qualified Fission.IPFS.Types   as IPFS
-import qualified Fission.IPFS.Peer    as IPFS.Peer
 import qualified Fission.Web.Client   as Client
 
-import           Fission.CLI.Config.Types
 import qualified Fission.Config as Config
-import qualified Fission.CLI.Environment as Environment
+
 import           Fission.CLI.Environment.Types
-import qualified Fission.CLI.Display.Wait    as CLI.Wait
+import qualified Fission.CLI.Environment as Environment
+import           Fission.CLI.Config.Types
+import qualified Fission.CLI.Connect as Connect
 
 -- | Ensure we have a local config file with the appropriate data
 ensureLocalConfig
@@ -45,7 +44,7 @@ ensureLocalConfig handler = do
       let _userAuth' = (userAuth config)
 
       -- Connect the local IPFS node to the Fission network
-      Environment.swarmConnectWithRetry _peer' 1 >>= \case
+      Connect.swarmConnectWithRetry _peer' 1 >>= \case
         Right _ ->
           -- All setup and ready to run!
           localRIO LoggedIn {..} handler
@@ -53,7 +52,7 @@ ensureLocalConfig handler = do
         Left err -> do
           -- We were unable to connect!
           logError $ displayShow err
-          Environment.couldNotSwarmConnect
+          Connect.couldNotSwarmConnect
           return undefined
 
     Left err -> do
