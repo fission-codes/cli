@@ -34,7 +34,7 @@ import           Fission.CLI.Display.Error as CLI.Error
 
 import           Fission.CLI.Command.Watch.Types as Watch
 import           Fission.CLI.Config.Types
-import qualified Fission.CLI.Pin                 as CLI.Pin
+import qualified Fission.CLI.IPFS.Pin            as CLI.Pin
 import qualified Fission.CLI.DNS                 as CLI.DNS
 import qualified Fission.CLI.Config.Guard    as Config.Guard
 

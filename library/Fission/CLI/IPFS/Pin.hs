@@ -1,5 +1,5 @@
 -- | Pin files via the CLI
-module Fission.CLI.Pin
+module Fission.CLI.IPFS.Pin
   ( pin
   , run
   ) where
@@ -12,7 +12,6 @@ import Servant.Client
 import qualified Fission.Config as Config
 import           Fission.Internal.Constraint
 
-import qualified Fission.IPFS.Peer    as IPFS.Peer
 import           Fission.IPFS.CID.Types
 
 import qualified Fission.Web.Client      as Client

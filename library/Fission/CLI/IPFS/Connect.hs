@@ -1,5 +1,5 @@
 -- | Module for connecting to the Fission IPFS service
-module Fission.CLI.Connect where
+module Fission.CLI.IPFS.Connect where
 
 import           RIO           hiding (set)
 import           RIO.Process (HasProcessContext)
@@ -17,8 +17,8 @@ import qualified Fission.Web.Client.Types as Client
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 
-import qualified Fission.IPFS.Peer    as IPFS.Peer
-import qualified Fission.IPFS.Types    as IPFS
+import qualified Fission.IPFS.Peer  as IPFS.Peer
+import qualified Fission.IPFS.Types as IPFS
 
 data Err = UnableToConnect
   deriving (Show, Exception)

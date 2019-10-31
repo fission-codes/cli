@@ -16,7 +16,7 @@ import qualified Fission.Config as Config
 import           Fission.CLI.Environment.Types
 import qualified Fission.CLI.Environment as Environment
 import           Fission.CLI.Config.Types
-import qualified Fission.CLI.Connect as Connect
+import qualified Fission.CLI.IPFS.Connect as Connect
 
 -- | Ensure we have a local config file with the appropriate data
 ensureLocalConfig

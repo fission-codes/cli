@@ -17,7 +17,7 @@ import qualified Fission.Web.Client   as Client
 
 import           Fission.CLI.Command.Up.Types as Up
 import qualified Fission.CLI.Display.Error    as Error
-import qualified Fission.CLI.Pin              as CLI.Pin
+import qualified Fission.CLI.IPFS.Pin         as CLI.Pin
 import qualified Fission.CLI.DNS              as CLI.DNS
 import           Fission.CLI.Config.Types
 import qualified Fission.CLI.Config.Guard    as Config.Guard

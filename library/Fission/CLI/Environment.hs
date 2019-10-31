@@ -13,7 +13,6 @@ import           Data.Has
 import qualified Data.Yaml as YAML
 import           Data.List.NonEmpty as NonEmpty
 
-import qualified Fission.Config as Config
 import           Fission.Internal.Constraint
 
 import           Fission.Web.Client.Peers as Peers
@@ -21,15 +20,14 @@ import qualified Fission.Web.Client.Types as Client
 
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
-import qualified Fission.CLI.Display.Wait    as CLI.Wait
 
 import           Fission.CLI.Environment.Types
 
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 
-import qualified Fission.IPFS.Peer    as IPFS.Peer
-import qualified Fission.IPFS.Types    as IPFS
+import qualified Fission.IPFS.Peer  as IPFS.Peer
+import qualified Fission.IPFS.Types as IPFS
 
 -- | Initialize the Config file
 init :: MonadRIO cfg m
