@@ -67,6 +67,8 @@ login = do
           CLI.Error.put err "Authorization failed"
 
         Right _ok -> do
+          logDebug "Auth Successful"
+
           Environment.init auth
           CLI.Success.putOk "Registered & logged in. Your credentials are in ~/.fission.yaml"
 

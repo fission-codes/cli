@@ -2,10 +2,12 @@
 module Fission.CLI.Environment where
 
 import           RIO           hiding (set)
+import           RIO.Process (HasProcessContext)
 import           RIO.Directory
 import           RIO.File
 import           RIO.FilePath
 import           Servant.API
+import           Servant.Client
 
 import qualified System.Console.ANSI as ANSI
 
@@ -32,6 +34,9 @@ import qualified Fission.Internal.UTF8 as UTF8
 import qualified Fission.IPFS.Peer    as IPFS.Peer
 import qualified Fission.IPFS.Types    as IPFS
 
+data Err = UnableToConnect
+  deriving (Show, Exception)
+
 -- | Initialize the Config file
 init :: MonadRIO cfg m
           => HasLogFunc        cfg
@@ -40,14 +45,9 @@ init :: MonadRIO cfg m
           -> m ()
 init auth = do
   Client.Runner run <- Config.get
+  logDebug "Initializing config file"
 
-  peersResponse <- liftIO
-        $ Cursor.withHidden
-        $ CLI.Wait.waitFor "Retrieving Fission Peer List..."
-        $ run
-        $ Peers.get
-
-  case peersResponse of
+  getPeers >>= \case
     Left err ->
       CLI.Error.put err "Peer retrieval failed"
 
@@ -55,36 +55,30 @@ init auth = do
       liftIO $ write auth peers
       CLI.Success.putOk "Logged in"
 
-swarmConnectWithRetry peer = CLI.Wait.waitFor "Connecting to Fission nodes..." $ swarmConnectWithRetry' peer 1
-
-swarmConnectWithRetry' :: MonadRIO cfg m
+-- | Connect to the Fission IPFS network with a set amount of retries
+swarmConnectWithRetry :: MonadRIO cfg m
           => HasLogFunc        cfg
+          => HasProcessContext        cfg
           => Has Client.Runner cfg
+          => Has IPFS.Timeout cfg
+          => Has IPFS.BinPath cfg
           => IPFS.Peer
-          -> Int
+          -> Natural
           -> m (Either SomeException ())
-swarmConnectWithRetry' peer (-1) = return $ Left "Failure"
-swarmConnectWithRetry' peer retries = do
-  Client.Runner run <- Config.get
+swarmConnectWithRetry peer (-1) = return $ Left $ toException UnableToConnect
+swarmConnectWithRetry peer tries = IPFS.Peer.connect peer >>= \case
+  Right _ ->
+    return $ Right ()
 
-  IPFS.Peer.connect peer >>= \case
-    Right _ ->
-      return $ Right ()
+  Left _err ->
+    getPeers >>= \case
+      Left _ ->
+        return $ Left $ toException UnableToConnect
 
-    Left _err -> do
-      peersResponse <- liftIO
-          $ Cursor.withHidden
-          $ CLI.Wait.waitFor "Retrieving Fission Peer List..."
-          $ run
-          $ Peers.get
-
-      case peersResponse of
-        Left err ->
-          return $ Left "Failure"
-
-        Right peers -> do
-          let peer = head $ NonEmpty.fromList peers
-          return $ swarmConnectWithRetry' peer (retries - 1)
+      Right peers -> do
+        UTF8.putText "🛰 Unable to connect to the Fission IPFS peer, trying again..."
+        let peer' = head $ NonEmpty.fromList peers
+        swarmConnectWithRetry peer' (tries - 1)
 
 -- | Retrieve auth from the user's system
 get :: MonadIO m => m (Either YAML.ParseException Environment)
@@ -95,7 +89,7 @@ write :: MonadUnliftIO m => BasicAuthData -> [IPFS.Peer] -> m ()
 write auth peers = do
   path <- cachePath
   let configFileContent = Environment {
-                            peers = NonEmpty.fromList peers
+                            peers = Just (NonEmpty.fromList peers)
                           , userAuth = auth
                           }
   writeBinaryFileDurable path $ YAML.encode $ configFileContent
@@ -133,3 +127,43 @@ removeConfigFile :: MonadUnliftIO m => m (Either IOException ())
 removeConfigFile = do
   path <- cachePath
   try $ removeFile path
+
+-- | Retrieves a Fission Peer from local config
+--   If not found we retrive from the network and store
+getOrRetrievePeer :: MonadRIO cfg m
+  => MonadUnliftIO         m
+  => HasLogFunc        cfg
+  => Has Client.Runner cfg
+  => Environment
+  -> m IPFS.Peer
+getOrRetrievePeer config =
+  case peers config of
+    Just prs -> do
+      logDebug "Retrieved Peer from .fission.yaml"
+      return $ head prs
+
+    Nothing ->
+      getPeers >>= \case
+        Left err -> do
+          logError $ displayShow err
+          logDebug "Unable to retrieve peers from the network, using default address"
+          return $ IPFS.Peer.fission
+
+        Right peers -> do
+          logDebug "Retrieved Peer from API"
+          let auth = userAuth config
+          write auth peers
+          return $ head $ NonEmpty.fromList peers
+
+-- | Retrieves the Fission peer list from the server
+getPeers :: MonadReader cfg m
+  => Has Client.Runner cfg
+  => MonadIO m
+  => m (Either ClientError [IPFS.Peer])
+getPeers = do
+  Client.Runner run <- Config.get
+  liftIO
+    $ Cursor.withHidden
+    $ CLI.Wait.waitFor "Retrieving Fission Peer List..."
+    $ run
+    $ Peers.get

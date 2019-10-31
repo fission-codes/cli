@@ -38,31 +38,26 @@ ensureLocalConfig handler = do
   _ipfsPath'    :: IPFS.BinPath   <- Config.get
   _ipfsTimeout' :: IPFS.Timeout   <- Config.get
 
+  -- Get our stored user config
   Environment.get >>= \case
     Right config -> do
+      _peer'         <- Environment.getOrRetrievePeer config
       let _userAuth' = (userAuth config)
-          _peer'     = head $ (peers config)
 
-      Environment.swarmConnectWithRetry' >>= \case
+      -- Connect the local IPFS node to the Fission network
+      Environment.swarmConnectWithRetry _peer' 1 >>= \case
         Right _ ->
+          -- All setup and ready to run!
           localRIO LoggedIn {..} handler
 
         Left err -> do
+          -- We were unable to connect!
           logError $ displayShow err
           Environment.couldNotSwarmConnect
           return undefined
 
-      -- CLI.Wait.waitFor "Connecting to Fission nodes..."
-      --   $ IPFS.Peer.connect _peer' >>= \case
-      --     Right _ ->
-      --       localRIO LoggedIn {..} handler
-
-      --     Left err -> do
-      --       logError $ displayShow err
-      --       Environment.couldNotSwarmConnect
-      --       return undefined
-
     Left err -> do
+      -- We were unable to read the users config
       logError $ displayShow err
       Environment.couldNotRead
       return undefined
