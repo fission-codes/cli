@@ -17,11 +17,11 @@ import qualified Fission.Web.Client.Types as Client
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 
+import           Fission.CLI.IPFS.Error.Types
+
 import qualified Fission.IPFS.Peer  as IPFS.Peer
 import qualified Fission.IPFS.Types as IPFS
 
-data Err = UnableToConnect
-  deriving (Show, Exception)
 
 -- | Connect to the Fission IPFS network with a set amount of retries
 swarmConnectWithRetry :: MonadRIO cfg m

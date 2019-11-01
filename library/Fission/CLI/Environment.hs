@@ -31,10 +31,10 @@ import qualified Fission.IPFS.Types as IPFS
 
 -- | Initialize the Config file
 init :: MonadRIO cfg m
-          => HasLogFunc        cfg
-          => Has Client.Runner cfg
-          => BasicAuthData
-          -> m ()
+      => HasLogFunc        cfg
+      => Has Client.Runner cfg
+      => BasicAuthData
+      -> m ()
 init auth = do
   logDebug "Initializing config file"
 
@@ -54,10 +54,10 @@ get = liftIO . YAML.decodeFileEither =<< cachePath
 write :: MonadUnliftIO m => BasicAuthData -> [IPFS.Peer] -> m ()
 write auth peers = do
   path <- cachePath
-  let configFileContent = Environment {
-                            peers = Just (NonEmpty.fromList peers)
-                          , userAuth = auth
-                          }
+  let configFileContent = Environment
+                            { peers = Just (NonEmpty.fromList peers)
+                            , userAuth = auth
+                            }
   writeBinaryFileDurable path $ YAML.encode $ configFileContent
 
 -- | Absolute path of the auth cache on disk
@@ -86,11 +86,11 @@ removeConfigFile = do
 -- | Retrieves a Fission Peer from local config
 --   If not found we retrive from the network and store
 getOrRetrievePeer :: MonadRIO cfg m
-  => MonadUnliftIO         m
-  => HasLogFunc        cfg
-  => Has Client.Runner cfg
-  => Environment
-  -> m IPFS.Peer
+                  => MonadUnliftIO         m
+                  => HasLogFunc        cfg
+                  => Has Client.Runner cfg
+                  => Environment
+                  -> m IPFS.Peer
 getOrRetrievePeer config =
   case peers config of
     Just prs -> do
