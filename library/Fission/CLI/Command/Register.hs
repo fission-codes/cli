@@ -20,13 +20,13 @@ import qualified Fission.Web.Client.Types as Client
 
 import qualified Fission.User.Registration.Types as User
 
-import qualified Fission.CLI.Auth as Auth
 import           Fission.CLI.Config.Types
 
 import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
+import qualified Fission.CLI.Environment     as Environment
 
 -- | The command to attach to the CLI tree
 command :: MonadUnliftIO m
@@ -47,7 +47,7 @@ register :: MonadRIO       cfg m
         => HasLogFunc        cfg
         => Has Client.Runner cfg
         => m ()
-register = Auth.get >>= \case
+register = Environment.get >>= \case
   Right _auth ->
     CLI.Success.putOk "Already registered. Remove your credentials at ~/.fission.yaml if you want to re-register"
 
@@ -94,5 +94,7 @@ register' = do
           CLI.Error.put err "Authorization failed"
 
         Right _ok -> do
-          Auth.write $ BasicAuthData username (BS.pack password)
+          let basicAuth = BasicAuthData username (BS.pack password)
+
+          Environment.init basicAuth
           CLI.Success.putOk "Registered & logged in. Your credentials are in ~/.fission.yaml"

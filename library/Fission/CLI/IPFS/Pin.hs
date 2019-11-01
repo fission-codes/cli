@@ -1,13 +1,10 @@
 -- | Pin files via the CLI
-module Fission.CLI.Pin
+module Fission.CLI.IPFS.Pin
   ( pin
   , run
   ) where
 
 import RIO
-import RIO.Process (HasProcessContext)
-
-import Data.Has
 
 import Servant
 import Servant.Client
@@ -15,8 +12,6 @@ import Servant.Client
 import qualified Fission.Config as Config
 import           Fission.Internal.Constraint
 
-import qualified Fission.IPFS.Peer    as IPFS.Peer
-import qualified Fission.IPFS.Types   as IPFS
 import           Fission.IPFS.CID.Types
 
 import qualified Fission.Web.Client      as Client
@@ -25,21 +20,18 @@ import qualified Fission.Web.Client.IPFS as Fission
 import           Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Loader  as CLI
 import           Fission.CLI.Display.Success as CLI.Success
+import           Fission.CLI.Config.Types
 
 run :: MonadRIO          cfg m
-    => HasLogFunc        cfg
-    => HasProcessContext cfg
-    => Has Client.Runner cfg
-    => Has IPFS.BinPath  cfg
-    => Has IPFS.Timeout  cfg
+    => HasLoggedIn  cfg
     => CID
-    -> BasicAuthData
     -> m (Either ClientError CID)
-run cid@(CID hash) auth = do
+run cid@(CID hash)  = do
   logDebug $ "Remote pinning " <> display hash
-  IPFS.Peer.connect IPFS.Peer.fission
 
   Client.Runner runner <- Config.get
+  auth <- Config.get
+
   liftIO (pin runner auth cid) >>= \case
     Right _ -> do
       CLI.Success.live hash

@@ -43,6 +43,6 @@ main = do
   let url         = BaseUrl (if isTLS then Https else Http) host port path
       _fissionAPI = Client.Runner $ Client.request httpManager url
 
-  withLogFunc logOptions \_logFunc -> runRIO CLI.Config {..} do
+  withLogFunc logOptions \_logFunc -> runRIO CLI.BaseConfig {..} do
     logDebug $ "Requests will be made to " <> displayShow url
     cli
