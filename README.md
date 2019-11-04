@@ -10,10 +10,17 @@ Seamlessly deploy websites, files, and directories to the decentralized web.
 
 ## QuickStart
 
+On Mac, we're using Homebrew:
+
+```
+brew tap fission-suite/fission
+brew install fission-cli
+```
+
 ### Installation 
 Grab the latest binary for your operating system from our [release page](https://github.com/fission-suite/cli/releases).
 
-You'll find the most up to date instructions for [installation](https://app.gitbook.com/@runfission/s/fission-guide/installation#installing-fission) and [getting started](https://app.gitbook.com/@runfission/s/fission-guide/getting-started) in our [Guide](https://app.gitbook.com/@runfission/s/fission-guide)
+You'll find the most up to date instructions for [installation](https://app.gitbook.com/@runfission/s/fission-guide/installation#installing-fission) and [getting started](https://app.gitbook.com/@runfission/s/fission-guide/getting-started) in our [Guide](https://app.gitbook.com/@runfission/s/fission-guide).
 
 ### Seamless Deployments
 Deployments are just one step: `fission up`
