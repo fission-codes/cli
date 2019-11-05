@@ -129,6 +129,7 @@ parseOptions = do
   path <- strArgument $ mconcat
     [ metavar "PATH"
     , help    "The file path of the assets or directory to watch"
+    , value   "./"
     ]
 
   return Watch.Options {..}
