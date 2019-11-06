@@ -47,21 +47,6 @@ init auth = do
       liftIO $ write auth peers
       CLI.Success.putOk "Logged in"
 
--- | Locate auth on the user's system
-find :: MonadIO m => m (Maybe FilePath)
-find = do
-  currDir <- getCurrentDirectory
-  findRecurse currDir
-
-findRecurse :: MonadIO m => FilePath -> m (Maybe FilePath)
-findRecurse "/" = return Nothing
-findRecurse path = do 
-  let filepath = path </> ".fission.yaml"
-  doesFileExist filepath >>= \case
-    True  -> return $ Just filepath
-    False -> findRecurse $ takeDirectory path
-
-
 -- | Retrieve auth from the user's system
 get :: MonadIO m => m (Either SomeException Environment)
 get = find >>= \case 
@@ -77,6 +62,20 @@ get' :: MonadIO m => FilePath -> m (Either SomeException Environment)
 get' path = (liftIO . YAML.decodeFileEither $ path) >>= \case
   Right auth -> return $ Right auth
   Left err -> return . Left $ toException err
+
+-- | Locate auth on the user's system
+find :: MonadIO m => m (Maybe FilePath)
+find = do
+  currDir <- getCurrentDirectory
+  findRecurse currDir
+
+findRecurse :: MonadIO m => FilePath -> m (Maybe FilePath)
+findRecurse "/" = return Nothing
+findRecurse path = do 
+  let filepath = path </> ".fission.yaml"
+  doesFileExist filepath >>= \case
+    True  -> return $ Just filepath
+    False -> findRecurse $ takeDirectory path
 
 -- | Write user's auth to a local on-system path
 write :: MonadUnliftIO m => BasicAuthData -> [IPFS.Peer] -> m ()
