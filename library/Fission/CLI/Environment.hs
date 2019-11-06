@@ -50,18 +50,12 @@ init auth = do
 -- | Retrieve auth from the user's system
 get :: MonadIO m => m (Either SomeException Environment)
 get = find >>= \case 
-  Just path -> get' path
-  Nothing -> return . Left $ toException Error.NoEnv
-
--- | Retrieve auth from ~/.fission.yaml
-getHome :: MonadIO m => m (Either SomeException Environment)
-getHome = get' =<< cachePath
+  Just path -> mapLeft toException <$> decode path
+  Nothing -> return . Left $ toException Error.EnvNotFound
 
 -- | Retrieve auth from the user's system
-get' :: MonadIO m => FilePath -> m (Either SomeException Environment)
-get' path = (liftIO . YAML.decodeFileEither $ path) >>= \case
-  Right auth -> return $ Right auth
-  Left err -> return . Left $ toException err
+decode :: MonadIO m => FilePath -> m (Either YAML.ParseException Environment)
+decode path = liftIO . YAML.decodeFileEither $ path
 
 -- | Locate auth on the user's system
 find :: MonadIO m => m (Maybe FilePath)
