@@ -57,7 +57,7 @@ ensureLocalConfig handler = do
 
     Left err -> do
       -- We were unable to read the users config
-      logError $ displayShow err
+      logDebug $ displayShow err
       Environment.couldNotRead
       return undefined
 
