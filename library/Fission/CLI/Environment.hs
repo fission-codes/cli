@@ -64,12 +64,13 @@ find = do
   findRecurse currDir
 
 findRecurse :: MonadIO m => FilePath -> m (Maybe FilePath)
-findRecurse "/" = return Nothing
 findRecurse path = do 
   let filepath = path </> ".fission.yaml"
   doesFileExist filepath >>= \case
     True  -> return $ Just filepath
-    False -> findRecurse $ takeDirectory path
+    False -> case path of
+      "/" -> return Nothing
+      _   -> findRecurse $ takeDirectory path
 
 -- | Write user's auth to a local on-system path
 write :: MonadUnliftIO m => BasicAuthData -> [IPFS.Peer] -> m ()
