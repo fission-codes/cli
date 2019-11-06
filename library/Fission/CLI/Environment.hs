@@ -66,9 +66,10 @@ find = do
 findRecurse :: MonadIO m => FilePath -> m (Maybe FilePath)
 findRecurse path = do 
   let filepath = path </> ".fission.yaml"
-  doesFileExist filepath >>= \case
-    True  -> return $ Just filepath
-    False -> case path of
+  exists <- doesFileExist filepath
+  if exists
+    then return $ Just filepath
+    else case path of
       "/" -> return Nothing
       _   -> findRecurse $ takeDirectory path
 
