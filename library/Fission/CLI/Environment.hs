@@ -22,6 +22,7 @@ import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 
 import           Fission.CLI.Environment.Types
+import qualified Fission.CLI.Environment.Error as Error
 
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
@@ -46,9 +47,36 @@ init auth = do
       liftIO $ write auth peers
       CLI.Success.putOk "Logged in"
 
+-- | Locate auth on the user's system
+find :: MonadIO m => m (Maybe FilePath)
+find = do
+  currDir <- getCurrentDirectory
+  findRecurse currDir
+
+findRecurse :: MonadIO m => FilePath -> m (Maybe FilePath)
+findRecurse "/" = return Nothing
+findRecurse path = do 
+  let filepath = path </> ".fission.yaml"
+  doesFileExist filepath >>= \case
+    True  -> return $ Just filepath
+    False -> findRecurse $ takeDirectory path
+
+
 -- | Retrieve auth from the user's system
-get :: MonadIO m => m (Either YAML.ParseException Environment)
-get = liftIO . YAML.decodeFileEither =<< cachePath
+get :: MonadIO m => m (Either SomeException Environment)
+get = find >>= \case 
+  Just path -> get' path
+  Nothing -> return . Left $ toException Error.NoEnv
+
+-- | Retrieve auth from ~/.fission.yaml
+getHome :: MonadIO m => m (Either SomeException Environment)
+getHome = get' =<< cachePath
+
+-- | Retrieve auth from the user's system
+get' :: MonadIO m => FilePath -> m (Either SomeException Environment)
+get' path = (liftIO . YAML.decodeFileEither $ path) >>= \case
+  Right auth -> return $ Right auth
+  Left err -> return . Left $ toException err
 
 -- | Write user's auth to a local on-system path
 write :: MonadUnliftIO m => BasicAuthData -> [IPFS.Peer] -> m ()
@@ -73,7 +101,7 @@ couldNotRead = do
   UTF8.putText "🚫 Unable to read credentials. Try logging in with "
 
   liftIO $ ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
-  UTF8.putText "fission-cli login"
+  UTF8.putText "fission-cli login\n"
 
   liftIO $ ANSI.setSGR [ANSI.Reset]
 

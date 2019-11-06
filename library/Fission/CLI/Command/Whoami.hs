@@ -34,7 +34,7 @@ whoami :: MonadRIO   cfg m
 whoami =
   Environment.get >>= \case
     Left err -> do
-      logError $ displayShow err
+      logDebug $ displayShow err
       Environment.couldNotRead
 
     Right env -> do
