@@ -28,6 +28,8 @@ import           Fission.Internal.Constraint
 import           Fission.Web.Client.Peers as Peers
 import qualified Fission.Web.Client.Types as Client
 
+import qualified Fission.User.Password.Types as User
+
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 
@@ -46,7 +48,15 @@ init :: MonadRIO cfg m
       => Has Client.Runner cfg
       => BasicAuthData
       -> m ()
-init auth = do
+init auth = initAt auth =<< cachePath
+
+initAt :: MonadRIO cfg m
+      => HasLogFunc        cfg
+      => Has Client.Runner cfg
+      => BasicAuthData
+      -> FilePath
+      -> m ()
+initAt auth path = do
   logDebug "Initializing config file"
 
   Peers.getPeers >>= \case
@@ -54,7 +64,7 @@ init auth = do
       CLI.Error.put err "Peer retrieval failed"
 
     Right peers -> do
-      liftIO $ write auth peers
+      liftIO $ write auth peers path
       CLI.Success.putOk "Logged in"
 
 -- | Retrieve auth from the user's system
@@ -83,10 +93,8 @@ findRecurse path = do
       "/" -> return Nothing
       _   -> findRecurse $ takeDirectory path
 
--- | Write user's auth to a local on-system path
-write :: MonadUnliftIO m => BasicAuthData -> [IPFS.Peer] -> m ()
-write auth peers = do
-  path <- cachePath
+write :: MonadUnliftIO m => BasicAuthData -> [IPFS.Peer] -> FilePath -> m ()
+write auth peers path = do
   let configFileContent = Environment
                             { peers = Just (NonEmpty.fromList peers)
                             , userAuth = auth
@@ -98,6 +106,23 @@ cachePath :: MonadIO m => m FilePath
 cachePath = do
   home <- getHomeDirectory
   return $ home </> ".fission.yaml"
+
+writePassword :: MonadRIO cfg m
+      => HasLogFunc        cfg
+      => Has Client.Runner cfg
+      => User.Password
+      -> m (Either SomeException Bool)
+writePassword (User.Password newPass) =
+  find >>= \case
+    Nothing -> return . Left $ toException Error.EnvNotFound 
+    Just path -> decode path >>= \case
+      Left err -> return . Left $ toException err
+      Right env -> do
+        let auth = BasicAuthData
+                    (basicAuthUsername . userAuth $ env)
+                    (encodeUtf8 $ fromMaybe "" newPass)
+        initAt auth path
+        return $ Right True
 
 -- | Create a could not read message for the terminal
 couldNotRead :: MonadIO m => m ()
@@ -140,5 +165,5 @@ getOrRetrievePeer config =
         Right peers -> do
           logDebug "Retrieved Peer from API"
           let auth = userAuth config
-          write auth peers
+          write auth peers =<< cachePath
           return $ head $ NonEmpty.fromList peers

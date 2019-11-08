@@ -14,7 +14,7 @@ import           System.Console.Haskeline
 import qualified Fission.Config as Config
 import           Fission.Internal.Constraint
 
-import           Fission.Web.Client.Register as Register
+import           Fission.Web.Client.User as User.Client
 import qualified Fission.Web.Client.Types as Client
 import qualified Fission.CLI.Environment as Environment
 
@@ -60,7 +60,7 @@ login = do
       authResult <- Cursor.withHidden
                   . liftIO
                   . CLI.Wait.waitFor "Verifying your credentials"
-                  . run $ Register.verify auth
+                  . run $ User.Client.verify auth
 
       case authResult of
         Left  err ->

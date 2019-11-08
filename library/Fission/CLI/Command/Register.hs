@@ -15,7 +15,7 @@ import           System.Console.Haskeline
 import qualified Fission.Config as Config
 import           Fission.Internal.Constraint
 
-import qualified Fission.Web.Client.Register  as User.Client
+import qualified Fission.Web.Client.User  as User.Client
 import qualified Fission.Web.Client.Types as Client
 
 import qualified Fission.User.Registration.Types as User
