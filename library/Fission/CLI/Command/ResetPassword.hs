@@ -70,14 +70,18 @@ resetPassword' auth newPassword = do
                   . CLI.Wait.waitFor "Registering..."
                   . runner
                   . User.Client.resetPassword auth
-                  $ User.Password (Just $ T.pack newPassword)
+                  $ User.Password $ T.pack newPassword
 
   case resetResult of
     Left  err ->
       CLI.Error.put err "Password Reset failed"
 
-    Right updatedPass -> do
-      Environment.writePassword updatedPass >>= \case
+    Right (User.Password updatedPass) -> do
+      let updatedAuth = BasicAuthData {
+        basicAuthUsername = basicAuthUsername auth,
+        basicAuthPassword = encodeUtf8 updatedPass
+      }
+      Environment.overwriteLocalAuth updatedAuth >>= \case
         Left err -> 
           CLI.Error.put err "Could not write password to .fission.yaml"
         Right _ok -> 
