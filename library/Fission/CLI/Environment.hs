@@ -43,6 +43,24 @@ import qualified Fission.Internal.UTF8 as UTF8
 import qualified Fission.IPFS.Peer  as IPFS.Peer
 import qualified Fission.IPFS.Types as IPFS
 
+buildEnv :: MonadIO m => m PartialEnv
+buildEnv = do
+  env <- getCurrentDirectory >>= recurseEnv
+  getUsername env
+
+recurseEnv :: MonadIO m => FilePath -> m PartialEnv
+recurseEnv "/" = decodePartial $ "/.fission.yaml"
+recurseEnv path = do
+  parent <- recurseEnv $ takeDirectory path
+  curr <- decodePartial $ path </> ".fission.yaml"
+  return $ parent <> curr
+
+-- | Retrieve auth from the user's system
+decodePartial :: MonadIO m => FilePath -> m PartialEnv
+decodePartial path = liftIO $ YAML.decodeFileEither path >>= \case
+  Left _ -> return $ mempty PartialEnv
+  Right env -> return env
+
 -- | Initialize the Config file
 init :: MonadRIO cfg m
       => HasLogFunc        cfg
