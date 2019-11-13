@@ -79,7 +79,7 @@ resetPassword' auth newPassword = do
 
     Right (User.Password updatedPass) -> do
       Environment.findLocalAuth >>= \case
-        Left err -> CLI.Error.put err "Could"
+        Left _ -> Environment.couldNotRead
         Right path -> do
           let
             updatedAuth = BasicAuthData

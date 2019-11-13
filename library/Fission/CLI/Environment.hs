@@ -66,6 +66,9 @@ get = do
   partial <- Env.Partial.get
   return $ Env.Partial.toFull partial
 
+write :: MonadIO m => Environment -> FilePath -> m ()
+write = Env.Partial.write . Env.Partial.fromFull
+
 -- | Locate current auth on the user's system
 findLocalAuth :: MonadIO m => m (Either Error.Env FilePath)
 findLocalAuth = do
@@ -95,7 +98,7 @@ writeAuth :: MonadRIO cfg m
           -> m ()
 writeAuth auth path = do
   partial <- Env.Partial.decode path
-  let updated = Env.Partial.updateAuth partial auth
+  let updated = partial { maybeUserAuth = Just auth }
   Env.Partial.write updated path
 
 -- | Create a could not read message for the terminal
@@ -138,6 +141,6 @@ getOrRetrievePeer config =
 
         Right peers -> do
           logDebug "Retrieved Peer from API"
-          let updated = Env.Partial.updatePeers (Env.Partial.fromFull config) peers
-          Env.Partial.write updated =<< globalEnv
+          let updated = config { peers = Just (NonEmpty.fromList peers) }
+          write updated =<< globalEnv
           return $ head $ NonEmpty.fromList peers

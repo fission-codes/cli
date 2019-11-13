@@ -5,7 +5,6 @@ module Fission.CLI.Environment.Partial
   , write
   , toFull
   , fromFull
-  , updateAuth
   , updatePeers
   ) where
 
@@ -13,7 +12,6 @@ import           RIO           hiding (set)
 import           RIO.Directory
 import           RIO.File
 import           RIO.FilePath
-import           Servant.API
 
 import qualified Data.Yaml as YAML
 import           Data.List.NonEmpty as NonEmpty
@@ -60,12 +58,6 @@ fromFull :: Environment -> Env.Partial
 fromFull env = Env.Partial
   { maybeUserAuth = Just $ userAuth env
   , maybePeers = peers env
-  }
-
-updateAuth :: Env.Partial -> BasicAuthData -> Env.Partial
-updateAuth env auth = Env.Partial
-  { maybeUserAuth = Just auth
-  , maybePeers = maybePeers env
   }
 
 updatePeers :: Env.Partial -> [IPFS.Peer] -> Env.Partial
