@@ -5,6 +5,7 @@ module Fission.CLI.Environment
   , decode
   , find
   , write
+  , writePassword
   , cachePath
   , couldNotRead
   , removeConfigFile

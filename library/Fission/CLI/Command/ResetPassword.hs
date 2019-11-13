@@ -20,13 +20,13 @@ import qualified Fission.Web.Client.Types as Client
 import qualified Fission.User.Password.Types as User
 
 import           Fission.CLI.Config.Types
+import           Fission.CLI.Config.LoggedIn as LoggedIn
 
 import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
 import qualified Fission.CLI.Environment     as Environment
-import           Fission.CLI.Environment.Types
 
 -- | The command to attach to the CLI tree
 command :: MonadUnliftIO m
@@ -38,29 +38,22 @@ command cfg =
   addCommand
     "reset-password"
     "Reset Fision Password"
-    (const $ runRIO cfg resetPassword)
+    (const $ void $ runRIO cfg $ LoggedIn.ensure $ resetPassword)
     (pure ())
 
 -- | Register and login (i.e. save credentials to disk)
 resetPassword :: MonadRIO       cfg m
-              => MonadUnliftIO         m
-              => HasLogFunc        cfg
-              => Has Client.Runner cfg
+              => MonadUnliftIO      m
+              => HasLoggedIn    cfg
               => m ()
-resetPassword = 
-  Environment.get >>= \case
-    Left err -> do
-      logDebug $ displayShow err
-      Environment.couldNotRead
-    Right env -> do
-      let auth = userAuth env
+resetPassword = do
+  auth <- Config.get
+  liftIO (runInputT defaultSettings $ getPassword (Just '•') "New Password: ") >>= \case
+    Nothing ->
+      logError "Unable to read password"
 
-      liftIO (runInputT defaultSettings $ getPassword (Just '•') "New Password: ") >>= \case
-        Nothing ->
-          logError "Unable to read password"
-
-        Just newPassword -> resetPassword' auth newPassword
-                  
+    Just newPassword -> resetPassword' auth newPassword
+            
 resetPassword' :: MonadRIO cfg m
                => MonadUnliftIO         m
                => HasLogFunc cfg

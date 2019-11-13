@@ -32,13 +32,13 @@ import qualified Fission.AWS.Types  as AWS
 import           Fission.Internal.Exception
 import           Fission.CLI.Display.Error as CLI.Error
 
-import qualified Fission.CLI.Config.LoggedIn as LoggedIn
+import qualified Fission.CLI.Config.FissionConnected as FissionConnected
 
 import           Fission.CLI.Command.Watch.Types as Watch
 import           Fission.CLI.Config.Types
 import qualified Fission.CLI.IPFS.Pin            as CLI.Pin
 import qualified Fission.CLI.DNS                 as CLI.DNS
-import           Fission.CLI.Config.LoggedIn
+import           Fission.CLI.Config.FissionConnected
 
 -- | The command to attach to the CLI tree
 command :: MonadIO m
@@ -53,12 +53,12 @@ command cfg =
   addCommand
     "watch"
     "Keep your working directory in sync with the IPFS network"
-    (\options -> void $ runRIO cfg $ LoggedIn.ensure $ watcher options)
+    (\options -> void $ runRIO cfg $ FissionConnected.ensure $ watcher options)
     parseOptions
 
 -- | Continuously sync the current working directory to the server over IPFS
-watcher :: MonadRIO          cfg m
-        => HasLoggedIn  cfg
+watcher :: MonadRIO             cfg m
+        => HasFissionConnected  cfg
         => Watch.Options
         -> m ()
 watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
@@ -79,7 +79,7 @@ watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
     void $ handleTreeChanges timeCache hashCache watchMgr cfg absPath
     forever $ liftIO $ threadDelay 1000000 -- Sleep main thread
 
-handleTreeChanges :: HasLoggedIn  cfg
+handleTreeChanges :: HasFissionConnected  cfg
                   => MVar UTCTime
                   -> MVar Text
                   -> WatchManager
@@ -107,8 +107,8 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
             UTF8.putText "\n"
             void $ pinAndUpdateDNS cid
 
-pinAndUpdateDNS :: MonadRIO          cfg m
-                => HasLoggedIn  cfg
+pinAndUpdateDNS :: MonadRIO             cfg m
+                => HasFissionConnected  cfg
                 => CID
                 -> m (Either ClientError AWS.DomainName)
 pinAndUpdateDNS cid =
