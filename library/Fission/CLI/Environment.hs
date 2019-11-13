@@ -144,7 +144,7 @@ removeConfigFile = do
 
 -- | Retrieves a Fission Peer from local config
 --   If not found we retrive from the network and store
-getOrRetrievePeer :: MonadRIO cfg m
+getOrRetrievePeer :: MonadRIO          cfg m
                   => MonadUnliftIO         m
                   => HasLogFunc        cfg
                   => Has Client.Runner cfg

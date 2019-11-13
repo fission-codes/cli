@@ -39,7 +39,7 @@ command cfg =
     parseOptions
 
 -- | Sync the current working directory to the server over IPFS
-up :: MonadRIO     cfg m
+up :: MonadRIO             cfg m
    => HasFissionConnected  cfg
    => Up.Options
    -> m ()

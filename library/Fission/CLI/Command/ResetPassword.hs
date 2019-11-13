@@ -54,9 +54,9 @@ resetPassword = do
 
     Just newPassword -> resetPassword' auth newPassword
             
-resetPassword' :: MonadRIO cfg m
+resetPassword' :: MonadRIO          cfg m
                => MonadUnliftIO         m
-               => HasLogFunc cfg
+               => HasLogFunc        cfg
                => Has Client.Runner cfg
                => BasicAuthData
                -> String
