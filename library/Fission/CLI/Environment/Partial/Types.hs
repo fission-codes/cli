@@ -14,9 +14,9 @@ data Partial = Partial
     } 
 
 instance ToJSON Partial where
-  toJSON Partial {..} = object
-    [ "user_auth" .= maybeUserAuth
-    , "peers"     .= maybePeers 
+  toJSON Partial {..} = object $ catMaybes
+    [ maybe Nothing (Just . makePair "user_auth") maybeUserAuth
+    , maybe Nothing (Just . makePair "peers") maybePeers 
     ]
 
 instance FromJSON Partial where
@@ -35,6 +35,9 @@ instance Monoid Partial where
     maybeUserAuth = Nothing,
     maybePeers = Nothing
   }
+
+makePair :: (KeyValue kv, ToJSON v) => Text -> v -> kv
+makePair a b = a .= b
 
 getField :: (Partial -> Maybe field) -> Partial -> Partial -> Maybe field
 getField accessor a b = maybe (accessor a) Just (accessor b)
