@@ -9,9 +9,9 @@ import qualified Fission.IPFS.Types as IPFS
 import           Fission.Internal.Orphanage.BasicAuthData ()
                 
 data Partial = Partial
-    { maybeUserAuth :: Maybe BasicAuthData
-    , maybePeers    :: Maybe (NonEmpty IPFS.Peer)
-    } 
+  { maybeUserAuth :: Maybe BasicAuthData
+  , maybePeers    :: Maybe (NonEmpty IPFS.Peer)
+  } 
 
 instance ToJSON Partial where
   toJSON Partial {..} = object $ catMaybes

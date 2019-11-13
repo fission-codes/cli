@@ -40,10 +40,10 @@ import qualified Fission.IPFS.Types as IPFS
 
 -- | Initialize the Environment file
 init :: MonadRIO cfg m
-      => HasLogFunc        cfg
-      => Has Client.Runner cfg
-      => BasicAuthData
-      -> m ()
+     => HasLogFunc        cfg
+     => Has Client.Runner cfg
+     => BasicAuthData
+     -> m ()
 init auth = do
   logDebug "Initializing config file"
   path <- globalEnv
@@ -92,9 +92,9 @@ globalEnv = do
   return $ home </> ".fission.yaml"
 
 writeAuth :: MonadRIO cfg m
-      => BasicAuthData
-      -> FilePath
-      -> m (Either SomeException Bool)
+          => BasicAuthData
+          -> FilePath
+          -> m (Either SomeException Bool)
 writeAuth auth path = do
   partial <- Partial.decode path
   let updated = Partial.updateAuth partial auth
