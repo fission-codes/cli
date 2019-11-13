@@ -35,7 +35,7 @@ command cfg =
   addCommand
     "up"
     "Keep your current working directory up"
-    (\options -> runRIO cfg $ LoggedIn.ensure $ up options)
+    (\options -> void $ runRIO cfg $ LoggedIn.ensure $ up options)
     parseOptions
 
 -- | Sync the current working directory to the server over IPFS

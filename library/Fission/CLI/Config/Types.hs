@@ -1,14 +1,5 @@
 -- | Top level for all CLI config types
-module Fission.CLI.Config.Types
-  ( CommandM
-  -- , module BaseConfig
-  -- , module LoggedIn
-  -- , fissionAPI
-  -- , logFunc
-  ) where
-
--- import           Fission.CLI.Config.Types.BaseConfig
--- import           Fission.CLI.Config.Types.LoggedIn
+module Fission.CLI.Config.Types (CommandM) where
 
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Writer.Lazy

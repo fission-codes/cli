@@ -53,7 +53,7 @@ command cfg =
   addCommand
     "watch"
     "Keep your working directory in sync with the IPFS network"
-    (\options -> runRIO cfg $ LoggedIn.ensure $ watcher options)
+    (\options -> void $ runRIO cfg $ LoggedIn.ensure $ watcher options)
     parseOptions
 
 -- | Continuously sync the current working directory to the server over IPFS

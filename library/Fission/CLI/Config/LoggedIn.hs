@@ -16,6 +16,7 @@ import qualified Fission.Web.Client   as Client
 
 import qualified Fission.Config as Config
 import           Fission.CLI.Config.LoggedIn.Types
+import           Fission.CLI.Config.LoggedIn.Error.Types
 
 import           Fission.CLI.Environment.Types as Environment
 import qualified Fission.CLI.Environment       as Environment
@@ -35,7 +36,7 @@ ensure
      , Has Client.Runner cfg
      )
   => RIO LoggedIn a
-  -> m a
+  -> m (Either Error a)
 ensure action = do
   _logFunc     :: LogFunc        <- view logFuncL
   _processCtx  :: ProcessContext <- view processContextL
@@ -51,18 +52,19 @@ ensure action = do
 
       -- Connect the local IPFS node to the Fission network
       Connect.swarmConnectWithRetry _peer 1 >>= \case
-        Right _ ->
+        Right _ -> do
           -- All setup and ready to run!
-          liftIO $ runRIO LoggedIn {..} action
+          result <- liftIO $ runRIO LoggedIn {..} action
+          Right <$> return result
 
         Left err -> do
           -- We were unable to connect!
           logError $ displayShow err
           Connect.couldNotSwarmConnect
-          return undefined
+          return $ Left CannotConnect
 
     Left err -> do
       -- We were unable to read the users config
       logDebug $ displayShow err
       Environment.couldNotRead
-      return undefined -- FIXME!
+      return $ Left NotLoggedIn
