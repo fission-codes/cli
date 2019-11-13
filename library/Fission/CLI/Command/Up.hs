@@ -20,7 +20,7 @@ import qualified Fission.CLI.Display.Error    as Error
 import qualified Fission.CLI.IPFS.Pin         as CLI.Pin
 import qualified Fission.CLI.DNS              as CLI.DNS
 import           Fission.CLI.Config.Types
-import qualified Fission.CLI.Config.Guard    as Config.Guard
+import           Fission.CLI.Config.LoggedIn  as LoggedIn
 
 -- | The command to attach to the CLI tree
 command :: MonadIO m
@@ -35,11 +35,11 @@ command cfg =
   addCommand
     "up"
     "Keep your current working directory up"
-    (\options -> runRIO cfg $ Config.Guard.ensureLocalConfig $ up options)
+    (\options -> runRIO cfg $ LoggedIn.ensure $ up options)
     parseOptions
 
 -- | Sync the current working directory to the server over IPFS
-up :: MonadRIO cfg m
+up :: MonadRIO     cfg m
    => HasLoggedIn  cfg
    => Up.Options
    -> m ()
@@ -68,4 +68,3 @@ parseOptions = do
     ]
 
   return Up.Options {..}
-

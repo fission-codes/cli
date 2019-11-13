@@ -32,12 +32,13 @@ import qualified Fission.AWS.Types  as AWS
 import           Fission.Internal.Exception
 import           Fission.CLI.Display.Error as CLI.Error
 
+import qualified Fission.CLI.Config.LoggedIn as LoggedIn
+
 import           Fission.CLI.Command.Watch.Types as Watch
 import           Fission.CLI.Config.Types
 import qualified Fission.CLI.IPFS.Pin            as CLI.Pin
 import qualified Fission.CLI.DNS                 as CLI.DNS
-import qualified Fission.CLI.Config.Guard    as Config.Guard
-
+import           Fission.CLI.Config.LoggedIn
 
 -- | The command to attach to the CLI tree
 command :: MonadIO m
@@ -52,7 +53,7 @@ command cfg =
   addCommand
     "watch"
     "Keep your working directory in sync with the IPFS network"
-    (\options -> runRIO cfg $ Config.Guard.ensureLocalConfig $ watcher options)
+    (\options -> runRIO cfg $ LoggedIn.ensure $ watcher options)
     parseOptions
 
 -- | Continuously sync the current working directory to the server over IPFS

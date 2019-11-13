@@ -1,5 +1,6 @@
-module Fission.CLI.IPFS.Error.Types where
-import RIO
+module Fission.CLI.IPFS.Error.Types (Err (..)) where
+
+import           RIO
 
 data Err = UnableToConnect
   deriving (Show, Exception)

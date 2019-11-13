@@ -1,5 +1,15 @@
 -- | Configuration required to run any CLI function that interacts with the Fission service
-module Fission.CLI.Config.Types.LoggedIn where
+module Fission.CLI.Config.LoggedIn.Types
+  ( LoggedIn (..)
+  , HasLoggedIn
+  , fissionAPI
+  , logFunc
+  , processCtx
+  , ipfsPath
+  , ipfsTimeout
+  , peer
+  , userAuth
+  ) where
 
 import RIO
 import RIO.Process (ProcessContext, HasProcessContext (..))
@@ -22,34 +32,34 @@ type HasLoggedIn cfg
     )
 
 data LoggedIn = LoggedIn
-  { _fissionAPI'  :: !Client.Runner
-  , _logFunc'     :: !LogFunc
-  , _processCtx'  :: !ProcessContext
-  , _ipfsPath'    :: !IPFS.BinPath
-  , _ipfsTimeout' :: !IPFS.Timeout
-  , _peer'        :: !IPFS.Peer
-  , _userAuth'    :: !BasicAuthData
+  { _fissionAPI  :: !Client.Runner
+  , _logFunc     :: !LogFunc
+  , _processCtx  :: !ProcessContext
+  , _ipfsPath    :: !IPFS.BinPath
+  , _ipfsTimeout :: !IPFS.Timeout
+  , _peer        :: !IPFS.Peer
+  , _userAuth    :: !BasicAuthData
   }
 
 makeLenses ''LoggedIn
 
 instance Has Client.Runner LoggedIn where
-  hasLens = fissionAPI'
+  hasLens = fissionAPI
 
 instance HasLogFunc LoggedIn where
-  logFuncL = logFunc'
+  logFuncL = logFunc
 
 instance HasProcessContext LoggedIn where
-  processContextL = processCtx'
+  processContextL = processCtx
 
 instance Has IPFS.BinPath LoggedIn where
-  hasLens = ipfsPath'
+  hasLens = ipfsPath
 
 instance Has IPFS.Timeout LoggedIn where
-  hasLens = ipfsTimeout'
+  hasLens = ipfsTimeout
 
 instance Has IPFS.Peer LoggedIn where
-  hasLens = peer'
+  hasLens = peer
 
 instance Has BasicAuthData LoggedIn where
-  hasLens = userAuth'
+  hasLens = userAuth
