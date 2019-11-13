@@ -78,18 +78,16 @@ resetPassword' auth newPassword = do
       CLI.Error.put err "Password Reset failed"
 
     Right (User.Password updatedPass) -> do
-      let updatedAuth = BasicAuthData {
-        basicAuthUsername = basicAuthUsername auth,
-        basicAuthPassword = encodeUtf8 updatedPass
-      }
       Environment.findLocalAuth >>= \case
         Left err -> CLI.Error.put err "Could"
         Right path -> do
-          Environment.writeAuth updatedAuth path >>= \case
-            Left err -> 
-              CLI.Error.put err "Could not write password to .fission.yaml"
-            Right _ok -> 
-              CLI.Success.putOk $
-                "Password reset. Your updated credentials are in " <> UTF8.textShow path
+          let
+            updatedAuth = BasicAuthData
+              { basicAuthUsername = basicAuthUsername auth
+              , basicAuthPassword = encodeUtf8 updatedPass
+              }
+          Environment.writeAuth updatedAuth path
+          CLI.Success.putOk $
+            "Password reset. Your updated credentials are in " <> UTF8.textShow path
 
 

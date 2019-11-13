@@ -1,4 +1,4 @@
-module Fission.CLI.Environment.Types ( Environment (..)) where
+module Fission.CLI.Environment.Types (Environment (..)) where
 
 import RIO
 

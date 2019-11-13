@@ -24,4 +24,4 @@ resetPassword' :: BasicAuthData -> User.Password.Reset -> ClientM (User.Password
 register :<|> verify :<|> resetPassword' = client (Proxy :: Proxy UserRoute)
 
 resetPassword :: BasicAuthData -> User.Password -> ClientM (User.Password)
-resetPassword auth pw = resetPassword' auth $ (User.Password.Reset $ Just pw)
+resetPassword auth pw = resetPassword' auth $ User.Password.Reset $ Just pw

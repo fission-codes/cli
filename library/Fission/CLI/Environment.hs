@@ -28,8 +28,8 @@ import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 
 import           Fission.CLI.Environment.Types
-import           Fission.CLI.Environment.Partial.Types as Environment
-import qualified Fission.CLI.Environment.Partial as Partial
+import           Fission.CLI.Environment.Partial.Types as Env
+import qualified Fission.CLI.Environment.Partial as Env.Partial
 import qualified Fission.CLI.Environment.Error as Error
 
 import           Fission.Internal.Orphanage.BasicAuthData ()
@@ -53,18 +53,18 @@ init auth = do
       CLI.Error.put err "Peer retrieval failed"
 
     Right peers -> do
-      let env = Environment.Partial {
+      let env = Env.Partial {
         maybeUserAuth = Just auth,
         maybePeers = Just (NonEmpty.fromList peers)
       }
-      liftIO $ Partial.write env path
+      liftIO $ Env.Partial.write env path
       CLI.Success.putOk "Logged in"
 
 -- | Gets hierarchical environment by recursed through file system
 get :: MonadIO m => m (Either Error.Env Environment)
 get = do 
-  partial <- Partial.get
-  return $ Partial.toFull partial
+  partial <- Env.Partial.get
+  return $ Env.Partial.toFull partial
 
 -- | Locate current auth on the user's system
 findLocalAuth :: MonadIO m => m (Either Error.Env FilePath)
@@ -74,16 +74,14 @@ findLocalAuth = do
     Nothing -> return $ Left Error.EnvNotFound 
     Just path -> return $ Right path
 
-findRecurse :: MonadIO m => (Environment.Partial -> Bool) -> FilePath -> m (Maybe FilePath)
-findRecurse fn path = do 
+findRecurse :: MonadIO m => (Env.Partial -> Bool) -> FilePath -> m (Maybe FilePath)
+findRecurse f path = do 
   let filepath = path </> ".fission.yaml"
-  partial <- Partial.decode filepath
-  let exists = fn partial
-  if exists
-    then return $ Just filepath
-    else case path of
-      "/" -> return Nothing
-      _   -> findRecurse fn $ takeDirectory path
+  partial <- Env.Partial.decode filepath
+  case (f partial, path) of
+    (True, _) -> return $ Just filepath
+    (_, "/")  -> return Nothing
+    _         -> findRecurse f $ takeDirectory path
 
 -- | globalEnv environment in users home
 globalEnv :: MonadIO m => m FilePath
@@ -94,12 +92,11 @@ globalEnv = do
 writeAuth :: MonadRIO cfg m
           => BasicAuthData
           -> FilePath
-          -> m (Either SomeException Bool)
+          -> m ()
 writeAuth auth path = do
-  partial <- Partial.decode path
-  let updated = Partial.updateAuth partial auth
-  Partial.write updated path
-  return $ Right True
+  partial <- Env.Partial.decode path
+  let updated = Env.Partial.updateAuth partial auth
+  Env.Partial.write updated path
 
 -- | Create a could not read message for the terminal
 couldNotRead :: MonadIO m => m ()
@@ -141,6 +138,6 @@ getOrRetrievePeer config =
 
         Right peers -> do
           logDebug "Retrieved Peer from API"
-          let updated = Partial.updatePeers (Partial.fromFull config) peers
-          Partial.write updated =<< globalEnv
+          let updated = Env.Partial.updatePeers (Env.Partial.fromFull config) peers
+          Env.Partial.write updated =<< globalEnv
           return $ head $ NonEmpty.fromList peers
