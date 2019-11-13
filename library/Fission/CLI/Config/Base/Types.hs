@@ -1,5 +1,12 @@
 -- | General configuration required to run any CLI function
-module Fission.CLI.Config.Types.BaseConfig where
+module Fission.CLI.Config.Base.Types
+  ( BaseConfig (..)
+  , logFunc
+  , fissionAPI
+  , processCtx
+  , ipfsPath
+  , ipfsTimeout
+  ) where
 
 import RIO
 import RIO.Process (ProcessContext, HasProcessContext (..))

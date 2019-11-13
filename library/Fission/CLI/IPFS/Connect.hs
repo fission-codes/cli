@@ -1,5 +1,8 @@
 -- | Module for connecting to the Fission IPFS service
-module Fission.CLI.IPFS.Connect where
+module Fission.CLI.IPFS.Connect
+  ( swarmConnectWithRetry
+  , couldNotSwarmConnect
+  ) where
 
 import           RIO           hiding (set)
 import           RIO.Process (HasProcessContext)

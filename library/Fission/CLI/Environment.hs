@@ -1,5 +1,15 @@
 -- | Reading and writing local user config values
-module Fission.CLI.Environment where
+module Fission.CLI.Environment
+  ( init
+  , get
+  , decode
+  , find
+  , write
+  , cachePath
+  , couldNotRead
+  , removeConfigFile
+  , getOrRetrievePeer
+  ) where
 
 import           RIO           hiding (set)
 import           RIO.Directory
@@ -11,7 +21,7 @@ import qualified System.Console.ANSI as ANSI
 
 import           Data.Has
 import qualified Data.Yaml as YAML
-import           Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty as NonEmpty hiding (init)
 
 import           Fission.Internal.Constraint
 
@@ -49,7 +59,7 @@ init auth = do
 
 -- | Retrieve auth from the user's system
 get :: MonadIO m => m (Either SomeException Environment)
-get = find >>= \case 
+get = find >>= \case
   Just path -> mapLeft toException <$> decode path
   Nothing -> return . Left $ toException Error.EnvNotFound
 
@@ -64,7 +74,7 @@ find = do
   findRecurse currDir
 
 findRecurse :: MonadIO m => FilePath -> m (Maybe FilePath)
-findRecurse path = do 
+findRecurse path = do
   let filepath = path </> ".fission.yaml"
   exists <- doesFileExist filepath
   if exists
