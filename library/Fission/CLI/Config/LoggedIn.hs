@@ -14,10 +14,8 @@ import           Fission.Internal.Constraint
 import qualified Fission.IPFS.Types   as IPFS
 import qualified Fission.Web.Client   as Client
 
-import qualified Fission.Config                    as Config
-import           Fission.CLI.Config
+import qualified Fission.Config as Config
 import           Fission.CLI.Config.LoggedIn.Types
-import           Fission.CLI.Config.LoggedIn.Types as Config
 
 import           Fission.CLI.Environment.Types as Environment
 import qualified Fission.CLI.Environment       as Environment
@@ -33,7 +31,7 @@ ensure
      , Has IPFS.Timeout  cfg
      , Has Client.Runner cfg
      )
-  => RIO Config.LoggedIn a
+  => RIO LoggedIn a
   -> m a
 ensure handler = do
   _logFunc     :: LogFunc        <- view logFuncL
@@ -52,7 +50,7 @@ ensure handler = do
       Connect.swarmConnectWithRetry _peer 1 >>= \case
         Right _ ->
           -- All setup and ready to run!
-          runLocal Config.LoggedIn {..} handler
+          liftIO $ runRIO LoggedIn {..} handler
 
         Left err -> do
           -- We were unable to connect!
