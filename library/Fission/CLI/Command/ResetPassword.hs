@@ -13,6 +13,7 @@ import           System.Console.Haskeline
 
 import qualified Fission.Config as Config
 import           Fission.Internal.Constraint
+import qualified Fission.Internal.UTF8 as UTF8
 
 import qualified Fission.Web.Client.User  as User.Client
 import qualified Fission.Web.Client.Types as Client
@@ -81,10 +82,14 @@ resetPassword' auth newPassword = do
         basicAuthUsername = basicAuthUsername auth,
         basicAuthPassword = encodeUtf8 updatedPass
       }
-      Environment.overwriteLocalAuth updatedAuth >>= \case
-        Left err -> 
-          CLI.Error.put err "Could not write password to .fission.yaml"
-        Right _ok -> 
-          CLI.Success.putOk "Password reset. Your updated credentials are in ~/.fission.yaml"
+      Environment.findLocalAuth >>= \case
+        Left err -> CLI.Error.put err "Could"
+        Right path -> do
+          Environment.writeAuth updatedAuth path >>= \case
+            Left err -> 
+              CLI.Error.put err "Could not write password to .fission.yaml"
+            Right _ok -> 
+              CLI.Success.putOk $
+                "Password reset. Your updated credentials are in " <> UTF8.textShow path
 
 

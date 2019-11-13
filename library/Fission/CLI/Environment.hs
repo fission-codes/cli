@@ -2,7 +2,8 @@
 module Fission.CLI.Environment
   ( init
   , get
-  , overwriteLocalAuth
+  , findLocalAuth
+  , writeAuth
   , couldNotRead
   , removeConfigFile
   , getOrRetrievePeer
@@ -66,10 +67,12 @@ get = do
   return $ Partial.toFull partial
 
 -- | Locate current auth on the user's system
-findLocalAuth :: MonadIO m => m (Maybe FilePath)
+findLocalAuth :: MonadIO m => m (Either Error.Env FilePath)
 findLocalAuth = do
   currDir <- getCurrentDirectory
-  findRecurse (isJust . maybeUserAuth) currDir
+  findRecurse (isJust . maybeUserAuth) currDir >>= \case
+    Nothing -> return $ Left Error.EnvNotFound 
+    Just path -> return $ Right path
 
 findRecurse :: MonadIO m => (Environment.Partial -> Bool) -> FilePath -> m (Maybe FilePath)
 findRecurse fn path = do 
@@ -88,17 +91,15 @@ globalEnv = do
   home <- getHomeDirectory
   return $ home </> ".fission.yaml"
 
-overwriteLocalAuth :: MonadRIO cfg m
+writeAuth :: MonadRIO cfg m
       => BasicAuthData
+      -> FilePath
       -> m (Either SomeException Bool)
-overwriteLocalAuth auth = 
-  findLocalAuth >>= \case
-    Nothing -> return . Left $ toException Error.EnvNotFound 
-    Just path -> do
-      partial <- Partial.decode path
-      let updated = Partial.updateAuth partial auth
-      Partial.write updated path
-      return $ Right True
+writeAuth auth path = do
+  partial <- Partial.decode path
+  let updated = Partial.updateAuth partial auth
+  Partial.write updated path
+  return $ Right True
 
 -- | Create a could not read message for the terminal
 couldNotRead :: MonadIO m => m ()
