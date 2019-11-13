@@ -22,6 +22,9 @@ import qualified Fission.CLI.Environment       as Environment
 import qualified Fission.CLI.IPFS.Connect      as Connect
 
 -- | Ensure we have a local config file with the appropriate data
+--
+-- Takes a @LoggedIn@-dependant action, and lifts it into an environment that
+-- contains a superset of the environment
 ensure
   :: ( MonadRIO          cfg m
      , MonadUnliftIO         m
@@ -33,7 +36,7 @@ ensure
      )
   => RIO LoggedIn a
   -> m a
-ensure handler = do
+ensure action = do
   _logFunc     :: LogFunc        <- view logFuncL
   _processCtx  :: ProcessContext <- view processContextL
   _fissionAPI  :: Client.Runner  <- Config.get
@@ -50,7 +53,7 @@ ensure handler = do
       Connect.swarmConnectWithRetry _peer 1 >>= \case
         Right _ ->
           -- All setup and ready to run!
-          liftIO $ runRIO LoggedIn {..} handler
+          liftIO $ runRIO LoggedIn {..} action
 
         Left err -> do
           -- We were unable to connect!
