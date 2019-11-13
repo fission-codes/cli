@@ -51,7 +51,7 @@ ensureLocalConfig handler = do
 
         Left err -> do
           -- We were unable to connect!
-          logError $ displayShow err
+          logDebug $ displayShow err
           Connect.couldNotSwarmConnect
           return undefined
 

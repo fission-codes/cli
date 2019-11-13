@@ -44,7 +44,7 @@ swarmConnectWithRetry peer tries = IPFS.Peer.connect peer >>= \case
         return $ Left $ toException UnableToConnect
 
       Right peers -> do
-        UTF8.putText "🛰 Unable to connect to the Fission IPFS peer, trying again..."
+        UTF8.putText "🛰 Unable to connect to the Fission IPFS peer, trying again...\n"
         let peer' = head $ NonEmpty.fromList peers
         swarmConnectWithRetry peer' (tries - 1)
 
@@ -52,9 +52,9 @@ swarmConnectWithRetry peer tries = IPFS.Peer.connect peer >>= \case
 couldNotSwarmConnect :: MonadIO m => m ()
 couldNotSwarmConnect = do
   liftIO $ ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Red]
-  UTF8.putText "😭 We were unable to connect to the Fission IPFS peer!"
+  UTF8.putText "😭 We were unable to connect to the Fission IPFS peer!\n"
 
   liftIO $ ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
-  UTF8.putText "Try checking your connection or logining in again"
+  UTF8.putText "Try checking your connection or logging in again\n"
 
   liftIO $ ANSI.setSGR [ANSI.Reset]
