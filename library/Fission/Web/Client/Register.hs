@@ -1,20 +1,33 @@
 module Fission.Web.Client.Register
   ( register
   , verify
+  , reset
   ) where
 
-import RIO
+import           RIO
 
-import Servant
-import Servant.Client
+import           Servant
+import           Servant.Client
 
-import qualified Fission.User.Registration.Types as User
-import           Fission.Web.Routes              (UserRoute)
+import qualified Fission.User.Registration.Types          as User
+import           Fission.Web.Routes                       (UserRoute)
+
+import           Fission.User.Password.Types
+import           Fission.Web.User.Password.Reset.Types
 
 import           Fission.Internal.Orphanage.BasicAuthData ()
 
-verify   :: BasicAuthData     -> ClientM Bool
-register :: User.Registration -> ClientM ()
+register
+  :: User.Registration
+  -> ClientM ()
 
-register :<|> verify = client (Proxy :: Proxy UserRoute)
+verify
+  :: BasicAuthData
+  -> ClientM Bool
 
+reset
+  :: BasicAuthData
+  -> Fission.Web.User.Password.Reset.Types.Reset
+  -> ClientM Fission.User.Password.Types.Password
+
+register :<|> verify :<|> reset = client (Proxy :: Proxy UserRoute)

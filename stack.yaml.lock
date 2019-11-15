@@ -61,6 +61,13 @@ packages:
   original:
     hackage: ip-1.5.1
 - completed:
+    hackage: raven-haskell-0.1.2.1@sha256:59ab0300183a599650ed5761e3e984ff2934afe1ce6d924d1064876cac90275d,1255
+    pantry-tree:
+      size: 632
+      sha256: 8c37e6109aa0314832aba4be962e0c140c4d45920b9d135d88bacfc762079ff5
+  original:
+    hackage: raven-haskell-0.1.2.1
+- completed:
     hackage: tasty-rerun-1.1.14@sha256:ba9c19a281535bea566e1044bc02c36ef17abcb310af4b6a149ec11780c7ce35,3083
     pantry-tree:
       size: 284
@@ -69,18 +76,18 @@ packages:
     hackage: tasty-rerun-1.1.14
 - completed:
     cabal-file:
-      size: 21475
-      sha256: db4fe162e6a3917d6b169e0a7ded537e61221309a44fc61fe9ff027de30df649
+      size: 21269
+      sha256: f476edc8f126070f200bf0eb2d7372950d44bcd3d05b56bef146021b392f34d6
     name: fission-web-api
-    version: 1.19.0
+    version: 2.0.0
     git: https://github.com/fission-suite/web-api.git
     pantry-tree:
-      size: 11444
-      sha256: 48ba8a8c3b13c1cc5f9e1dc790a05c2965ce8443bb842e313ebfb7d802dbb2f2
-    commit: 3cc9971fbb294917379dec53833b54166084d511
+      size: 11411
+      sha256: bf74c55d60c848da798f223527475686969fed94a57e93995556cd290e26c498
+    commit: cd9a74b225254dbd2a7d7dd8be6aa6ba423d5df9
   original:
     git: https://github.com/fission-suite/web-api.git
-    commit: 3cc9971fbb294917379dec53833b54166084d511
+    commit: cd9a74b225254dbd2a7d7dd8be6aa6ba423d5df9
 snapshots:
 - completed:
     size: 524127
