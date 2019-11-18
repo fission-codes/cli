@@ -37,8 +37,8 @@ command :: MonadUnliftIO m
 command cfg =
   addCommand
     "reset-password"
-    "Reset Fision Password"
-    (const $ void $ runRIO cfg $ LoggedIn.ensure $ resetPassword)
+    "Reset Fission Password"
+    (const $ void $ runRIO cfg $ LoggedIn.ensure resetPassword)
     (pure ())
 
 -- | Register and login (i.e. save credentials to disk)
