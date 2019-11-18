@@ -82,11 +82,11 @@ register' = do
                       . runner
                       . User.Client.register
                       $ User.Registration
-                          { _username = decodeUtf8Lenient username
-                          , _password = T.pack password
-                          , _email    = if BS.null rawEmail
-                                           then Nothing
-                                           else Just $ decodeUtf8Lenient rawEmail
+                          { username = decodeUtf8Lenient username
+                          , password = T.pack password
+                          , email    = if BS.null rawEmail
+                                          then Nothing
+                                          else Just $ decodeUtf8Lenient rawEmail
                           }
 
       case registerResult of

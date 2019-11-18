@@ -46,9 +46,10 @@ extra-deps:
 - happy-1.19.10
 - http-client-0.5.14 # Peer dependency of amazonka
 - ip-1.5.1
+- raven-haskell-0.1.2.1
 - tasty-rerun-1.1.14
 - git: https://github.com/fission-suite/web-api.git
-  commit: 3cc9971fbb294917379dec53833b54166084d511
+  commit: cd9a74b225254dbd2a7d7dd8be6aa6ba423d5df9
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
