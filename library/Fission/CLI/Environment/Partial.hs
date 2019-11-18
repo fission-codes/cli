@@ -42,8 +42,8 @@ decode path = liftIO $ YAML.decodeFileEither path >>= \case
   Right env -> return env
 
 -- | Writes partial environment to path
-write :: MonadIO m => Env.Partial -> FilePath -> m ()
-write env path = writeBinaryFileDurable path $ YAML.encode env
+write :: MonadIO m => FilePath -> Env.Partial -> m ()
+write path env = writeBinaryFileDurable path $ YAML.encode env
 
 toFull :: Env.Partial -> (Either Error.Env Environment)
 toFull partial =

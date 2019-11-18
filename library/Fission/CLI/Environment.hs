@@ -57,7 +57,7 @@ init auth = do
         maybeUserAuth = Just auth,
         maybePeers = Just (NonEmpty.fromList peers)
       }
-      liftIO $ Env.Partial.write env path
+      liftIO $ Env.Partial.write path env
       CLI.Success.putOk "Logged in"
 
 -- | Gets hierarchical environment by recursed through file system
@@ -66,8 +66,8 @@ get = do
   partial <- Env.Partial.get
   return $ Env.Partial.toFull partial
 
-write :: MonadIO m => Environment -> FilePath -> m ()
-write = Env.Partial.write . Env.Partial.fromFull
+write :: MonadIO m => FilePath -> Environment -> m ()
+write path env = Env.Partial.write path $ Env.Partial.fromFull env
 
 -- | Locate current auth on the user's system
 findLocalAuth :: MonadIO m => m (Either Error.Env FilePath)
@@ -98,8 +98,7 @@ writeAuth :: MonadRIO cfg m
           -> m ()
 writeAuth auth path = do
   partial <- Env.Partial.decode path
-  let updated = partial { maybeUserAuth = Just auth }
-  Env.Partial.write updated path
+  Env.Partial.write path $ partial { maybeUserAuth = Just auth }
 
 -- | Create a could not read message for the terminal
 couldNotRead :: MonadIO m => m ()
@@ -141,6 +140,6 @@ getOrRetrievePeer config =
 
         Right peers -> do
           logDebug "Retrieved Peer from API"
-          let updated = config { peers = Just (NonEmpty.fromList peers) }
-          write updated =<< globalEnv
+          path <- globalEnv
+          write path $ config { peers = Just (NonEmpty.fromList peers) }
           return $ head $ NonEmpty.fromList peers
