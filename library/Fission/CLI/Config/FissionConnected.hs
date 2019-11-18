@@ -28,7 +28,6 @@ import qualified Fission.CLI.IPFS.Connect      as Connect
 -- contains a superset of the environment
 ensure
   :: ( MonadRIO          cfg m
-     , MonadUnliftIO         m
      , HasLogFunc        cfg
      , HasProcessContext cfg
      , Has IPFS.BinPath  cfg
