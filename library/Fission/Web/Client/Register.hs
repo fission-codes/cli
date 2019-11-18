@@ -17,17 +17,8 @@ import           Fission.Web.User.Password.Reset.Types
 
 import           Fission.Internal.Orphanage.BasicAuthData ()
 
-register
-  :: User.Registration
-  -> ClientM ()
-
-verify
-  :: BasicAuthData
-  -> ClientM Bool
-
-reset
-  :: BasicAuthData
-  -> Reset
-  -> ClientM Password
+register :: User.Registration      -> ClientM ()
+verify   :: BasicAuthData          -> ClientM Bool
+reset    :: BasicAuthData -> Reset -> ClientM Password
 
 register :<|> verify :<|> reset = client (Proxy :: Proxy UserRoute)
