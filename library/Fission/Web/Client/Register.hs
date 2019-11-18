@@ -27,7 +27,7 @@ verify
 
 reset
   :: BasicAuthData
-  -> Fission.Web.User.Password.Reset.Types.Reset
-  -> ClientM Fission.User.Password.Types.Password
+  -> Reset
+  -> ClientM Password
 
 register :<|> verify :<|> reset = client (Proxy :: Proxy UserRoute)
