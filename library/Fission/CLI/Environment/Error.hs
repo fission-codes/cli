@@ -1,12 +1,13 @@
-module Fission.CLI.Environment.Error (Error(..)) where
+module Fission.CLI.Environment.Error (Env(..)) where
 
 import RIO
 
-data Error = EnvNotFound
+data Env = EnvNotFound | EnvIncomplete
   deriving ( Exception
            , Eq
            , Generic
            )
 
-instance Show Error where
+instance Show Env where
   show EnvNotFound = "Could not find .fission.yaml"
+  show EnvIncomplete = "Could not construct a full .fission.yaml"
