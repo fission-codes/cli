@@ -9,7 +9,6 @@ import           Fission.Prelude
 import           RIO.Directory
 import           RIO.Process (HasProcessContext)
 import qualified RIO.Text as Text
-import qualified RIO.Time as Time
 
 import Servant.Client
 
@@ -85,10 +84,10 @@ handleTreeChanges :: HasFissionConnected  cfg
                   -> IO StopListening
 handleTreeChanges timeCache hashCache watchMgr cfg dir =
   FS.watchTree watchMgr dir (const True) \_ -> runRIO cfg do
-    now     <- Time.getCurrentTime
+    now     <- getCurrentTime
     oldTime <- readMVar timeCache
 
-    unless (Time.diffUTCTime now oldTime < Time.doherty) do
+    unless (diffUTCTime now oldTime < Time.doherty) do
       void <| swapMVar timeCache now
       threadDelay Time.dohertyMicroSeconds -- Wait for all events to fire in sliding window
 
