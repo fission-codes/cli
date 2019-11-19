@@ -75,6 +75,13 @@ packages:
   original:
     hackage: tasty-rerun-1.1.14
 - completed:
+    hackage: lzma-clib-5.2.2@sha256:25eb43d5fd8a8ab58380f475b91fb1fa907381f8a81c8d8ba63ba428d97ae0cc,4900
+    pantry-tree:
+      size: 11577
+      sha256: ed5ce184eaad3b4239f86d1d478d0b5ed6a93af5aac72f19f376c1690585576d
+  original:
+    hackage: lzma-clib-5.2.2
+- completed:
     cabal-file:
       size: 21870
       sha256: cabe00c1ebf4f7297584fab7a2e26062f9418979c77622fe8df12ba4bb42ddc9
@@ -90,7 +97,7 @@ packages:
     commit: ce4df3b37e63bd37a979221e52b8c334c105c27a
 snapshots:
 - completed:
-    size: 524127
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/6.yaml
-    sha256: dc70dfb45e2c32f54719819bd055f46855dd4b3bd2e58b9f3f38729a2d553fbb
-  original: lts-14.6
+    size: 525663
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/14.yaml
+    sha256: 6edc48df46eb8bf7b861e98dd30d021a92c2e1820c9bb6528aac5d997b0e14ef
+  original: lts-14.14
