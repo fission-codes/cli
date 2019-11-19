@@ -11,19 +11,19 @@
 jobs:
 - template: ./.azure/azure-linux-template.yml
   parameters:
-    name: Linux
+    name: ubuntu14
     vmImage: ubuntu-14.04
     os: linux
 
 - template: ./.azure/azure-linux-template.yml
   parameters:
-    name: Linux
+    name: ubuntu16
     vmImage: ubuntu-16.04
     os: linux
 
 - template: ./.azure/azure-linux-template.yml
   parameters:
-    name: Linux
+    name: ubuntu18
     vmImage: ubuntu-18.04
     os: linux
 
