@@ -1,6 +1,6 @@
 module Fission.CLI.Config.LoggedIn.Error.Types (Error (..)) where
 
-import           RIO
+import           Fission.Prelude
 
 data Error = NotLoggedIn
   deriving (Eq, Show, Exception)

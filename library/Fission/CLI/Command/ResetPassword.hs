@@ -1,18 +1,16 @@
 -- | Register command
 module Fission.CLI.Command.ResetPassword (command, resetPassword) where
 
-import           RIO
+import           Fission.Prelude
 
 import           Servant
 
-import           Data.Has
 import qualified Data.Text as T
 
 import           Options.Applicative.Simple (addCommand)
 import           System.Console.Haskeline
 
 import qualified Fission.Config as Config
-import           Fission.Internal.Constraint
 import qualified Fission.Internal.UTF8 as UTF8
 
 import qualified Fission.Web.Client.User  as User.Client
@@ -39,7 +37,7 @@ command cfg =
   addCommand
     "reset-password"
     "Reset Fission Password"
-    (const $ void $ runRIO cfg $ LoggedIn.ensure resetPassword)
+    (const <| void <| runRIO cfg <| LoggedIn.ensure resetPassword)
     (pure ())
 
 -- | Register and login (i.e. save credentials to disk)
@@ -49,7 +47,7 @@ resetPassword :: MonadRIO       cfg m
               => m ()
 resetPassword = do
   auth <- Config.get
-  liftIO (runInputT defaultSettings $ getPassword (Just '•') "New Password: ") >>= \case
+  liftIO (runInputT defaultSettings <| getPassword (Just '•') "New Password: ") >>= \case
     Nothing ->
       logError "Unable to read password"
 
@@ -71,7 +69,7 @@ resetPassword' auth newPassword = do
                   . CLI.Wait.waitFor "Registering..."
                   . runner
                   . User.Client.resetPassword auth
-                  $ User.Password $ T.pack newPassword
+                  <| User.Password <| T.pack newPassword
 
   case resetResult of
     Left  err ->
@@ -87,7 +85,7 @@ resetPassword' auth newPassword = do
               , basicAuthPassword = encodeUtf8 updatedPass
               }
           Environment.writeAuth updatedAuth path
-          CLI.Success.putOk $
+          CLI.Success.putOk <|
             "Password reset. Your updated credentials are in " <> UTF8.textShow path
 
 

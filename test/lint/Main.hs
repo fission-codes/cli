@@ -1,6 +1,6 @@
 module Main (main) where
 
-import RIO
+import Fission.Prelude
 
 import Language.Haskell.HLint (hlint)
 

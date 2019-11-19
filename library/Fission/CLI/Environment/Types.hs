@@ -1,8 +1,7 @@
 module Fission.CLI.Environment.Types (Environment (..)) where
 
-import RIO
+import Fission.Prelude
 
-import           Data.Aeson
 import           Servant.API
 
 import qualified Fission.IPFS.Types as IPFS
@@ -20,6 +19,6 @@ instance ToJSON Environment where
     ]
 
 instance FromJSON Environment where
-  parseJSON = withObject "Environment" $ \obj ->
+  parseJSON = withObject "Environment" <| \obj ->
     Environment <$> obj .: "user_auth"
                 <*> obj .: "peers"

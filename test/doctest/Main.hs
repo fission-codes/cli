@@ -1,6 +1,6 @@
 module Main (main) where
 
-import           RIO
+import           Fission.Prelude
 import qualified RIO.List as List
 
 import Data.Aeson.Lens
@@ -39,7 +39,7 @@ setup tmp src = do
     go :: FilePath -> ByteString -> DirTree ByteString -> IO ()
     go dirPath exts' = \case
       Failed { err } ->
-        error $ show err
+        error <| show err
 
       Dir { name, contents } -> do
         let path = dirPath <> "/" <> name
@@ -52,7 +52,7 @@ setup tmp src = do
 header :: [ByteString] -> ByteString
 header raw = mconcat
   [ "{-# LANGUAGE "
-  , mconcat $ List.intersperse ", " raw
+  , mconcat <| List.intersperse ", " raw
   , " #-}\n"
   ]
 
@@ -60,7 +60,7 @@ getExts :: IO [ByteString]
 getExts = do
   pkg <- decodeFileThrow "package.yaml" :: IO Value
   let exts = pkg ^. key "default-extensions" . _Array
-  return $ extract <$> toList exts
+  return <| extract <$> toList exts
   where
     extract (String txt) = encodeUtf8 txt
     extract _            = error "Malformed package.yaml"

@@ -1,14 +1,11 @@
 -- | Grab files directly from IPFS
 module Fission.CLI.Command.Down (command, down) where
 
-import           RIO
+import           Fission.Prelude
 import           RIO.Process (HasProcessContext)
 
-import           Data.Has
 import           Options.Applicative.Simple (addCommand)
 import           Options.Applicative (strArgument, metavar, help)
-
-import           Fission.Internal.Constraint
 
 import qualified Fission.Storage.IPFS as IPFS
 import qualified Fission.IPFS.Types   as IPFS
@@ -31,8 +28,8 @@ command cfg =
   addCommand
     "down"
     "Pull a ipfs or ipns object down to your system"
-    (\cid -> runRIO cfg $ down cid)
-    (strArgument $ mconcat
+    (\cid -> runRIO cfg <| down cid)
+    (strArgument <| mconcat
       [ metavar "ContentID"
       , help "The CID of the IPFS object you want to download"
       ])
@@ -47,12 +44,12 @@ down :: MonadUnliftIO         m
      => IPFS.CID
      -> m ()
 down cid@(CID hash) = do
-  getResult <- CLI.Wait.waitFor "Retrieving Object..." $
+  getResult <- CLI.Wait.waitFor "Retrieving Object..." <| 
                 IPFS.getFileOrDirectory cid
 
   case getResult of
     Right _ok ->
-      CLI.Success.putOk $ hash <> " Successfully downloaded!"
+      CLI.Success.putOk <| hash <> " Successfully downloaded!"
 
     Left err ->
       CLI.Error.put err "Oh no! The download failed unexpectedly"

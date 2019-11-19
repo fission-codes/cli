@@ -4,11 +4,7 @@ module Fission.CLI.Config.LoggedIn
   , module Fission.CLI.Config.LoggedIn.Types
   ) where
 
-import           RIO
-
-import           Data.Has
-
-import           Fission.Internal.Constraint
+import           Fission.Prelude
 
 import qualified Fission.Web.Client   as Client
 
@@ -40,11 +36,11 @@ ensure action = do
       let
         _userAuth = Environment.userAuth config
       -- All setup and logged in!
-      result <- liftIO $ runRIO LoggedIn {..} action
+      result <- liftIO <| runRIO LoggedIn {..} action
       Right <$> return result
 
     Left err -> do
       -- We were unable to read the users config
-      logDebug $ displayShow err
+      logDebug <| displayShow err
       Environment.couldNotRead
-      return $ Left NotLoggedIn
+      return <| Left NotLoggedIn

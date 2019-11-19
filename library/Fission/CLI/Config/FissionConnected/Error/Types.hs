@@ -1,6 +1,6 @@
 module Fission.CLI.Config.FissionConnected.Error.Types (Error (..)) where
 
-import           RIO
+import           Fission.Prelude
 
 data Error
   = NotFissionConnected

@@ -2,7 +2,7 @@
 
 module Main (main) where
 
-import           RIO
+import           Fission.Prelude
 import qualified RIO.Partial as Part
 import           RIO.Process
 
@@ -15,17 +15,17 @@ main :: IO ()
 main = runSimpleApp do
   output <- proc "cabal" ["new-haddock"] readProcessStdout_
 
-  if average (match $ show output) >= expected
+  if average (match <| show output) >= expected
     then liftIO exitSuccess
     else do
-      logWarn $ displayShow output
+      logWarn <| displayShow output
       liftIO exitFailure
 
 match :: String -> [Int]
 match = fmap Part.read
       . concat
       . catMaybes
-      . fmap (matchRegex $ mkRegex "^ *([0-9]*)% ")
+      . fmap (matchRegex <| mkRegex "^ *([0-9]*)% ")
       . lines
 
 average :: (Fractional a, Real b) => [b] -> a

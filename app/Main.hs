@@ -1,8 +1,7 @@
 module Main (main) where
 
-import           RIO
+import           Fission.Prelude
 import qualified RIO.Partial as Partial
-import           RIO.Process (mkDefaultProcessContext)
 
 import           Network.HTTP.Client     as HTTP
 import           Network.HTTP.Client.TLS as HTTP
@@ -28,8 +27,8 @@ main = do
   _ipfsTimeout <- withEnv "IPFS_TIMEOUT" (IPFS.Timeout 3600) (IPFS.Timeout . Partial.read)
 
   isTLS <- getFlag "FISSION_TLS" .!~ True
-  path  <- withEnv "FISSION_ROOT" "" id
-  host  <- withEnv "FISSION_HOST" "runfission.com" id
+  path  <- withEnv "FISSION_ROOT" "" identity
+  host  <- withEnv "FISSION_HOST" "runfission.com" identity
   port  <- withEnv "FISSION_PORT" (if isTLS then 443 else 80) Partial.read
   tOut  <- withEnv "FISSION_TIMEOUT" 1800000000 Partial.read
 
@@ -37,12 +36,12 @@ main = do
                            then tlsManagerSettings
                            else defaultManagerSettings
 
-  httpManager <- HTTP.newManager $ rawHTTPSettings
+  httpManager <- HTTP.newManager <| rawHTTPSettings
     { managerResponseTimeout = responseTimeoutMicro tOut }
 
   let url         = BaseUrl (if isTLS then Https else Http) host port path
-      _fissionAPI = Client.Runner $ Client.request httpManager url
+      _fissionAPI = Client.Runner (Client.request httpManager url)
 
   withLogFunc logOptions \_logFunc -> runRIO CLI.BaseConfig {..} do
-    logDebug $ "Requests will be made to " <> displayShow url
+    logDebug <| "Requests will be made to " <> displayShow url
     cli

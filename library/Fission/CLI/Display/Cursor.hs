@@ -1,7 +1,7 @@
 -- | Helpers for working with a cursor in a console
 module Fission.CLI.Display.Cursor (withHidden) where
 
-import RIO
+import Fission.Prelude
 
 import qualified System.Console.ANSI as ANSI
 

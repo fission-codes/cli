@@ -4,7 +4,7 @@ module Fission.Web.Client
   , module Fission.Web.Client.Types
   ) where
 
-import RIO
+import Fission.Prelude
 
 import qualified Network.HTTP.Client as HTTP
 import           Servant
@@ -19,4 +19,4 @@ withAuth :: HasClient ClientM api
 withAuth basicAuth proxy = client proxy basicAuth
 
 request :: HTTP.Manager -> BaseUrl -> ClientM a -> IO (Either ClientError a)
-request manager url query = runClientM query $ mkClientEnv manager url
+request manager url query = runClientM query <| mkClientEnv manager url

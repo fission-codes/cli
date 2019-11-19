@@ -1,11 +1,10 @@
 -- | Register command
 module Fission.CLI.Command.Register (command, register) where
 
-import           RIO
+import           Fission.Prelude
 import           RIO.ByteString
 
 import qualified Data.ByteString.Char8 as BS
-import           Data.Has
 import qualified Data.Text as T
 
 import           Options.Applicative.Simple (addCommand)
@@ -13,7 +12,6 @@ import           Servant
 import           System.Console.Haskeline
 
 import qualified Fission.Config as Config
-import           Fission.Internal.Constraint
 
 import qualified Fission.Web.Client.User  as User.Client
 import qualified Fission.Web.Client.Types as Client
@@ -38,7 +36,7 @@ command cfg =
   addCommand
     "register"
     "Register for Fission and login"
-    (const $ runRIO cfg register)
+    (const <| runRIO cfg register)
     (pure ())
 
 -- | Register and login (i.e. save credentials to disk)
@@ -65,7 +63,7 @@ register' = do
   putStr "Username: "
   username <- getLine
 
-  liftIO (runInputT defaultSettings $ getPassword (Just '•') "Password: ") >>= \case
+  liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ") >>= \case
     Nothing ->
       logError "Unable to read password"
 
@@ -81,12 +79,12 @@ register' = do
                       . CLI.Wait.waitFor "Registering..."
                       . runner
                       . User.Client.register
-                      $ User.Registration
+                      <| User.Registration
                           { username = decodeUtf8Lenient username
                           , password = T.pack password
                           , email    = if BS.null rawEmail
                                           then Nothing
-                                          else Just $ decodeUtf8Lenient rawEmail
+                                          else Just <| decodeUtf8Lenient rawEmail
                           }
 
       case registerResult of

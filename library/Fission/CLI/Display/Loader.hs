@@ -6,10 +6,10 @@ module Fission.CLI.Display.Loader
   , loading
   ) where
 
-import           RIO
+import           Fission.Prelude
 import qualified RIO.List as List
 
-import           Control.Concurrent
+import           Control.Concurrent hiding (threadDelay)
 import qualified System.Console.ANSI as ANSI
 
 import qualified Fission.Internal.UTF8 as UTF8
@@ -18,10 +18,10 @@ import qualified Fission.Internal.UTF8 as UTF8
 --
 --   The indicator disappears when the process completes
 withLoader :: MonadUnliftIO m => Natural -> m a -> m a
-withLoader delay action = RIO.bracket acquire release $ \_ -> action
+withLoader delay action = bracket acquire release <| \_ -> action
   where
     acquire :: MonadIO m => m ThreadId
-    acquire = liftIO . forkIO $ loading delay
+    acquire = liftIO . forkIO <| loading delay
 
     release :: MonadIO m => ThreadId -> m ()
     release pid = liftIO do
@@ -37,13 +37,13 @@ reset = liftIO do
 -- | Prepare for the next step -- in this case wait and reset the line
 prep :: MonadIO m => Natural -> m ()
 prep delay = do
-  RIO.threadDelay $ fromIntegral delay
-  liftIO $ ANSI.cursorBackward 4
+  threadDelay <| fromIntegral delay
+  liftIO <| ANSI.cursorBackward 4
 
 -- | Loading animation
 loading :: MonadIO m => Natural -> m ()
 loading delay = forever
         . (const (prep delay) <=< sequence_)
         . List.intersperse (prep delay)
-        $ fmap UTF8.putText
+        <| fmap UTF8.putText
             ["🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛"]

@@ -1,6 +1,6 @@
 module Fission.CLI.Environment.Error (Env(..)) where
 
-import RIO
+import Fission.Prelude
 
 data Env = EnvNotFound | EnvIncomplete
   deriving ( Exception

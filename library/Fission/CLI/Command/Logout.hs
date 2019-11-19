@@ -1,11 +1,9 @@
 -- | Login command
 module Fission.CLI.Command.Logout (command, logout) where
 
-import           RIO
+import           Fission.Prelude
 
 import           Options.Applicative.Simple (addCommand)
-
-import           Fission.Internal.Constraint
 
 import qualified Fission.CLI.Environment as Environment
 import           Fission.CLI.Config.Types
@@ -22,7 +20,7 @@ command cfg =
   addCommand
     "logout"
     "Logout of your Fission account"
-    (const $ runRIO cfg logout)
+    (const <| runRIO cfg logout)
     (pure ())
 
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.

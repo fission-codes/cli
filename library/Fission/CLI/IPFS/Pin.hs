@@ -4,13 +4,12 @@ module Fission.CLI.IPFS.Pin
   , run
   ) where
 
-import RIO
+import Fission.Prelude
 
 import Servant
 import Servant.Client
 
 import qualified Fission.Config as Config
-import           Fission.Internal.Constraint
 
 import           Fission.IPFS.CID.Types
 
@@ -29,7 +28,7 @@ run
   => CID
   -> m (Either ClientError CID)
 run cid@(CID hash)  = do
-  logDebug $ "Remote pinning " <> display hash
+  logDebug <| "Remote pinning " <> display hash
 
   Client.Runner runner <- Config.get
   auth <- Config.get
@@ -37,11 +36,11 @@ run cid@(CID hash)  = do
   liftIO (pin runner auth cid) >>= \case
     Right _ -> do
       CLI.Success.live hash
-      return $ Right cid
+      return <| Right cid
 
     Left err -> do
       CLI.Error.put' err
-      return $ Left err
+      return <| Left err
 
 pin :: MonadUnliftIO m => (ClientM NoContent -> m a) -> BasicAuthData -> CID -> m a
-pin runner auth cid = CLI.withLoader 50000 . runner $ Fission.pin (Fission.request auth) cid
+pin runner auth cid = CLI.withLoader 50000 . runner <| Fission.pin (Fission.request auth) cid
