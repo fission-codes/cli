@@ -9,10 +9,6 @@ import           Fission.Prelude
 import           RIO.Directory
 import           RIO.Process (HasProcessContext)
 import qualified RIO.Text as Text
-<<<<<<< HEAD
-=======
-import qualified RIO.Time as Time
->>>>>>> use Fission.Prelude
 
 import Servant.Client
 
@@ -88,7 +84,7 @@ handleTreeChanges :: HasFissionConnected  cfg
                   -> IO StopListening
 handleTreeChanges timeCache hashCache watchMgr cfg dir =
   FS.watchTree watchMgr dir (const True) \_ -> runRIO cfg do
-    now     <- Time.getCurrentTime
+    now     <- getCurrentTime
     oldTime <- readMVar timeCache
 
     unless (diffUTCTime now oldTime < Time.doherty) do
