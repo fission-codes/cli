@@ -143,4 +143,8 @@ getOrRetrievePeer config =
           return <| head <| NonEmpty.fromList peers
 
 ignoreDefault :: IPFS.Ignored
-ignoreDefault = [Glob.compile ".fission.yaml"] 
+ignoreDefault =
+  [ Glob.compile ".fission.yaml"
+  , Glob.compile ".env"
+  , Glob.compile ".DS_Store"
+  ]
