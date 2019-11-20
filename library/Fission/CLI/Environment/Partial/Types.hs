@@ -1,4 +1,4 @@
-module Fission.CLI.Environment.Partial.Types ( Partial (..)) where
+module Fission.CLI.Environment.Partial.Types (Partial (..)) where
 
 import Fission.Prelude
 

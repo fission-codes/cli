@@ -14,6 +14,7 @@ import           RIO.Directory
 import           RIO.FilePath
 import           Servant.API
 
+import qualified System.FilePath.Glob as Glob
 import qualified System.Console.ANSI as ANSI
 import           Data.List.NonEmpty  as NonEmpty hiding (init, (<|))
 
@@ -53,7 +54,7 @@ init auth = do
         env = Env.Partial
           { maybeUserAuth = Just auth
           , maybePeers = Just (NonEmpty.fromList peers)
-          , maybeIgnored = Just []
+          , maybeIgnored = Just ignoreDefault
           }
       liftIO <| Env.Partial.write path env
       CLI.Success.putOk "Logged in"
@@ -140,3 +141,6 @@ getOrRetrievePeer config =
           path <- globalEnv
           write path <| config { peers = Just (NonEmpty.fromList peers) }
           return <| head <| NonEmpty.fromList peers
+
+ignoreDefault :: IPFS.Ignored
+ignoreDefault = [Glob.compile ".fission.yaml"] 
