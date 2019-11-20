@@ -1,11 +1,10 @@
 -- | Servant client for retrieving peer data
 module Fission.Web.Client.Peers (getPeers) where
 
-import RIO
+import Fission.Prelude
 
 import Servant
 import Servant.Client
-import Data.Has
 
 import qualified Fission.Web.IPFS.Peer as Peer
 import qualified Fission.Web.Client.Types as Client
@@ -28,10 +27,10 @@ getPeers :: MonadReader cfg m
 getPeers = do
   Client.Runner run <- Config.get
   liftIO
-    $ Cursor.withHidden
-    $ CLI.Wait.waitFor "Retrieving Fission Peer List..."
-    $ run
-    $ get
+    <| Cursor.withHidden
+    <| CLI.Wait.waitFor "Retrieving Fission Peer List..."
+    <| run
+    <| get
 
 -- | Retrieve a list of peers from the fission api
 get :: ClientM [IPFS.Peer]

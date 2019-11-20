@@ -8,10 +8,8 @@ module Fission.CLI.Config.Base.Types
   , ipfsTimeout
   ) where
 
-import RIO
-import RIO.Process (ProcessContext, HasProcessContext (..))
+import Fission.Prelude
 
-import Data.Has
 import Control.Lens (makeLenses)
 
 import qualified Fission.Web.Client.Types as Client

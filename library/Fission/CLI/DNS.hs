@@ -1,16 +1,12 @@
 -- | Update DNS via the CLI
 module Fission.CLI.DNS (update) where
 
-import RIO
-
-import Data.Has
+import Fission.Prelude
 
 import Servant
 import Servant.Client
 
 import qualified Fission.Config as Config
-import           Fission.Internal.Constraint
-
 import           Fission.IPFS.CID.Types
 
 import qualified Fission.Web.Client      as Client
@@ -30,17 +26,17 @@ update :: MonadRIO       cfg m
     -> m (Either ClientError AWS.DomainName)
 update cid@(CID hash) = do
   auth <- Config.get
-  logDebug $ "Updating DNS to " <> display hash
+  logDebug <| "Updating DNS to " <> display hash
 
   Client.Runner runner <- Config.get
   update' runner auth cid >>= \case
     Right domain -> do
-      CLI.Success.dnsUpdated $ AWS.getDomainName domain
-      return $ Right domain
+      CLI.Success.dnsUpdated <| AWS.getDomainName domain
+      return <| Right domain
 
     Left err -> do
       CLI.Error.put' err
-      return $ Left err
+      return <| Left err
 
 update' :: MonadIO m
         => (ClientM AWS.DomainName -> IO a)
@@ -50,4 +46,4 @@ update' :: MonadIO m
 update' runner auth cid =
   liftIO . CLI.withLoader 50000
          . runner
-         $ DNS.Client.update auth cid
+         <| DNS.Client.update auth cid

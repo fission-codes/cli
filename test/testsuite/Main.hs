@@ -4,7 +4,7 @@
 
 module Main (main) where
 
-import RIO
+import Fission.Prelude
 
 import Test.Tasty                   (TestTree, defaultMainWithIngredients, testGroup)
 import Test.Tasty.HUnit             (Assertion, testCase, (@?=))
@@ -33,11 +33,11 @@ import Test.Tasty.SmallCheck        (testProperty)
 --   --                     }
 
 --   putStrLn "Testing..."
---   hspec . spec . run port . logger $ app config
+--   hspec . spec . run port . logger <| app config
 
 -- spec :: IO () -> Spec
 -- spec server = with server do
---   describe "GET /ping" $ do
+--   describe "GET /ping" <| do
 --     it "responds with 200" do
 --       1 `shouldBe` 1
 --       -- get "/users" `shouldRespondWith` 200

@@ -4,7 +4,7 @@ module Fission.Web.Client.Register
   , reset
   ) where
 
-import           RIO
+import           Fission.Prelude
 
 import           Servant
 import           Servant.Client

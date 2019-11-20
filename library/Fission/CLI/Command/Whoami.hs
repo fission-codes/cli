@@ -1,7 +1,7 @@
 -- | Whoami command
 module Fission.CLI.Command.Whoami (command, whoami) where
 
-import           RIO
+import           Fission.Prelude
 import           RIO.ByteString
 
 import           Options.Applicative.Simple (addCommand)
@@ -9,7 +9,6 @@ import           Servant
 
 import qualified System.Console.ANSI as ANSI
 
-import           Fission.Internal.Constraint
 import qualified Fission.Internal.UTF8 as UTF8
 
 import qualified Fission.CLI.Environment as Environment
@@ -25,7 +24,7 @@ command cfg =
   addCommand
     "whoami"
     "Check the current user"
-    (const $ runRIO cfg whoami)
+    (const <| runRIO cfg whoami)
     (pure ())
 
 whoami :: MonadRIO   cfg m
@@ -34,13 +33,13 @@ whoami :: MonadRIO   cfg m
 whoami =
   Environment.get >>= \case
     Left err -> do
-      logDebug $ displayShow err
+      logDebug <| displayShow err
       Environment.couldNotRead
 
     Right env -> do
       let auth = userAuth env
       UTF8.putText "💻 Currently logged in as: "
-      liftIO $ ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
-      putStr $ basicAuthUsername auth <> "\n"
+      liftIO <| ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
+      putStr <| basicAuthUsername auth <> "\n"
 
-      liftIO $ ANSI.setSGR [ANSI.Reset]
+      liftIO <| ANSI.setSGR [ANSI.Reset]

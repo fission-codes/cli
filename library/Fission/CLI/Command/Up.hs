@@ -1,14 +1,12 @@
 -- | File sync, IPFS-style
 module Fission.CLI.Command.Up (command, up) where
 
-import           RIO
+import           Fission.Prelude
 import           RIO.Directory
 import           RIO.Process (HasProcessContext)
 
-import           Data.Has
 import           Options.Applicative.Simple hiding (command)
 
-import           Fission.Internal.Constraint
 import           Fission.Internal.Exception
 
 import qualified Fission.Storage.IPFS as IPFS
@@ -35,7 +33,7 @@ command cfg =
   addCommand
     "up"
     "Keep your current working directory up"
-    (\options -> void $ runRIO cfg $ FissionConnected.ensure $ up options)
+    (\options -> void <| runRIO cfg <| FissionConnected.ensure <| up options)
     parseOptions
 
 -- | Sync the current working directory to the server over IPFS
@@ -44,24 +42,24 @@ up :: MonadRIO             cfg m
    => Up.Options
    -> m ()
 up Up.Options {..} = handleWith_ Error.put' do
-  absPath <- liftIO $ makeAbsolute path
-  cid     <- liftE $ IPFS.addDir path
+  absPath <- liftIO <| makeAbsolute path
+  cid     <- liftE <| IPFS.addDir path
 
-  logDebug $ "Starting single IPFS add locally of " <> displayShow absPath
+  logDebug <| "Starting single IPFS add locally of " <> displayShow absPath
 
   unless dnsOnly do
-    void . liftE $ CLI.Pin.run cid
+    void . liftE <| CLI.Pin.run cid
 
-  liftE $ CLI.DNS.update cid
+  liftE <| CLI.DNS.update cid
 
 parseOptions :: Parser Up.Options
 parseOptions = do
-  dnsOnly <- switch $ mconcat
+  dnsOnly <- switch <| mconcat
     [ long "dns-only"
     , help "Only update DNS (skip file sync)"
     ]
 
-  path <- strArgument $ mconcat
+  path <- strArgument <| mconcat
     [ metavar "PATH"
     , help    "The file path of the assets or directory to sync"
     , value   "./"

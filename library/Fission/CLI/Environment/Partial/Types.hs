@@ -1,8 +1,7 @@
 module Fission.CLI.Environment.Partial.Types ( Partial (..)) where
 
-import RIO
+import Fission.Prelude
 
-import           Data.Aeson
 import           Servant.API
 
 import qualified Fission.IPFS.Types as IPFS
@@ -14,13 +13,13 @@ data Partial = Partial
   } 
 
 instance ToJSON Partial where
-  toJSON Partial {..} = object $ catMaybes
+  toJSON Partial {..} = object <| catMaybes
     [ ("user_auth" .=) <$> maybeUserAuth
     , ("peers" .=) <$> maybePeers
     ]
 
 instance FromJSON Partial where
-  parseJSON = withObject "Partial" $ \obj ->
+  parseJSON = withObject "Partial" <| \obj ->
     Partial <$> obj .:? "user_auth"
             <*> obj .:? "peers"
 

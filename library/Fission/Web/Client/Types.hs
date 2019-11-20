@@ -1,6 +1,6 @@
 module Fission.Web.Client.Types (Runner (..)) where
 
-import RIO
+import Fission.Prelude
 
 import Servant.Client
 

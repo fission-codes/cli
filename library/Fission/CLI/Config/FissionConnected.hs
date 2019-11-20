@@ -4,12 +4,8 @@ module Fission.CLI.Config.FissionConnected
   , module Fission.CLI.Config.FissionConnected.Types
   ) where
 
-import           RIO
+import           Fission.Prelude
 import           RIO.Process (ProcessContext, HasProcessContext (..))
-
-import           Data.Has
-
-import           Fission.Internal.Constraint
 
 import qualified Fission.IPFS.Types   as IPFS
 import qualified Fission.Web.Client   as Client
@@ -53,17 +49,17 @@ ensure action = do
       Connect.swarmConnectWithRetry _peer 1 >>= \case
         Right _ -> do
           -- All setup and ready to run!
-          result <- liftIO $ runRIO FissionConnected {..} action
+          result <- liftIO <| runRIO FissionConnected {..} action
           Right <$> return result
 
         Left err -> do
           -- We were unable to connect!
-          logError $ displayShow err
+          logError <| displayShow err
           Connect.couldNotSwarmConnect
-          return $ Left CannotConnect
+          return <| Left CannotConnect
 
     Left err -> do
       -- We were unable to read the users config
-      logDebug $ displayShow err
+      logDebug <| displayShow err
       Environment.couldNotRead
-      return $ Left NotFissionConnected
+      return <| Left NotFissionConnected

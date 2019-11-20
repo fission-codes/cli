@@ -1,13 +1,9 @@
 module Fission.CLI (cli) where
 
-import           RIO
+import           Fission.Prelude
 import           RIO.Process (HasProcessContext)
 
-import           Data.Has
-
 import           Options.Applicative.Simple
-
-import           Fission.Internal.Constraint
 
 import qualified Fission.Web.Client   as Client
 import qualified Fission.IPFS.Types   as IPFS
@@ -32,7 +28,7 @@ cli :: MonadRIO    cfg m
     => m ()
 cli = do
   cfg <- ask
-  (_, runCLI) <- liftIO $ simpleOptions version description detail (pure ()) do
+  (_, runCLI) <- liftIO <| simpleOptions version description detail (pure ()) do
     Login.command         cfg
     Logout.command        cfg
     Register.command      cfg

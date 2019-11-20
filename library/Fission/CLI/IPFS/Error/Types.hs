@@ -1,6 +1,6 @@
 module Fission.CLI.IPFS.Error.Types (Err (..)) where
 
-import           RIO
+import           Fission.Prelude
 
 data Err = UnableToConnect
   deriving (Show, Exception)

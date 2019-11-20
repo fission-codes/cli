@@ -7,10 +7,9 @@ module Fission.CLI.Config.LoggedIn.Types
   , userAuth
   ) where
 
-import RIO
+import Fission.Prelude
 import Servant.API
 
-import Data.Has
 import Control.Lens (makeLenses)
 
 import qualified Fission.Web.Client.Types as Client

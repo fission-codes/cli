@@ -5,7 +5,7 @@ module Fission.Web.Client.IPFS
   , request
   ) where
 
-import RIO
+import Fission.Prelude
 
 import Servant
 import Servant.Client
