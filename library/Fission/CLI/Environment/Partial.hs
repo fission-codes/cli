@@ -52,16 +52,19 @@ toFull partial =
     Just basicAuth -> Right <| Environment
       { userAuth = basicAuth
       , peers = maybePeers partial
+      , ignored = fromMaybe [] <| maybeIgnored partial
       }
 
 fromFull :: Environment -> Env.Partial
 fromFull env = Env.Partial
   { maybeUserAuth = Just <| userAuth env
   , maybePeers = peers env
+  , maybeIgnored = Just <| ignored env
   }
 
 updatePeers :: Env.Partial -> [IPFS.Peer] -> Env.Partial
 updatePeers env peers = Env.Partial
   { maybeUserAuth = maybeUserAuth env
   , maybePeers = Just (NonEmpty.fromList peers)
+  , maybeIgnored = maybeIgnored env
   }

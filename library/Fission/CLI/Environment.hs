@@ -49,10 +49,12 @@ init auth = do
       CLI.Error.put err "Peer retrieval failed"
 
     Right peers -> do
-      let env = Env.Partial {
-        maybeUserAuth = Just auth,
-        maybePeers = Just (NonEmpty.fromList peers)
-      }
+      let
+        env = Env.Partial
+          { maybeUserAuth = Just auth
+          , maybePeers = Just (NonEmpty.fromList peers)
+          , maybeIgnored = Just []
+          }
       liftIO <| Env.Partial.write path env
       CLI.Success.putOk "Logged in"
 

@@ -44,6 +44,7 @@ ensure action = do
     Right config -> do
       _peer         <- Environment.getOrRetrievePeer config
       let _userAuth = Environment.userAuth config
+      let _ignoredFiles = Environment.ignored config
 
       -- Connect the local IPFS node to the Fission network
       Connect.swarmConnectWithRetry _peer 1 >>= \case
