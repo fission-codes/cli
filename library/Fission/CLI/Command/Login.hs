@@ -3,10 +3,11 @@ module Fission.CLI.Command.Login (command, login) where
 
 import           Fission.Prelude
 import           RIO.ByteString
+import           RIO.Process (HasProcessContext)
 
 import qualified Data.ByteString.Char8 as BS
 
-import           Options.Applicative.Simple (addCommand)
+import           Options.Applicative.Simple hiding (command)
 import           Servant
 import           System.Console.Haskeline
 
@@ -27,14 +28,15 @@ import qualified Fission.CLI.Display.Wait    as CLI.Wait
 -- | The command to attach to the CLI tree
 command :: MonadIO m
         => HasLogFunc        cfg
+        => HasProcessContext cfg
         => Has Client.Runner cfg
         => cfg
         -> CommandM (m ())
 command cfg =
   addCommand
     "login"
-    "Add your Fission credentials"
-    (const <| runRIO cfg login)
+    "Add your Fission! credentials"
+    (\options -> void <| runRIO cfg <| login options)
     parseOptions
 
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
@@ -42,11 +44,11 @@ login :: MonadRIO          cfg m
       => MonadUnliftIO         m
       => HasLogFunc        cfg
       => Has Client.Runner cfg
-      => Login.Options ()
+      => Login.Options
       -> m ()
 login Login.Options {..} = do
   logDebug "Starting login sequence"
-  logDebug username2
+  putStr (BS.pack username2)
   putStr "Username: "
   username <- getLine
   liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ") >>= \case
@@ -75,13 +77,21 @@ login Login.Options {..} = do
 
 parseOptions :: Parser Login.Options
 parseOptions = do
-
   username2 <- strArgument <| mconcat
-    [ metavar "FISSION_USERNAME"
-    , long "username2"
-    , short "u"
-    , help    "Specifcy the FIssion user you'd like to login as"
+    [ metavar "PATH"
+    , help    "The file path of the assetss or directory to sync"
+    , value   "./"
     ]
 
   return Login.Options {..}
+
+-- parseOptions :: Parser Up.Options
+-- parseOptions = do
+--   path <- strArgument <| mconcat
+--     [ metavar "PATH"
+--     , help    "The file path of the assets or directory to sync"
+--     , value   "./"
+--     ]
+
+--   return Up.Options {..}
 
