@@ -3,6 +3,7 @@ module Fission.CLI.Environment
   ( init
   , get
   , findLocalAuth
+  , findRecurse
   , writeAuth
   , couldNotRead
   , removeConfigFile
@@ -55,6 +56,7 @@ init auth = do
           { maybeUserAuth = Just auth
           , maybePeers = Just (NonEmpty.fromList peers)
           , maybeIgnored = Just ignoreDefault
+          , maybeBuildDir = Nothing
           }
       liftIO <| Env.Partial.write path env
       CLI.Success.putOk "Logged in"
@@ -74,14 +76,14 @@ findLocalAuth = do
   currDir <- getCurrentDirectory
   findRecurse (isJust . maybeUserAuth) currDir >>= \case
     Nothing -> return <| Left Error.EnvNotFound 
-    Just path -> return <| Right path
+    Just (path, _) -> return <| Right path
 
-findRecurse :: MonadIO m => (Env.Partial -> Bool) -> FilePath -> m (Maybe FilePath)
+findRecurse :: MonadIO m => (Env.Partial -> Bool) -> FilePath -> m (Maybe (FilePath, Env.Partial))
 findRecurse f path = do 
   let filepath = path </> ".fission.yaml"
   partial <- Env.Partial.decode filepath
   case (f partial, path) of
-    (True, _) -> return <| Just filepath
+    (True, _) -> return <| Just (filepath, partial)
     (_, "/")  -> return Nothing
     _         -> findRecurse f <| takeDirectory path
 
