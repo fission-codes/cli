@@ -35,7 +35,7 @@ command :: MonadIO m
 command cfg =
   addCommand
     "login"
-    "Add your Fission! credentials"
+    "Add your Fission credentials"
     (\options -> void <| runRIO cfg <| login options)
     parseOptions
 
@@ -77,10 +77,11 @@ login Login.Options {..} = do
 
 parseOptions :: Parser Login.Options
 parseOptions = do
-  username2 <- strArgument <| mconcat
-    [ metavar "PATH"
-    , help    "The file path of the assetss or directory to sync"
-    , value   "./"
+  username2 <- strOption <| mconcat
+    [ long    "user"
+    , metavar "FISSION_USERNAME"
+    , help    "The username to login with"
+    , value   ""
     ]
 
   return Login.Options {..}
