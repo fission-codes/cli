@@ -3,7 +3,6 @@ module Fission.CLI.Command.Login (command, login) where
 
 import           Fission.Prelude
 import           RIO.ByteString
-import           RIO.Process (HasProcessContext)
 
 import qualified Data.ByteString.Char8 as BS
 
@@ -28,7 +27,6 @@ import qualified Fission.CLI.Display.Wait    as CLI.Wait
 -- | The command to attach to the CLI tree
 command :: MonadIO m
         => HasLogFunc        cfg
-        => HasProcessContext cfg
         => Has Client.Runner cfg
         => cfg
         -> CommandM (m ())
@@ -40,13 +38,23 @@ command cfg =
     parseOptions
 
 
+-- | Get a users username, if not passed in via cli option prompt for input
 getUsername :: MonadRIO cfg m
-      => Maybe ByteString
-      -> m ByteString
+            => Maybe ByteString
+            -> m ByteString
 getUsername (Just username) = return username
 getUsername Nothing = do
   putStr "Username: "
   getLine
+
+-- | Get a users password, if not passed in via cli option prompt for input
+getUserPassword :: MonadRIO cfg m
+                => Maybe ByteString
+                -> m (Maybe ByteString)
+getUserPassword (Just option_password) = return (Just option_password)
+getUserPassword Nothing = do
+  mayPassword <- liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ")
+  return (fmap BS.pack mayPassword)
 
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
 login :: MonadRIO          cfg m
@@ -57,15 +65,16 @@ login :: MonadRIO          cfg m
       -> m ()
 login Login.Options {..} = do
   logDebug "Starting login sequence"
-  username <- getUsername username_option
-  liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ") >>= \case
+  username      <- getUsername username_option
+  maybePassword <- getUserPassword password_option
+  case maybePassword of
     Nothing ->
       logError "Unable to read password"
 
     Just password -> do
       logDebug "Attempting API verification"
       Client.Runner run <- Config.get
-      let auth = BasicAuthData username <| BS.pack password
+      let auth = BasicAuthData username password
 
       authResult <- Cursor.withHidden
                   . liftIO
@@ -90,15 +99,10 @@ parseOptions = do
     , help    "The username to login with"
     ]
 
+  password_option <- optional <| strOption <| mconcat
+    [ long    "password"
+    , metavar "FISSION_PASSWORD"
+    , help    "The password to login with"
+    ]
+
   return Login.Options {..}
-
--- parseOptions :: Parser Up.Options
--- parseOptions = do
---   path <- strArgument <| mconcat
---     [ metavar "PATH"
---     , help    "The file path of the assets or directory to sync"
---     , value   "./"
---     ]
-
---   return Up.Options {..}
-
