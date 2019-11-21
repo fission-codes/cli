@@ -15,6 +15,7 @@ import qualified Fission.Web.Client       as Client
 
 import           Fission.CLI.Command.Up.Types as Up
 import qualified Fission.CLI.Display.Error    as Error
+import qualified Fission.CLI.Prompt.BuildDir  as Prompt
 import qualified Fission.CLI.IPFS.Pin         as CLI.Pin
 import qualified Fission.CLI.DNS              as CLI.DNS
 
@@ -45,10 +46,12 @@ up :: MonadRIO             cfg m
    -> m ()
 up Up.Options {..} = handleWith_ Error.put' do
   ignoredFiles :: IPFS.Ignored <- Config.get
-  absPath <- liftIO <| makeAbsolute path
-  cid     <- liftE <| IPFS.addDir ignoredFiles path
 
+  toAdd <- Prompt.checkBuildDir path
+  absPath <- liftIO <| makeAbsolute toAdd
   logDebug <| "Starting single IPFS add locally of " <> displayShow absPath
+          
+  cid     <- liftE <| IPFS.addDir ignoredFiles path
 
   unless dnsOnly do
     void . liftE <| CLI.Pin.run cid
