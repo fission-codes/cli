@@ -18,6 +18,7 @@ import qualified Fission.CLI.Environment as Environment
 
 import           Fission.CLI.Config.Types
 
+import           Fission.CLI.Command.Login.Types as Login
 import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
@@ -34,16 +35,18 @@ command cfg =
     "login"
     "Add your Fission credentials"
     (const <| runRIO cfg login)
-    (pure ())
+    parseOptions
 
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
 login :: MonadRIO          cfg m
       => MonadUnliftIO         m
       => HasLogFunc        cfg
       => Has Client.Runner cfg
-      => m ()
-login = do
+      => Login.Options ()
+      -> m ()
+login Login.Options {..} = do
   logDebug "Starting login sequence"
+  logDebug username2
   putStr "Username: "
   username <- getLine
   liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ") >>= \case
@@ -69,4 +72,16 @@ login = do
 
           Environment.init auth
           CLI.Success.putOk "Registered & logged in. Your credentials are in ~/.fission.yaml"
+
+parseOptions :: Parser Login.Options
+parseOptions = do
+
+  username2 <- strArgument <| mconcat
+    [ metavar "FISSION_USERNAME"
+    , long "username2"
+    , short "u"
+    , help    "Specifcy the FIssion user you'd like to login as"
+    ]
+
+  return Login.Options {..}
 
