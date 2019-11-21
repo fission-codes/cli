@@ -39,6 +39,15 @@ command cfg =
     (\options -> void <| runRIO cfg <| login options)
     parseOptions
 
+
+getUsername :: MonadRIO cfg m
+      => Maybe ByteString
+      -> m ByteString
+getUsername (Just username) = return username
+getUsername Nothing = do
+  putStr "Username: "
+  getLine
+
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
 login :: MonadRIO          cfg m
       => MonadUnliftIO         m
@@ -48,9 +57,7 @@ login :: MonadRIO          cfg m
       -> m ()
 login Login.Options {..} = do
   logDebug "Starting login sequence"
-  putStr (BS.pack username2)
-  putStr "Username: "
-  username <- getLine
+  username <- getUsername username_option
   liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ") >>= \case
     Nothing ->
       logError "Unable to read password"
@@ -77,11 +84,10 @@ login Login.Options {..} = do
 
 parseOptions :: Parser Login.Options
 parseOptions = do
-  username2 <- strOption <| mconcat
+  username_option <- optional <| strOption <| mconcat
     [ long    "user"
     , metavar "FISSION_USERNAME"
     , help    "The username to login with"
-    , value   ""
     ]
 
   return Login.Options {..}
