@@ -33,8 +33,8 @@ checkBuildDir relPath = do
         buildDir <- promptBuildDir guess >>= \case
           True -> return guess
           False -> return relPath
-        let empty = mempty Env.Partial
-        let updated = empty { maybeBuildDir = Just buildDir }
+        let
+          updated = (mempty Env.Partial) { maybeBuildDir = Just buildDir }
         Env.Partial.writeMerge (absPath </> ".fission.yaml") updated
         return buildDir
 

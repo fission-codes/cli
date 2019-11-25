@@ -45,6 +45,7 @@ decode path = liftIO <| YAML.decodeFileEither path >>= \case
 write :: MonadIO m => FilePath -> Env.Partial -> m ()
 write path env = writeBinaryFileDurable path <| YAML.encode env
 
+-- | Merges partial env with the env at the path and overwrites
 writeMerge :: MonadIO m => FilePath -> Env.Partial -> m ()
 writeMerge path newEnv = do
   currEnv <- decode path

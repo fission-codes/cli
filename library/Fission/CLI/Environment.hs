@@ -61,12 +61,13 @@ init auth = do
       liftIO <| Env.Partial.write path env
       CLI.Success.putOk "Logged in"
 
--- | Gets hierarchical environment by recursed through file system
+-- | Gets hierarchical environment by recursing through file system
 get :: MonadIO m => m (Either Error.Env Environment)
 get = do 
   partial <- Env.Partial.get
   return <| Env.Partial.toFull partial
 
+-- | Writes env to path, overwriting if necessary
 write :: MonadIO m => FilePath -> Environment -> m ()
 write path env = Env.Partial.write path <| Env.Partial.fromFull env
 
@@ -78,6 +79,7 @@ findLocalAuth = do
     Nothing -> return <| Left Error.EnvNotFound 
     Just (path, _) -> return <| Right path
 
+-- | Recurses up to user root to find a env that satisfies function "f"
 findRecurse :: MonadIO m => (Env.Partial -> Bool) -> FilePath -> m (Maybe (FilePath, Env.Partial))
 findRecurse f path = do 
   let filepath = path </> ".fission.yaml"
@@ -92,14 +94,6 @@ globalEnv :: MonadIO m => m FilePath
 globalEnv = do
   home <- getHomeDirectory
   return <| home </> ".fission.yaml"
-
-writeAuth :: MonadRIO cfg m
-          => BasicAuthData
-          -> FilePath
-          -> m ()
-writeAuth auth path = do
-  partial <- Env.Partial.decode path
-  Env.Partial.write path <| partial { maybeUserAuth = Just auth }
 
 -- | Create a could not read message for the terminal
 couldNotRead :: MonadIO m => m ()

@@ -8,6 +8,7 @@ import           RIO.ByteString as BS hiding (map, pack)
 import qualified Fission.Internal.UTF8 as UTF8
 import qualified Data.List as L
 
+-- | Continues prompting the user until they put in a valid response
 reask :: 
   ( MonadIO m )
   => Text
@@ -20,6 +21,7 @@ reask prompt check = do
     then return resp
     else reask prompt check
 
+-- | reask where valid responses are some form of yes/no
 reaskYN ::
   ( MonadIO m )
   => Text
