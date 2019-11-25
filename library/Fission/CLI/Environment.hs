@@ -4,7 +4,6 @@ module Fission.CLI.Environment
   , get
   , findLocalAuth
   , findRecurse
-  , writeAuth
   , couldNotRead
   , removeConfigFile
   , getOrRetrievePeer
