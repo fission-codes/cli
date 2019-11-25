@@ -7,8 +7,8 @@ import           RIO.Process (HasProcessContext)
 import           Options.Applicative.Simple (addCommand)
 import           Options.Applicative (strArgument, metavar, help)
 
-import qualified Fission.Storage.IPFS as IPFS
-import qualified Fission.IPFS.Types   as IPFS
+import qualified Fission.Storage.IPFS.Get as IPFS
+import qualified Fission.IPFS.Types       as IPFS
 import           Fission.IPFS.CID.Types
 import           Fission.CLI.Config.Types
 

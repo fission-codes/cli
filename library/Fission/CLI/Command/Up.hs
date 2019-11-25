@@ -9,16 +9,18 @@ import           Options.Applicative.Simple hiding (command)
 
 import           Fission.Internal.Exception
 
-import qualified Fission.Storage.IPFS as IPFS
-import qualified Fission.IPFS.Types   as IPFS
-import qualified Fission.Web.Client   as Client
+import qualified Fission.Storage.IPFS.Add as IPFS
+import qualified Fission.IPFS.Types       as IPFS
+import qualified Fission.Web.Client       as Client
 
 import           Fission.CLI.Command.Up.Types as Up
 import qualified Fission.CLI.Display.Error    as Error
 import qualified Fission.CLI.IPFS.Pin         as CLI.Pin
 import qualified Fission.CLI.DNS              as CLI.DNS
+
 import           Fission.CLI.Config.Types
 import           Fission.CLI.Config.FissionConnected  as FissionConnected
+import qualified Fission.Config           as Config
 
 -- | The command to attach to the CLI tree
 command :: MonadIO m
@@ -42,8 +44,9 @@ up :: MonadRIO             cfg m
    => Up.Options
    -> m ()
 up Up.Options {..} = handleWith_ Error.put' do
+  ignoredFiles :: IPFS.Ignored <- Config.get
   absPath <- liftIO <| makeAbsolute path
-  cid     <- liftE <| IPFS.addDir path
+  cid     <- liftE <| IPFS.addDir ignoredFiles path
 
   logDebug <| "Starting single IPFS add locally of " <> displayShow absPath
 

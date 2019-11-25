@@ -19,6 +19,7 @@ import Control.Lens (makeLenses)
 import qualified Fission.Web.Client.Types as Client
 import qualified Fission.IPFS.Types       as IPFS
 
+
 type HasFissionConnected cfg
   = ( HasLogFunc        cfg
     , HasProcessContext cfg
@@ -27,16 +28,18 @@ type HasFissionConnected cfg
     , Has IPFS.BinPath  cfg
     , Has IPFS.Peer     cfg
     , Has BasicAuthData cfg
+    , Has IPFS.Ignored  cfg
     )
 
 data FissionConnected = FissionConnected
-  { _fissionAPI  :: !Client.Runner
-  , _logFunc     :: !LogFunc
-  , _processCtx  :: !ProcessContext
-  , _ipfsPath    :: !IPFS.BinPath
-  , _ipfsTimeout :: !IPFS.Timeout
-  , _peer        :: !IPFS.Peer
-  , _userAuth    :: !BasicAuthData
+  { _fissionAPI   :: !Client.Runner
+  , _logFunc      :: !LogFunc
+  , _processCtx   :: !ProcessContext
+  , _ipfsPath     :: !IPFS.BinPath
+  , _ipfsTimeout  :: !IPFS.Timeout
+  , _peer         :: !IPFS.Peer
+  , _ignoredFiles :: !IPFS.Ignored
+  , _userAuth     :: !BasicAuthData
   }
 
 makeLenses ''FissionConnected
@@ -59,5 +62,9 @@ instance Has IPFS.Timeout FissionConnected where
 instance Has IPFS.Peer FissionConnected where
   hasLens = peer
 
+instance Has IPFS.Ignored FissionConnected where
+  hasLens = ignoredFiles
+
 instance Has BasicAuthData FissionConnected where
   hasLens = userAuth
+

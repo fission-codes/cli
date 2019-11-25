@@ -49,7 +49,7 @@ extra-deps:
 - raven-haskell-0.1.2.1
 - tasty-rerun-1.1.14
 - git: https://github.com/fission-suite/web-api.git
-  commit: 417f88192fd5b19033000d9ca71602345ec498a2
+  commit: ce4df3b37e63bd37a979221e52b8c334c105c27a
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

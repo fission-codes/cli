@@ -17,9 +17,9 @@ import           System.FSNotify as FS
 
 import qualified Fission.Internal.UTF8 as UTF8
 
-import qualified Fission.Web.Client   as Client
-import qualified Fission.Storage.IPFS as IPFS
-import qualified Fission.Time         as Time
+import qualified Fission.Web.Client       as Client
+import qualified Fission.Storage.IPFS.Add as IPFS
+import qualified Fission.Time             as Time
 
 import           Fission.IPFS.CID.Types
 import qualified Fission.IPFS.Types as IPFS
@@ -34,7 +34,9 @@ import           Fission.CLI.Command.Watch.Types as Watch
 import           Fission.CLI.Config.Types
 import qualified Fission.CLI.IPFS.Pin            as CLI.Pin
 import qualified Fission.CLI.DNS                 as CLI.DNS
+
 import           Fission.CLI.Config.FissionConnected
+import qualified Fission.Config           as Config
 
 -- | The command to attach to the CLI tree
 command :: MonadIO m
@@ -60,7 +62,8 @@ watcher :: MonadRIO             cfg m
 watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
   cfg            <- ask
   absPath        <- makeAbsolute path
-  cid@(CID hash) <- liftE <| IPFS.addDir absPath
+  ignoredFiles :: IPFS.Ignored <- Config.get
+  cid@(CID hash) <- liftE <| IPFS.addDir ignoredFiles absPath
 
   UTF8.putText <| "👀 Watching " <> Text.pack absPath <> " for changes...\n"
 
@@ -91,7 +94,7 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
       void <| swapMVar timeCache now
       threadDelay Time.dohertyMicroSeconds -- Wait for all events to fire in sliding window
 
-      IPFS.addDir dir >>= \case
+      IPFS.addDir [] dir >>= \case
         Left err ->
           CLI.Error.put' err
 

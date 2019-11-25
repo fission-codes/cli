@@ -76,18 +76,18 @@ packages:
     hackage: tasty-rerun-1.1.14
 - completed:
     cabal-file:
-      size: 21269
-      sha256: f476edc8f126070f200bf0eb2d7372950d44bcd3d05b56bef146021b392f34d6
+      size: 21870
+      sha256: cabe00c1ebf4f7297584fab7a2e26062f9418979c77622fe8df12ba4bb42ddc9
     name: fission-web-api
     version: 2.0.0
     git: https://github.com/fission-suite/web-api.git
     pantry-tree:
-      size: 11411
-      sha256: 6f7ee8c3fcedd1956fa7634beced0b94049dcbafdaa93f51fae485080f83ae7e
-    commit: 417f88192fd5b19033000d9ca71602345ec498a2
+      size: 11955
+      sha256: 9eebddd7ab7de52786b8bc2cf3013dddc9b724ef30cc520df72dbd0ff2defc32
+    commit: ce4df3b37e63bd37a979221e52b8c334c105c27a
   original:
     git: https://github.com/fission-suite/web-api.git
-    commit: 417f88192fd5b19033000d9ca71602345ec498a2
+    commit: ce4df3b37e63bd37a979221e52b8c334c105c27a
 snapshots:
 - completed:
     size: 524127
