@@ -68,15 +68,16 @@ foldGuess base acc path = (doesDirectoryExist <| combine base path) >>= \case
   False -> return acc
 
 -- | Common build folders for static site generators
+--   Highest -> Lowest priority (reversed because foldM folds from the left)
 buildGuesses :: FilePath -> [FilePath]
-buildGuesses base = map (combine base)
+buildGuesses base = reverse <| map (combine base)
   [ "_site" -- jekyll, hakyll, eleventy
   , "site" -- forgot which
-  , "public" -- gatsby, hugo
+  , "build" -- create-react-app, metalsmith, middleman
   , "dist" -- nuxt
+  , "public" -- gatsby, hugo
   , "output" -- pelican
   , "out" -- hexo
-  , "build" -- create-react-app, metalsmith, middleman
   , "website/build" -- docusaurus
   , "docs" -- many others
   ]
