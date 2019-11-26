@@ -27,6 +27,7 @@ import qualified Fission.CLI.Display.Error   as CLI.Error
 import           Fission.CLI.Environment.Types
 import           Fission.CLI.Environment.Partial.Types as Env
 import qualified Fission.CLI.Environment.Partial as Env.Partial
+import           Fission.CLI.Environment.Partial (globalEnv)
 import qualified Fission.CLI.Environment.Error as Error
 
 import           Fission.Internal.Orphanage.BasicAuthData ()
@@ -84,15 +85,18 @@ findRecurse f path = do
   let filepath = path </> ".fission.yaml"
   partial <- Env.Partial.decode filepath
   case (f partial, path) of
+    -- if found, return
     (True, _) -> return <| Just (filepath, partial)
-    (_, "/")  -> return Nothing
+    -- if at root, check globalEnv (home dir)
+    -- necessary for WSL
+    (_, "/")  -> do
+      globalPath <- globalEnv
+      global <- Env.Partial.decode globalPath
+      if f global
+        then return <| Just (globalPath, global)
+        else return Nothing
+    -- else recurse
     _         -> findRecurse f <| takeDirectory path
-
--- | globalEnv environment in users home
-globalEnv :: MonadIO m => m FilePath
-globalEnv = do
-  home <- getHomeDirectory
-  return <| home </> ".fission.yaml"
 
 -- | Create a could not read message for the terminal
 couldNotRead :: MonadIO m => m ()

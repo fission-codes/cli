@@ -3,6 +3,7 @@ module Fission.CLI.Environment.Partial
   , decode
   , write
   , writeMerge
+  , globalEnv
   , toFull
   , fromFull
   , updatePeers
@@ -29,7 +30,11 @@ get :: MonadIO m => m Env.Partial
 get = getRecurse =<< getCurrentDirectory
 
 getRecurse :: MonadIO m => FilePath -> m Env.Partial
-getRecurse "/" = decode <| "/.fission.yaml"
+getRecurse "/" = do
+  root <- decode <| "/.fission.yaml"
+  home <- decode =<< globalEnv
+  return <| home <> root
+
 getRecurse path = do
   parent <- getRecurse <| takeDirectory path
   curr <- decode <| path </> ".fission.yaml"
@@ -50,6 +55,12 @@ writeMerge :: MonadIO m => FilePath -> Env.Partial -> m ()
 writeMerge path newEnv = do
   currEnv <- decode path
   writeBinaryFileDurable path <| YAML.encode <| currEnv <> newEnv
+
+-- | globalEnv environment in users home
+globalEnv :: MonadIO m => m FilePath
+globalEnv = do
+  home <- getHomeDirectory
+  return <| home </> ".fission.yaml"
 
 toFull :: Env.Partial -> (Either Error.Env Environment)
 toFull partial =
