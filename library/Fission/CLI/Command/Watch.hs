@@ -31,6 +31,7 @@ import           Fission.CLI.Display.Error as CLI.Error
 import qualified Fission.CLI.Config.FissionConnected as FissionConnected
 
 import           Fission.CLI.Command.Watch.Types as Watch
+import qualified Fission.CLI.Prompt.BuildDir  as Prompt
 import           Fission.CLI.Config.Types
 import qualified Fission.CLI.IPFS.Pin            as CLI.Pin
 import qualified Fission.CLI.DNS                 as CLI.DNS
@@ -61,8 +62,12 @@ watcher :: MonadRIO             cfg m
         -> m ()
 watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
   cfg            <- ask
-  absPath        <- makeAbsolute path
   ignoredFiles :: IPFS.Ignored <- Config.get
+
+  toAdd <- Prompt.checkBuildDir path
+  absPath        <- makeAbsolute toAdd
+  logDebug <| "Starting single IPFS add locally of " <> displayShow absPath
+
   cid@(CID hash) <- liftE <| IPFS.addDir ignoredFiles absPath
 
   UTF8.putText <| "👀 Watching " <> Text.pack absPath <> " for changes...\n"

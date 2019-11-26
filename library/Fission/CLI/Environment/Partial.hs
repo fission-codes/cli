@@ -1,8 +1,8 @@
 module Fission.CLI.Environment.Partial
   ( get
-  , recurseEnv
   , decode
   , write
+  , writeMerge
   , toFull
   , fromFull
   , updatePeers
@@ -26,12 +26,12 @@ import qualified Fission.IPFS.Types as IPFS
 
 -- | Gets hierarchical environment by recursed through file system
 get :: MonadIO m => m Env.Partial
-get = recurseEnv =<< getCurrentDirectory
+get = getRecurse =<< getCurrentDirectory
 
-recurseEnv :: MonadIO m => FilePath -> m Env.Partial
-recurseEnv "/" = decode <| "/.fission.yaml"
-recurseEnv path = do
-  parent <- recurseEnv <| takeDirectory path
+getRecurse :: MonadIO m => FilePath -> m Env.Partial
+getRecurse "/" = decode <| "/.fission.yaml"
+getRecurse path = do
+  parent <- getRecurse <| takeDirectory path
   curr <- decode <| path </> ".fission.yaml"
   return <| parent <> curr
 
@@ -45,6 +45,12 @@ decode path = liftIO <| YAML.decodeFileEither path >>= \case
 write :: MonadIO m => FilePath -> Env.Partial -> m ()
 write path env = writeBinaryFileDurable path <| YAML.encode env
 
+-- | Merges partial env with the env at the path and overwrites
+writeMerge :: MonadIO m => FilePath -> Env.Partial -> m ()
+writeMerge path newEnv = do
+  currEnv <- decode path
+  writeBinaryFileDurable path <| YAML.encode <| currEnv <> newEnv
+
 toFull :: Env.Partial -> (Either Error.Env Environment)
 toFull partial =
   case maybeUserAuth partial of
@@ -53,6 +59,7 @@ toFull partial =
       { userAuth = basicAuth
       , peers = maybePeers partial
       , ignored = fromMaybe [] <| maybeIgnored partial
+      , buildDir = maybeBuildDir partial
       }
 
 fromFull :: Environment -> Env.Partial
@@ -60,11 +67,9 @@ fromFull env = Env.Partial
   { maybeUserAuth = Just <| userAuth env
   , maybePeers = peers env
   , maybeIgnored = Just <| ignored env
+  , maybeBuildDir = buildDir env
   }
 
 updatePeers :: Env.Partial -> [IPFS.Peer] -> Env.Partial
-updatePeers env peers = Env.Partial
-  { maybeUserAuth = maybeUserAuth env
-  , maybePeers = Just (NonEmpty.fromList peers)
-  , maybeIgnored = maybeIgnored env
-  }
+updatePeers env peers = env
+  { maybePeers    = Just (NonEmpty.fromList peers) }

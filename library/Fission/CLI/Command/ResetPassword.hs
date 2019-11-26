@@ -25,7 +25,10 @@ import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
-import qualified Fission.CLI.Environment     as Environment
+
+import qualified Fission.CLI.Environment               as Environment
+import qualified Fission.CLI.Environment.Partial       as Env.Partial
+import           Fission.CLI.Environment.Partial.Types as Env
 
 -- | The command to attach to the CLI tree
 command :: MonadUnliftIO m
@@ -84,7 +87,8 @@ resetPassword' auth newPassword = do
               { basicAuthUsername = basicAuthUsername auth
               , basicAuthPassword = encodeUtf8 updatedPass
               }
-          Environment.writeAuth updatedAuth path
+            updatedEnv = (mempty Env.Partial) { maybeUserAuth = Just updatedAuth}
+          Env.Partial.writeMerge path updatedEnv
           CLI.Success.putOk <|
             "Password reset. Your updated credentials are in " <> UTF8.textShow path
 

@@ -12,6 +12,7 @@ data Environment = Environment
   { userAuth :: BasicAuthData
   , peers    :: Maybe (NonEmpty IPFS.Peer)
   , ignored  :: IPFS.Ignored
+  , buildDir :: Maybe (FilePath)
   }
 
 instance ToJSON Environment where
@@ -19,6 +20,7 @@ instance ToJSON Environment where
     [ "user_auth" .= userAuth
     , "peers"     .= peers
     , "ignore"    .= ignored
+    , "build_dir" .= buildDir
     ]
 
 instance FromJSON Environment where
@@ -26,3 +28,4 @@ instance FromJSON Environment where
     Environment <$> obj .: "user_auth"
                 <*> obj .: "peers"
                 <*> obj .: "ignore"
+                <*> obj .: "build_dir"

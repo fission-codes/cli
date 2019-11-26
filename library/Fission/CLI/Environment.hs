@@ -3,7 +3,7 @@ module Fission.CLI.Environment
   ( init
   , get
   , findLocalAuth
-  , writeAuth
+  , findRecurse
   , couldNotRead
   , removeConfigFile
   , getOrRetrievePeer
@@ -55,16 +55,18 @@ init auth = do
           { maybeUserAuth = Just auth
           , maybePeers = Just (NonEmpty.fromList peers)
           , maybeIgnored = Just ignoreDefault
+          , maybeBuildDir = Nothing
           }
       liftIO <| Env.Partial.write path env
       CLI.Success.putOk "Logged in"
 
--- | Gets hierarchical environment by recursed through file system
+-- | Gets hierarchical environment by recursing through file system
 get :: MonadIO m => m (Either Error.Env Environment)
 get = do 
   partial <- Env.Partial.get
   return <| Env.Partial.toFull partial
 
+-- | Writes env to path, overwriting if necessary
 write :: MonadIO m => FilePath -> Environment -> m ()
 write path env = Env.Partial.write path <| Env.Partial.fromFull env
 
@@ -74,14 +76,15 @@ findLocalAuth = do
   currDir <- getCurrentDirectory
   findRecurse (isJust . maybeUserAuth) currDir >>= \case
     Nothing -> return <| Left Error.EnvNotFound 
-    Just path -> return <| Right path
+    Just (path, _) -> return <| Right path
 
-findRecurse :: MonadIO m => (Env.Partial -> Bool) -> FilePath -> m (Maybe FilePath)
+-- | Recurses up to user root to find a env that satisfies function "f"
+findRecurse :: MonadIO m => (Env.Partial -> Bool) -> FilePath -> m (Maybe (FilePath, Env.Partial))
 findRecurse f path = do 
   let filepath = path </> ".fission.yaml"
   partial <- Env.Partial.decode filepath
   case (f partial, path) of
-    (True, _) -> return <| Just filepath
+    (True, _) -> return <| Just (filepath, partial)
     (_, "/")  -> return Nothing
     _         -> findRecurse f <| takeDirectory path
 
@@ -90,14 +93,6 @@ globalEnv :: MonadIO m => m FilePath
 globalEnv = do
   home <- getHomeDirectory
   return <| home </> ".fission.yaml"
-
-writeAuth :: MonadRIO cfg m
-          => BasicAuthData
-          -> FilePath
-          -> m ()
-writeAuth auth path = do
-  partial <- Env.Partial.decode path
-  Env.Partial.write path <| partial { maybeUserAuth = Just auth }
 
 -- | Create a could not read message for the terminal
 couldNotRead :: MonadIO m => m ()
