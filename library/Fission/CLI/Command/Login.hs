@@ -3,6 +3,8 @@ module Fission.CLI.Command.Login (command, login) where
 
 import           Fission.Prelude
 import           RIO.ByteString
+import           RIO.Directory
+import           RIO.FilePath
 
 import qualified Data.ByteString.Char8 as BS
 
@@ -14,7 +16,10 @@ import qualified Fission.Config as Config
 
 import           Fission.Web.Client.User as User.Client
 import qualified Fission.Web.Client.Types as Client
-import qualified Fission.CLI.Environment as Environment
+
+import qualified Fission.CLI.Environment               as Env
+import           Fission.CLI.Environment.Partial.Types as Env
+import qualified Fission.CLI.Environment.Partial       as Env.Partial
 
 import           Fission.CLI.Config.Types
 
@@ -88,8 +93,18 @@ login Login.Options {..} = do
         Right _ok -> do
           logDebug "Auth Successful"
 
-          Environment.init auth
-          CLI.Success.putOk "Registered & logged in. Your credentials are in ~/.fission.yaml"
+          if local_auth
+          then do
+            currDir <- getCurrentDirectory
+            let 
+              envPath    = currDir </> ".fission.yaml"
+              updatedEnv = (mempty Env.Partial) { maybeUserAuth = Just auth }
+            Env.Partial.writeMerge envPath updatedEnv
+            CLI.Success.putOk 
+              <| "Successfully logged in. Your credentials are in " <> textShow envPath
+          else do
+            Env.init auth
+            CLI.Success.putOk "Successfully logged in. Your credentials are in ~/.fission.yaml"
 
 parseOptions :: Parser Login.Options
 parseOptions = do
@@ -103,6 +118,11 @@ parseOptions = do
     [ long    "password"
     , metavar "FISSION_PASSWORD"
     , help    "The password to login with"
+    ]
+
+  local_auth <- switch <| mconcat
+    [ long "local"
+    , help "Login at project root (as opposed to global at user home)"
     ]
 
   return Login.Options {..}

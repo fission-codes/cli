@@ -6,4 +6,5 @@ import Fission.Prelude hiding (Options)
 data Options = Options
   { username_option :: Maybe ByteString
   , password_option :: Maybe ByteString
+  , local_auth      :: Bool
   }
