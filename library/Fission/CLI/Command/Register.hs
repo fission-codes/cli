@@ -3,8 +3,6 @@ module Fission.CLI.Command.Register (command, register) where
 
 import           Fission.Prelude
 import           RIO.ByteString
-import           RIO.Directory
-import           RIO.FilePath
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
@@ -53,11 +51,7 @@ register :: MonadRIO       cfg m
         => Register.Options
         -> m ()
 register Register.Options {..} = do
-  envPath <-
-    if local_auth
-    then getCurrentDirectory >>= \dir -> return <| dir </> ".fission.yaml"
-    else Env.Partial.globalEnv
-  
+  envPath <- Env.getPath local_auth
   env <- Env.Partial.decode envPath
   case maybeUserAuth env of
     Nothing -> register' local_auth
@@ -111,19 +105,14 @@ register' local_auth = do
           logDebug "Register Successful"
 
           let auth = BasicAuthData username (BS.pack password)
+          envPath <- Env.getPath local_auth
 
           if local_auth
-          then do
-            currDir <- getCurrentDirectory
-            let 
-              envPath    = currDir </> ".fission.yaml"
-              updatedEnv = (mempty Env.Partial) { maybeUserAuth = Just auth }
-            Env.Partial.writeMerge envPath updatedEnv
-            CLI.Success.putOk 
-              <| "Registered & logged in. Your credentials are in " <> textShow envPath
-          else do
-            Env.init auth
-            CLI.Success.putOk "Registered & logged in. Your credentials are in ~/.fission.yaml"
+          then Env.Partial.writeMerge envPath
+            <| (mempty Env.Partial) { maybeUserAuth = Just auth }
+          else Env.init auth
+
+          CLI.Success.putOk <| "Registered & logged in. Your credentials are in " <> textShow envPath
 
 parseOptions :: Parser Register.Options
 parseOptions = do

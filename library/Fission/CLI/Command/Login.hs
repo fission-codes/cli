@@ -3,8 +3,6 @@ module Fission.CLI.Command.Login (command, login) where
 
 import           Fission.Prelude
 import           RIO.ByteString
-import           RIO.Directory
-import           RIO.FilePath
 
 import qualified Data.ByteString.Char8 as BS
 
@@ -93,18 +91,14 @@ login Login.Options {..} = do
         Right _ok -> do
           logDebug "Auth Successful"
 
+          envPath <- Env.getPath local_auth
+
           if local_auth
-          then do
-            currDir <- getCurrentDirectory
-            let 
-              envPath    = currDir </> ".fission.yaml"
-              updatedEnv = (mempty Env.Partial) { maybeUserAuth = Just auth }
-            Env.Partial.writeMerge envPath updatedEnv
-            CLI.Success.putOk 
-              <| "Successfully logged in. Your credentials are in " <> textShow envPath
-          else do
-            Env.init auth
-            CLI.Success.putOk "Successfully logged in. Your credentials are in ~/.fission.yaml"
+          then Env.Partial.writeMerge envPath
+            <| (mempty Env.Partial) { maybeUserAuth = Just auth }
+          else Env.init auth
+
+          CLI.Success.putOk <| "Successfully logged in. Your credentials are in " <> textShow envPath
 
 parseOptions :: Parser Login.Options
 parseOptions = do

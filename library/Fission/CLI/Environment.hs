@@ -2,6 +2,7 @@
 module Fission.CLI.Environment
   ( init
   , get
+  , getPath
   , findLocalAuth
   , findRecurse
   , couldNotRead
@@ -70,6 +71,10 @@ get = do
 -- | Writes env to path, overwriting if necessary
 write :: MonadIO m => FilePath -> Environment -> m ()
 write path env = Env.Partial.write path <| Env.Partial.fromFull env
+
+getPath :: MonadIO m => Bool -> m FilePath
+getPath True = getCurrentDirectory >>= \dir -> return <| dir </> ".fission.yaml"
+getPath False = globalEnv
 
 -- | Locate current auth on the user's system
 findLocalAuth :: MonadIO m => m (Either Error.Env FilePath)
