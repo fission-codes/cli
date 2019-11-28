@@ -19,7 +19,7 @@ import qualified Fission.CLI.Config.Base.Types as CLI
 
 main :: IO ()
 main = do
-  verbose     <- isJust <$> lookupEnv "RIO_VERBOSE"
+  verbose     <- isJust <$> lookupEnv "DEBUG"
   logOptions  <- logOptionsHandle stderr verbose
   _processCtx <- mkDefaultProcessContext
 
