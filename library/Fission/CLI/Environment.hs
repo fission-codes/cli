@@ -64,7 +64,7 @@ init auth = do
 
 -- | Gets hierarchical environment by recursing through file system
 get :: MonadIO m => m (Either Error.Env Environment)
-get = do 
+get = do
   partial <- Env.Partial.get
   return <| Env.Partial.toFull partial
 
@@ -72,21 +72,23 @@ get = do
 write :: MonadIO m => FilePath -> Environment -> m ()
 write path env = Env.Partial.write path <| Env.Partial.fromFull env
 
+-- | Get the path to the Environment file, local or global
 getPath :: MonadIO m => Bool -> m FilePath
-getPath True = getCurrentDirectory >>= \dir -> return <| dir </> ".fission.yaml"
-getPath False = globalEnv
+getPath local = if local
+                then  getCurrentDirectory >>= \dir -> return <| dir </> ".fission.yaml"
+                else globalEnv
 
 -- | Locate current auth on the user's system
 findLocalAuth :: MonadIO m => m (Either Error.Env FilePath)
 findLocalAuth = do
   currDir <- getCurrentDirectory
   findRecurse (isJust . maybeUserAuth) currDir >>= \case
-    Nothing -> return <| Left Error.EnvNotFound 
+    Nothing -> return <| Left Error.EnvNotFound
     Just (path, _) -> return <| Right path
 
 -- | Recurses up to user root to find a env that satisfies function "f"
 findRecurse :: MonadIO m => (Env.Partial -> Bool) -> FilePath -> m (Maybe (FilePath, Env.Partial))
-findRecurse f path = do 
+findRecurse f path = do
   let filepath = path </> ".fission.yaml"
   partial <- Env.Partial.decode filepath
   case (f partial, path) of
