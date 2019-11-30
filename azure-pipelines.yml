@@ -26,3 +26,9 @@ jobs:
     name: macOS
     vmImage: macOS-10.14
     os: osx
+
+- template: ./.azure/azure-windows-template.yml
+  parameters:
+   name: Windows
+   vmImage: windows-2019
+   os: windows
