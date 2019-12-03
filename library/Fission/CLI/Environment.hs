@@ -128,25 +128,25 @@ getOrRetrievePeer :: MonadRIO          cfg m
                   => HasLogFunc        cfg
                   => Has Client.Runner cfg
                   => Environment
-                  -> m IPFS.Peer
+                  -> m (Maybe IPFS.Peer)
 getOrRetrievePeer config =
   case peers config of
     Just prs -> do
       logDebug "Retrieved Peer from .fission.yaml"
-      return <| head prs
+      return <| Just <| head prs
 
     Nothing ->
       Peers.getPeers >>= \case
         Left err -> do
           logError <| displayShow err
-          logDebug "Unable to retrieve peers from the network, using default address"
-          return <| IPFS.Peer.fission
+          logDebug "Unable to retrieve peers from the network"
+          return Nothing
 
         Right peers -> do
           logDebug "Retrieved Peer from API"
           path <- globalEnv
           write path <| config { peers = Just (NonEmpty.fromList peers) }
-          return <| head <| NonEmpty.fromList peers
+          return <| Just <| head <| NonEmpty.fromList peers
 
 ignoreDefault :: IPFS.Ignored
 ignoreDefault =
