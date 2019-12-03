@@ -110,6 +110,7 @@ dependencies:
   - time
   - transformers
   - unliftio
+  - network-uri
   - uuid
   - uuid-types
   - word8
