@@ -83,21 +83,21 @@ packages:
     hackage: lzma-clib-5.2.2
 - completed:
     cabal-file:
-      size: 21870
-      sha256: cabe00c1ebf4f7297584fab7a2e26062f9418979c77622fe8df12ba4bb42ddc9
+      size: 21846
+      sha256: 76ef94c7297c953fc43d74388caa72dec05b28e3c6dd9b580db3bb8183cbd9b0
     name: fission-web-api
-    version: 2.0.0
+    version: 2.0.1
     git: https://github.com/fission-suite/web-api.git
     pantry-tree:
-      size: 11955
-      sha256: 9eebddd7ab7de52786b8bc2cf3013dddc9b724ef30cc520df72dbd0ff2defc32
-    commit: ce4df3b37e63bd37a979221e52b8c334c105c27a
+      size: 12030
+      sha256: b9a33bbea58aeec9faebe726580f9179bc7b6b43aa128cafa7649d4417a4bb04
+    commit: 8968e5ac10c5cd49005bb826a501ae6f0fad1cd2
   original:
     git: https://github.com/fission-suite/web-api.git
-    commit: ce4df3b37e63bd37a979221e52b8c334c105c27a
+    commit: 8968e5ac10c5cd49005bb826a501ae6f0fad1cd2
 snapshots:
 - completed:
-    size: 525663
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/14.yaml
-    sha256: 6edc48df46eb8bf7b861e98dd30d021a92c2e1820c9bb6528aac5d997b0e14ef
-  original: lts-14.14
+    size: 524127
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/6.yaml
+    sha256: dc70dfb45e2c32f54719819bd055f46855dd4b3bd2e58b9f3f38729a2d553fbb
+  original: lts-14.6

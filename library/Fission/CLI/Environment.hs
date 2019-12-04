@@ -34,7 +34,6 @@ import qualified Fission.CLI.Environment.Error as Error
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 
-import qualified Fission.IPFS.Peer  as IPFS.Peer
 import qualified Fission.IPFS.Types as IPFS
 
 -- | Initialize the Environment file
@@ -128,25 +127,29 @@ getOrRetrievePeer :: MonadRIO          cfg m
                   => HasLogFunc        cfg
                   => Has Client.Runner cfg
                   => Environment
-                  -> m IPFS.Peer
+                  -> m (Maybe IPFS.Peer)
 getOrRetrievePeer config =
   case peers config of
     Just prs -> do
       logDebug "Retrieved Peer from .fission.yaml"
-      return <| head prs
+      return <| Just <| head prs
 
     Nothing ->
       Peers.getPeers >>= \case
         Left err -> do
           logError <| displayShow err
-          logDebug "Unable to retrieve peers from the network, using default address"
-          return <| IPFS.Peer.fission
+          logDebug "Unable to retrieve peers from the network"
+          return Nothing
 
-        Right peers -> do
+        Right [] -> do
+          logDebug "Network request was successful, but response contained no peers"
+          return Nothing
+
+        Right peers@(peer : _) -> do
           logDebug "Retrieved Peer from API"
           path <- globalEnv
           write path <| config { peers = Just (NonEmpty.fromList peers) }
-          return <| head <| NonEmpty.fromList peers
+          return <| Just peer
 
 ignoreDefault :: IPFS.Ignored
 ignoreDefault =

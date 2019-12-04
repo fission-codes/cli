@@ -42,22 +42,27 @@ ensure action = do
   -- Get our stored user config
   Environment.get >>= \case
     Right config -> do
-      _peer         <- Environment.getOrRetrievePeer config
-      let _userAuth = Environment.userAuth config
-      let _ignoredFiles = Environment.ignored config
+      Environment.getOrRetrievePeer config >>= \case
+        Just _peer -> do
+          let _userAuth     = Environment.userAuth config
+          let _ignoredFiles = Environment.ignored config
 
-      -- Connect the local IPFS node to the Fission network
-      Connect.swarmConnectWithRetry _peer 1 >>= \case
-        Right _ -> do
-          -- All setup and ready to run!
-          result <- liftIO <| runRIO FissionConnected {..} action
-          Right <$> return result
+          -- Connect the local IPFS node to the Fission network
+          Connect.swarmConnectWithRetry _peer 1 >>= \case
+            Right _ -> do
+              -- All setup and ready to run!
+              result <- liftIO <| runRIO FissionConnected {..} action
+              return <| Right result
 
-        Left err -> do
-          -- We were unable to connect!
-          logError <| displayShow err
-          Connect.couldNotSwarmConnect
-          return <| Left CannotConnect
+            Left err -> do
+              -- We were unable to connect!
+              logError <| displayShow err
+              Connect.couldNotSwarmConnect
+              return <| Left CannotConnect
+
+        Nothing -> do
+          logError "Could not locate the Fission IPFS network"
+          return <| Left PeersNotFound
 
     Left err -> do
       -- We were unable to read the users config
