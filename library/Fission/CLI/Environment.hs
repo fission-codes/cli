@@ -34,7 +34,6 @@ import qualified Fission.CLI.Environment.Error as Error
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 
-import qualified Fission.IPFS.Peer  as IPFS.Peer
 import qualified Fission.IPFS.Types as IPFS
 
 -- | Initialize the Environment file
@@ -142,11 +141,15 @@ getOrRetrievePeer config =
           logDebug "Unable to retrieve peers from the network"
           return Nothing
 
-        Right peers -> do
+        Right [] -> do
+          logDebug "Network request was successful, but response contained no peers"
+          return Nothing
+
+        Right peers@(peer : _) -> do
           logDebug "Retrieved Peer from API"
           path <- globalEnv
           write path <| config { peers = Just (NonEmpty.fromList peers) }
-          return <| Just <| head <| NonEmpty.fromList peers
+          return <| Just peer
 
 ignoreDefault :: IPFS.Ignored
 ignoreDefault =

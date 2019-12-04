@@ -52,7 +52,7 @@ ensure action = do
             Right _ -> do
               -- All setup and ready to run!
               result <- liftIO <| runRIO FissionConnected {..} action
-              Right <$> return result
+              return <| Right result
 
             Left err -> do
               -- We were unable to connect!
