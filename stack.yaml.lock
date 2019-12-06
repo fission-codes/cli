@@ -83,18 +83,18 @@ packages:
     hackage: lzma-clib-5.2.2
 - completed:
     cabal-file:
-      size: 21846
-      sha256: 76ef94c7297c953fc43d74388caa72dec05b28e3c6dd9b580db3bb8183cbd9b0
+      size: 21882
+      sha256: a7fa492cd333afdbf31b7c1b19f856824eb95833fb4f7f7c36f8f02c3fb570e4
     name: fission-web-api
     version: 2.0.1
     git: https://github.com/fission-suite/web-api.git
     pantry-tree:
-      size: 12030
-      sha256: b9a33bbea58aeec9faebe726580f9179bc7b6b43aa128cafa7649d4417a4bb04
-    commit: 8968e5ac10c5cd49005bb826a501ae6f0fad1cd2
+      size: 12092
+      sha256: 627fdb18d19043823bd675c3db8d0ac3da1a0acb2f72546a45d5cebfab07475e
+    commit: 931c8bdd3bcde65bcb0daecd6a22c771c75f8f7d
   original:
     git: https://github.com/fission-suite/web-api.git
-    commit: 8968e5ac10c5cd49005bb826a501ae6f0fad1cd2
+    commit: 931c8bdd3bcde65bcb0daecd6a22c771c75f8f7d
 snapshots:
 - completed:
     size: 524127

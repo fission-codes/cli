@@ -50,7 +50,7 @@ extra-deps:
 - tasty-rerun-1.1.14
 - lzma-clib-5.2.2
 - git: https://github.com/fission-suite/web-api.git
-  commit: 8968e5ac10c5cd49005bb826a501ae6f0fad1cd2
+  commit: 931c8bdd3bcde65bcb0daecd6a22c771c75f8f7d
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
