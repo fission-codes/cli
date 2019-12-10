@@ -92,6 +92,8 @@ dependencies:
   - haskeline
   - http-client
   - http-client-tls
+  - http-types
+  - ipfs
   - lens
   - monad-logger
   - mtl
@@ -105,6 +107,7 @@ dependencies:
   - scientific
   - servant
   - servant-client
+  - servant-client-core
   - servant-server
   - text
   - time

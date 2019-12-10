@@ -11,8 +11,8 @@ import           Fission.Environment
 import           Fission.App (isDebugEnabled, setRioVerbose)
 import qualified Fission.Web.Client as Client
 
-import qualified Fission.IPFS.BinPath.Types as IPFS
-import qualified Fission.IPFS.Timeout.Types as IPFS
+import qualified Network.IPFS.BinPath.Types as IPFS
+import qualified Network.IPFS.Timeout.Types as IPFS
 
 import           Fission.CLI
 import qualified Fission.CLI.Config.Base.Types as CLI

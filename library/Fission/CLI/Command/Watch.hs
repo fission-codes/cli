@@ -18,11 +18,14 @@ import           System.FSNotify as FS
 import qualified Fission.Internal.UTF8 as UTF8
 
 import qualified Fission.Web.Client       as Client
-import qualified Fission.Storage.IPFS.Add as IPFS
 import qualified Fission.Time             as Time
 
-import           Fission.IPFS.CID.Types
-import qualified Fission.IPFS.Types as IPFS
+import           Network.IPFS
+import qualified Network.IPFS.Add as IPFS
+import           Network.IPFS.CID.Types
+import qualified Network.IPFS.Types as IPFS
+import           Fission.Internal.Orphanage.RIO () 
+
 import qualified Fission.AWS.Types  as AWS
 
 import           Fission.Internal.Exception
@@ -40,14 +43,16 @@ import           Fission.CLI.Config.FissionConnected
 import qualified Fission.Config           as Config
 
 -- | The command to attach to the CLI tree
-command :: MonadIO m
-        => HasLogFunc        cfg
-        => Has Client.Runner cfg
-        => HasProcessContext cfg
-        => Has IPFS.BinPath  cfg
-        => Has IPFS.Timeout  cfg
-        => cfg
-        -> CommandM (m ())
+command ::
+  ( MonadIO m
+  , HasLogFunc        cfg
+  , Has Client.Runner cfg
+  , HasProcessContext cfg
+  , Has IPFS.BinPath  cfg
+  , Has IPFS.Timeout  cfg
+  )
+  => cfg
+  -> CommandM (m ())
 command cfg =
   addCommand
     "watch"
@@ -56,10 +61,13 @@ command cfg =
     parseOptions
 
 -- | Continuously sync the current working directory to the server over IPFS
-watcher :: MonadRIO             cfg m
-        => HasFissionConnected  cfg
-        => Watch.Options
-        -> m ()
+watcher ::
+  ( MonadRIO            cfg m
+  , MonadLocalIPFS          m
+  , HasFissionConnected cfg
+  )
+  => Watch.Options
+  -> m ()
 watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
   cfg            <- ask
   ignoredFiles :: IPFS.Ignored <- Config.get
@@ -83,13 +91,16 @@ watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
     void <| handleTreeChanges timeCache hashCache watchMgr cfg absPath
     forever <| liftIO <| threadDelay 1000000 -- Sleep main thread
 
-handleTreeChanges :: HasFissionConnected  cfg
-                  => MVar UTCTime
-                  -> MVar Text
-                  -> WatchManager
-                  -> cfg
-                  -> FilePath
-                  -> IO StopListening
+handleTreeChanges ::
+  -- ( MonadRIO cfg m
+  -- , MonadLocalIPFS m
+  HasFissionConnected  cfg
+  => MVar UTCTime
+  -> MVar Text
+  -> WatchManager
+  -> cfg
+  -> FilePath
+  -> IO StopListening
 handleTreeChanges timeCache hashCache watchMgr cfg dir =
   FS.watchTree watchMgr dir (const True) \_ -> runRIO cfg do
     now     <- getCurrentTime
@@ -111,10 +122,12 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
             UTF8.putText "\n"
             void <| pinAndUpdateDNS cid
 
-pinAndUpdateDNS :: MonadRIO             cfg m
-                => HasFissionConnected  cfg
-                => CID
-                -> m (Either ClientError AWS.DomainName)
+pinAndUpdateDNS ::
+  ( MonadRIO             cfg m
+  , HasFissionConnected  cfg
+  )
+  => CID
+  -> m (Either ClientError AWS.DomainName)
 pinAndUpdateDNS cid =
   CLI.Pin.run cid >>= \case
     Left err -> do

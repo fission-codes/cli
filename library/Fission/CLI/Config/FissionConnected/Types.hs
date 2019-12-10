@@ -17,7 +17,7 @@ import Servant.API
 import Control.Lens (makeLenses)
 
 import qualified Fission.Web.Client.Types as Client
-import qualified Fission.IPFS.Types       as IPFS
+import qualified Network.IPFS.Types       as IPFS
 
 
 type HasFissionConnected cfg

@@ -4,7 +4,7 @@ import Fission.Prelude
 
 import           Servant.API
 
-import qualified Fission.IPFS.Types as IPFS
+import qualified Network.IPFS.Types as IPFS
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import           Fission.Internal.Orphanage.Glob.Pattern ()
 

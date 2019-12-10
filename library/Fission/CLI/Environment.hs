@@ -13,6 +13,7 @@ module Fission.CLI.Environment
 import           Fission.Prelude
 import           RIO.Directory
 import           RIO.FilePath
+
 import           Servant.API
 
 import qualified System.FilePath.Glob as Glob
@@ -34,7 +35,7 @@ import qualified Fission.CLI.Environment.Error as Error
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 
-import qualified Fission.IPFS.Types as IPFS
+import qualified Network.IPFS.Types as IPFS
 
 -- | Initialize the Environment file
 init :: MonadRIO cfg m

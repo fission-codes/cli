@@ -9,7 +9,7 @@ import Servant.Client
 import qualified Fission.Web.IPFS.Peer as Peer
 import qualified Fission.Web.Client.Types as Client
 
-import qualified Fission.IPFS.Types as IPFS
+import qualified Network.IPFS.Types as IPFS
 
 import qualified Fission.Config as Config
 

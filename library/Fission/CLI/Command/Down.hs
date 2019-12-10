@@ -8,9 +8,12 @@ import           Options.Applicative.Simple (addCommand)
 import           Options.Applicative (strArgument, metavar, help)
 import qualified Data.Text as Text
 
-import qualified Fission.Storage.IPFS.Get as IPFS
-import qualified Fission.IPFS.Types       as IPFS
-import           Fission.IPFS.CID.Types
+import           Network.IPFS
+import qualified Network.IPFS.Get as IPFS
+import qualified Network.IPFS.Types       as IPFS
+import           Network.IPFS.CID.Types
+import           Fission.Internal.Orphanage.RIO () 
+
 import           Fission.CLI.Config.Types
 
 import qualified Fission.CLI.Display.Success as CLI.Success
@@ -18,13 +21,15 @@ import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
 
 -- | The command to attach to the CLI tree
-command :: MonadRIO          cfg m
-        => HasLogFunc        cfg
-        => HasProcessContext cfg
-        => Has IPFS.BinPath  cfg
-        => Has IPFS.Timeout  cfg
-        => cfg
-        -> CommandM (m ())
+command ::
+  ( MonadIO m
+  , HasLogFunc        cfg
+  , HasProcessContext cfg
+  , Has IPFS.BinPath  cfg
+  , Has IPFS.Timeout  cfg
+  )
+  => cfg
+  -> CommandM (m ())
 command cfg =
   addCommand
     "down"
@@ -46,14 +51,14 @@ handleIPNS identifier = case URI.parseURI (Text.unpack identifier) of
     CID identifier
 
 -- | Sync the current working directory to the server over IPFS
-down :: MonadUnliftIO         m
-      => MonadRIO          cfg m
-      => HasLogFunc        cfg
-      => HasProcessContext cfg
-      => Has IPFS.Timeout  cfg
-      => Has IPFS.BinPath  cfg
-      => IPFS.CID
-      -> m ()
+down ::
+  ( MonadRIO      cfg m
+  , MonadUnliftIO     m
+  , MonadLocalIPFS    m
+  , HasLogFunc    cfg
+  )
+  => IPFS.CID
+  -> m ()
 down (CID identifier) = do
   getResult <- CLI.Wait.waitFor "Retrieving Object..."
               <| IPFS.getFileOrDirectory
