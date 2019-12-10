@@ -9,6 +9,7 @@ import           Servant.Client
 import           System.Environment (lookupEnv)
 
 import           Fission.Environment
+import           Fission.App (isDebugEnabled, setRioVerbose)
 import qualified Fission.Web.Client as Client
 
 import qualified Fission.IPFS.BinPath.Types as IPFS
@@ -19,8 +20,13 @@ import qualified Fission.CLI.Config.Base.Types as CLI
 
 main :: IO ()
 main = do
-  verbose     <- isJust <$> lookupEnv "RIO_VERBOSE"
-  logOptions  <- logOptionsHandle stderr verbose
+  isVerbose     <- isDebugEnabled
+
+  -- Set env var RIO_VERBOSE to True if DEBUG enabled
+  setRioVerbose isVerbose
+
+  logOptions  <- logOptionsHandle stderr isVerbose
+
   _processCtx <- mkDefaultProcessContext
 
   _ipfsPath    <- withEnv "IPFS_PATH" (IPFS.BinPath "/usr/local/bin/ipfs") IPFS.BinPath
