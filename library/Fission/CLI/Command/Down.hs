@@ -37,12 +37,13 @@ command cfg =
 
 -- | Return an IPNS address if the identifier is a URI
 handleIPNS :: Text -> CID
-handleIPNS identifer = case URI.parseURI (Text.unpack identifer) of
+handleIPNS identifier = case URI.parseURI (Text.unpack identifier) of
   Just uri -> do
-    let url = uri |> URI.authority |> Text.pack
-    CID ("/ipns/" <> url)
+    case uriAuthority uri of
+      Just auth -> do CID <| "/ipns/" <> (Text.pack <| uriRegName auth)
+      Nothing -> CID identifier
   Nothing ->
-    CID identifer
+    CID identifier
 
 -- | Sync the current working directory to the server over IPFS
 down :: MonadUnliftIO         m
@@ -53,14 +54,14 @@ down :: MonadUnliftIO         m
       => Has IPFS.BinPath  cfg
       => IPFS.CID
       -> m ()
-down (CID identifer) = do
+down (CID identifier) = do
   getResult <- CLI.Wait.waitFor "Retrieving Object..."
               <| IPFS.getFileOrDirectory
-              <| handleIPNS identifer
+              <| handleIPNS identifier
 
   case getResult of
     Right _ok ->
-      CLI.Success.putOk <| identifer <> " Successfully downloaded!"
+      CLI.Success.putOk <| identifier <> " Successfully downloaded!"
 
     Left err ->
       CLI.Error.put err "Oh no! The download failed unexpectedly"
