@@ -73,9 +73,10 @@ write path env = Env.Partial.write path <| Env.Partial.fromFull env
 
 -- | Get the path to the Environment file, local or global
 getPath :: MonadIO m => Bool -> m FilePath
-getPath local = if local
-                then  getCurrentDirectory >>= \dir -> return <| dir </> ".fission.yaml"
-                else globalEnv
+getPath ofLocal =
+  if ofLocal
+  then  getCurrentDirectory >>= \dir -> return <| dir </> ".fission.yaml"
+  else globalEnv
 
 -- | Locate current auth on the user's system
 findLocalAuth :: MonadIO m => m (Either Error.Env FilePath)

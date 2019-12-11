@@ -6,7 +6,6 @@ import qualified RIO.Partial as Partial
 import           Network.HTTP.Client     as HTTP
 import           Network.HTTP.Client.TLS as HTTP
 import           Servant.Client
-import           System.Environment (lookupEnv)
 
 import           Fission.Environment
 import           Fission.App (isDebugEnabled, setRioVerbose)
