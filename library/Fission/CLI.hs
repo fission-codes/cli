@@ -6,7 +6,8 @@ import           RIO.Process (HasProcessContext)
 import           Options.Applicative.Simple
 
 import qualified Fission.Web.Client   as Client
-import qualified Fission.IPFS.Types   as IPFS
+
+import qualified Network.IPFS.Types   as IPFS
 
 import qualified Fission.CLI.Command.Login         as Login
 import qualified Fission.CLI.Command.Logout        as Logout
@@ -18,14 +19,16 @@ import qualified Fission.CLI.Command.Watch         as Watch
 import qualified Fission.CLI.Command.Whoami        as Whoami
 
 -- | Top-level CLI description
-cli :: MonadRIO    cfg m
-    => MonadUnliftIO m
-    => HasLogFunc        cfg
-    => HasProcessContext cfg
-    => Has Client.Runner cfg
-    => Has IPFS.BinPath  cfg
-    => Has IPFS.Timeout  cfg
-    => m ()
+cli ::
+  ( MonadRIO    cfg m
+  , MonadUnliftIO m
+  , HasLogFunc        cfg
+  , HasProcessContext cfg
+  , Has Client.Runner cfg
+  , Has IPFS.BinPath  cfg
+  , Has IPFS.Timeout  cfg
+  )
+  => m ()
 cli = do
   cfg <- ask
   (_, runCLI) <- liftIO <| simpleOptions version description detail (pure ()) do

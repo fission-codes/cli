@@ -13,7 +13,7 @@ import Fission.Prelude
 import Control.Lens (makeLenses)
 
 import qualified Fission.Web.Client.Types as Client
-import qualified Fission.IPFS.Types       as IPFS
+import qualified Network.IPFS.Types       as IPFS
 
 -- | The configuration used for the CLI application
 data BaseConfig = BaseConfig

@@ -7,7 +7,9 @@ module Fission.CLI.Config.FissionConnected
 import           Fission.Prelude
 import           RIO.Process (ProcessContext, HasProcessContext (..))
 
-import qualified Fission.IPFS.Types   as IPFS
+import           Network.IPFS
+import qualified Network.IPFS.Types   as IPFS
+
 import qualified Fission.Web.Client   as Client
 
 import qualified Fission.Config as Config
@@ -22,14 +24,15 @@ import qualified Fission.CLI.IPFS.Connect      as Connect
 --
 -- Takes a @FissionConnected@-dependant action, and lifts it into an environment that
 -- contains a superset of the environment
-ensure
-  :: ( MonadRIO          cfg m
-     , HasLogFunc        cfg
-     , HasProcessContext cfg
-     , Has IPFS.BinPath  cfg
-     , Has IPFS.Timeout  cfg
-     , Has Client.Runner cfg
-     )
+ensure ::
+  ( MonadRIO          cfg m
+  , MonadLocalIPFS m
+  , HasLogFunc        cfg
+  , HasProcessContext cfg
+  , Has IPFS.BinPath  cfg
+  , Has IPFS.Timeout  cfg
+  , Has Client.Runner cfg
+  )
   => RIO FissionConnected a
   -> m (Either Error a)
 ensure action = do

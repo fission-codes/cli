@@ -18,20 +18,24 @@ import qualified Fission.Internal.UTF8 as UTF8
 
 import           Fission.CLI.IPFS.Error.Types
 
-import qualified Fission.IPFS.Peer  as IPFS.Peer
-import qualified Fission.IPFS.Types as IPFS
+import           Network.IPFS
+import qualified Network.IPFS.Peer  as IPFS.Peer
+import qualified Network.IPFS.Types as IPFS
 
 
 -- | Connect to the Fission IPFS network with a set amount of retries
-swarmConnectWithRetry :: MonadRIO cfg m
-          => HasLogFunc        cfg
-          => HasProcessContext        cfg
-          => Has Client.Runner cfg
-          => Has IPFS.Timeout cfg
-          => Has IPFS.BinPath cfg
-          => IPFS.Peer
-          -> Int
-          -> m (Either SomeException ())
+swarmConnectWithRetry ::
+  ( MonadRIO cfg m
+  , MonadLocalIPFS m
+  , HasLogFunc        cfg
+  , HasProcessContext        cfg
+  , Has Client.Runner cfg
+  , Has IPFS.Timeout cfg
+  , Has IPFS.BinPath cfg
+  )
+  => IPFS.Peer
+  -> Int
+  -> m (Either SomeException ())
 swarmConnectWithRetry _peer (-1) = return <| Left <| toException UnableToConnect
 swarmConnectWithRetry peer tries = IPFS.Peer.connect peer >>= \case
   Right _ ->

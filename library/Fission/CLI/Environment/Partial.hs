@@ -23,7 +23,7 @@ import qualified Fission.CLI.Environment.Error as Error
 
 import           Fission.Internal.Orphanage.BasicAuthData ()
 
-import qualified Fission.IPFS.Types as IPFS
+import qualified Network.IPFS.Types as IPFS
 
 -- | Gets hierarchical environment by recursed through file system
 get :: MonadIO m => m Env.Partial

@@ -50,7 +50,9 @@ extra-deps:
 - tasty-rerun-1.1.14
 - lzma-clib-5.2.2
 - git: https://github.com/fission-suite/web-api.git
-  commit: dddf53ad55ada2cde00d143d75cc348f4920f3fc
+  commit: 9b62ad6e806b30661280857685db215e68d72507
+- git: https://github.com/fission-suite/ipfs-haskell.git
+  commit: 2f704442f92eca6520e28e60ec1c85e23a387400
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

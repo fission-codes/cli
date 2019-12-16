@@ -11,7 +11,7 @@ import Servant.Client
 
 import qualified Fission.Config as Config
 
-import           Fission.IPFS.CID.Types
+import           Network.IPFS.CID.Types
 
 import qualified Fission.Web.Client      as Client
 import qualified Fission.Web.Client.IPFS as Fission
@@ -21,10 +21,10 @@ import qualified Fission.CLI.Display.Loader  as CLI
 import           Fission.CLI.Display.Success as CLI.Success
 import           Fission.CLI.Config.FissionConnected.Types
 
-run
-  :: ( MonadRIO             cfg m
-     , HasFissionConnected  cfg
-     )
+run ::
+  ( MonadRIO             cfg m
+  , HasFissionConnected  cfg
+  )
   => CID
   -> m (Either ClientError CID)
 run cid@(CID hash)  = do

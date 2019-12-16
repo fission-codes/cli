@@ -10,8 +10,8 @@ import Fission.Prelude
 import Servant
 import Servant.Client
 
-import qualified Fission.File.Types as File
-import           Fission.IPFS.CID.Types
+import qualified Network.IPFS.File.Types as File
+import           Network.IPFS.CID.Types
 
 import qualified Fission.Web.Client as Client
 import           Fission.Web.Routes (IPFSPrefix)

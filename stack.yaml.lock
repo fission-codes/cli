@@ -83,18 +83,32 @@ packages:
     hackage: lzma-clib-5.2.2
 - completed:
     cabal-file:
-      size: 21882
-      sha256: a7fa492cd333afdbf31b7c1b19f856824eb95833fb4f7f7c36f8f02c3fb570e4
+      size: 19952
+      sha256: 940ea7c6e5e260a4d648d915e0245f89562fcf1b1b10f18896ef2903c2d89ac0
     name: fission-web-api
     version: 2.0.1
     git: https://github.com/fission-suite/web-api.git
     pantry-tree:
-      size: 12092
-      sha256: f76143f16ff1a1b7296e879d413b7d5cc4ab6e4d8373b267a22dd00017fd8015
-    commit: dddf53ad55ada2cde00d143d75cc348f4920f3fc
+      size: 9631
+      sha256: 97583ba1870b30505778c6fe1e0d0d9215ed34ac5581ae91bde5c7ca30f96173
+    commit: 9b62ad6e806b30661280857685db215e68d72507
   original:
     git: https://github.com/fission-suite/web-api.git
-    commit: dddf53ad55ada2cde00d143d75cc348f4920f3fc
+    commit: 9b62ad6e806b30661280857685db215e68d72507
+- completed:
+    cabal-file:
+      size: 5025
+      sha256: c41389ecbce8472cacebe180f29b572013013a76e7adead1505bad377e769ed7
+    name: ipfs
+    version: 1.0.0
+    git: https://github.com/fission-suite/ipfs-haskell.git
+    pantry-tree:
+      size: 4662
+      sha256: 360de0ebb61340ee6b6cce63e667f0f7ec5b99a3cb9ba479b54cd79e95682bb2
+    commit: 2f704442f92eca6520e28e60ec1c85e23a387400
+  original:
+    git: https://github.com/fission-suite/ipfs-haskell.git
+    commit: 2f704442f92eca6520e28e60ec1c85e23a387400
 snapshots:
 - completed:
     size: 525663
