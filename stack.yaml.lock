@@ -82,33 +82,40 @@ packages:
   original:
     hackage: lzma-clib-5.2.2
 - completed:
-    cabal-file:
-      size: 19952
-      sha256: 940ea7c6e5e260a4d648d915e0245f89562fcf1b1b10f18896ef2903c2d89ac0
-    name: fission-web-api
-    version: 2.0.1
-    git: https://github.com/fission-suite/web-api.git
+    hackage: text-time-0.2.0@sha256:ae94071e29a5265f60de19c054a5308cee54a849678fbb8ea8d9657510c87b4c,1757
     pantry-tree:
-      size: 9631
-      sha256: 97583ba1870b30505778c6fe1e0d0d9215ed34ac5581ae91bde5c7ca30f96173
-    commit: 9b62ad6e806b30661280857685db215e68d72507
+      size: 637
+      sha256: 086572dbcc5663ab43f658634dcb3b08cc595690fba0a92387eeb7aa72651d6f
   original:
-    git: https://github.com/fission-suite/web-api.git
-    commit: 9b62ad6e806b30661280857685db215e68d72507
+    hackage: text-time-0.2.0
 - completed:
     cabal-file:
-      size: 5025
-      sha256: c41389ecbce8472cacebe180f29b572013013a76e7adead1505bad377e769ed7
+      size: 20445
+      sha256: 366222ab687a96c22d2be6d54aa1df1fba92c264f6418102d00076f0d78ae376
+    name: fission-web-api
+    version: 2.0.2
+    git: https://github.com/fission-suite/web-api.git
+    pantry-tree:
+      size: 9316
+      sha256: 4fe86c462999b787c23eeef2c01f96cb4bf44a57c880168aa9f36c6328fd9d89
+    commit: ef6d4d9e1d495f0343dc5e7d88d0451a61c69128
+  original:
+    git: https://github.com/fission-suite/web-api.git
+    commit: ef6d4d9e1d495f0343dc5e7d88d0451a61c69128
+- completed:
+    cabal-file:
+      size: 5203
+      sha256: cdf0bc88eedf8a10dd14e88bc8d19397abd2bc0f031f1ccb702446e7dfbe86dc
     name: ipfs
     version: 1.0.0
     git: https://github.com/fission-suite/ipfs-haskell.git
     pantry-tree:
-      size: 4662
-      sha256: 360de0ebb61340ee6b6cce63e667f0f7ec5b99a3cb9ba479b54cd79e95682bb2
-    commit: 2f704442f92eca6520e28e60ec1c85e23a387400
+      size: 4839
+      sha256: c892843cbcb59ef7ceeb9106cbe248cca2e4b370757af362870562310b2a16f0
+    commit: c34151de90b76e16c9725ebc168489396de01948
   original:
     git: https://github.com/fission-suite/ipfs-haskell.git
-    commit: 2f704442f92eca6520e28e60ec1c85e23a387400
+    commit: c34151de90b76e16c9725ebc168489396de01948
 snapshots:
 - completed:
     size: 525663

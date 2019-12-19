@@ -49,10 +49,11 @@ extra-deps:
 - raven-haskell-0.1.2.1
 - tasty-rerun-1.1.14
 - lzma-clib-5.2.2
+- text-time-0.2.0
 - git: https://github.com/fission-suite/web-api.git
-  commit: 9b62ad6e806b30661280857685db215e68d72507
+  commit: ef6d4d9e1d495f0343dc5e7d88d0451a61c69128
 - git: https://github.com/fission-suite/ipfs-haskell.git
-  commit: 2f704442f92eca6520e28e60ec1c85e23a387400
+  commit: c34151de90b76e16c9725ebc168489396de01948
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

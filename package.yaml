@@ -80,8 +80,8 @@ dependencies:
   - ansi-terminal
   - base
   - bcrypt
-  - cryptonite
   - bytestring
+  - cryptonite
   - data-default-class
   - data-has
   - envy
@@ -97,11 +97,12 @@ dependencies:
   - lens
   - monad-logger
   - mtl
+  - network-uri
   - optparse-applicative
   - optparse-simple
   - random-bytestring
-  - resource-pool
   - regex-compat
+  - resource-pool
   - rio
   - rio-orphans
   - scientific
@@ -113,7 +114,6 @@ dependencies:
   - time
   - transformers
   - unliftio
-  - network-uri
   - uuid
   - uuid-types
   - word8

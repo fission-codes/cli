@@ -55,10 +55,10 @@ register Register.Options {..} = do
   env <- Env.Partial.decode envPath
   case maybeUserAuth env of
     Nothing -> register' local_auth
-    Just _ -> 
+    Just _ ->
       CLI.Success.putOk <| mconcat
         [ "Already registered. Remove your credentials at "
-        ,  textShow envPath 
+        ,  textShow envPath
         , " if you want to re-register"]
 
 register' :: MonadRIO cfg m
@@ -92,9 +92,7 @@ register' local_auth = do
                       <| User.Registration
                           { username = decodeUtf8Lenient username
                           , password = T.pack password
-                          , email    = if BS.null rawEmail
-                                          then Nothing
-                                          else Just <| decodeUtf8Lenient rawEmail
+                          , email    = decodeUtf8Lenient rawEmail
                           }
 
       case registerResult of
