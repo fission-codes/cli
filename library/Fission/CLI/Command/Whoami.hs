@@ -2,21 +2,22 @@
 module Fission.CLI.Command.Whoami (command, whoami) where
 
 import           Fission.Prelude
-import           RIO.ByteString
-import           Data.Function
 
 import           Options.Applicative.Simple (addCommand)
-import           Servant
 
-import qualified System.Console.ANSI as ANSI
+import           Fission.Web.Client      as Client
+import qualified Fission.Web.Client.User as User
 
-import qualified Fission.Internal.UTF8 as UTF8
+import qualified Fission.User.Username.Types as User
 
-import qualified Fission.CLI.Environment as Environment
-import           Fission.CLI.Environment.Types
+import qualified Fission.CLI.Display.Success as CLI.Success
+import qualified Fission.CLI.Display.Error   as CLI.Error
 
-import           Fission.CLI.Config.Base
 import           Fission.CLI.Config.Types
+import           Fission.CLI.Config.Base
+
+import qualified Fission.Key.Store as Key
+import qualified Fission.CLI.Config.Connected.Error.Types as Error
 
 -- | The command to attach to the CLI tree
 command ::
@@ -27,25 +28,23 @@ command cfg =
   addCommand
     "whoami"
     "Check the current user"
-    (const <| runRIO cfg whoami)
+    (\_ -> runBase cfg whoami)
     (pure ())
 
 whoami ::
-  ( MonadReader       cfg m
-  , MonadIO               m
-  , MonadLogger           m
+  ( MonadIO        m
+  , MonadLogger    m
+  , MonadWebClient m
   )
   => m ()
-whoami =
-  Environment.get >>= \case
-    Left err -> do
-      logDebug <| displayShow err
-      Environment.couldNotRead
-
-    Right env -> do
-      let auth = userAuth env
-      UTF8.putText "💻 Currently logged in as: "
-      liftIO <| ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
-      putStr <| basicAuthUsername auth <> "\n"
-
-      liftIO <| ANSI.setSGR [ANSI.Reset]
+whoami = 
+  Key.exists >>= \case
+    False -> do
+      CLI.Error.notConnected Error.NoKeyFile
+    True -> do
+      authResult <- Client.run <| User.verify
+      case authResult of
+        Left err -> 
+          CLI.Error.notConnected err
+        Right (User.Username username) -> 
+          CLI.Success.loggedInAs <| username

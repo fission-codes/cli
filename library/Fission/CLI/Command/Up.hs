@@ -12,7 +12,7 @@ import           Fission.Internal.Exception
 import           Network.IPFS
 import qualified Network.IPFS.Add         as IPFS
 
-import           Fission.Web.Client.Auth
+import           Fission.Web.Client as Client
 
 import           Fission.CLI.Command.Up.Types as Up
 import qualified Fission.CLI.Display.Error    as Error
@@ -40,11 +40,11 @@ command cfg =
 
 -- | Sync the current working directory to the server over IPFS
 up ::
-  ( MonadUnliftIO      m
-  , MonadLogger        m
-  , MonadLocalIPFS     m
-  , MonadEnvironment   m
-  , MonadAuthedClient  m
+  ( MonadUnliftIO    m
+  , MonadLogger      m
+  , MonadLocalIPFS   m
+  , MonadEnvironment m
+  , MonadWebClient   m
   )
   => Up.Options
   -> m ()

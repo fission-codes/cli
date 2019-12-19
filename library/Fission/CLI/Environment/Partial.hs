@@ -19,9 +19,6 @@ import           Data.List.NonEmpty as NonEmpty hiding ((<|))
 
 import           Fission.CLI.Environment.Types
 import           Fission.CLI.Environment.Partial.Types as Env
-import qualified Fission.CLI.Environment.Error as Error
-
-import           Fission.Internal.Orphanage.BasicAuthData ()
 
 import qualified Network.IPFS.Types as IPFS
 
@@ -62,21 +59,17 @@ globalEnv = do
   home <- getHomeDirectory
   return <| home </> ".fission.yaml"
 
-toFull :: Env.Partial -> (Either Error.Env Environment)
+toFull :: Env.Partial -> Environment
 toFull partial =
-  case maybeUserAuth partial of
-    Nothing -> Left Error.EnvIncomplete
-    Just basicAuth -> Right <| Environment
-      { userAuth = basicAuth
-      , peers = maybePeers partial
-      , ignored = fromMaybe [] <| maybeIgnored partial
-      , buildDir = maybeBuildDir partial
-      }
+  Environment
+    { peers = maybePeers partial
+    , ignored = fromMaybe [] <| maybeIgnored partial
+    , buildDir = maybeBuildDir partial
+    }
 
 fromFull :: Environment -> Env.Partial
 fromFull env = Env.Partial
-  { maybeUserAuth = Just <| userAuth env
-  , maybePeers = peers env
+  { maybePeers = peers env
   , maybeIgnored = Just <| ignored env
   , maybeBuildDir = buildDir env
   }

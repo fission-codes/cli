@@ -4,7 +4,6 @@ module Fission.CLI.Config.Connected.Types
   ) where
 
 import           Fission.Prelude
-import           Servant
 
 import qualified RIO.ByteString.Lazy as Lazy
 
@@ -13,9 +12,7 @@ import           Network.IPFS.Types         as IPFS
 import qualified Network.IPFS.Process.Error as Process
 import           Network.IPFS.Process
 
-
 import           Fission.Web.Client
-import           Fission.Web.Client.Auth
 import qualified Fission.Web.Client.Types as Client
 
 import           Fission.CLI.Environment.Class
@@ -28,7 +25,6 @@ data ConnectedConfig = ConnectedConfig
   , ipfsTimeout  :: !IPFS.Timeout
   , peer         :: !IPFS.Peer
   , ignoredFiles :: !IPFS.Ignored
-  , userAuth     :: !BasicAuthData
   }
 
 instance HasProcessContext ConnectedConfig where
@@ -57,9 +53,6 @@ instance MonadWebClient FissionConnected where
   run cmd = do
     Client.Runner runner <- asks fissionAPI
     liftIO <| runner cmd
-
-instance MonadWebAuth FissionConnected where
-  getAuth = asks userAuth
 
 instance MonadLocalIPFS FissionConnected where
   runLocal opts arg = do

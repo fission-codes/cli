@@ -3,7 +3,6 @@ module Fission.CLI.Environment
   ( init
   , get
   , getPath
-  , findLocalAuth
   , findRecurse
   , couldNotRead
   , removeConfigFile
@@ -14,8 +13,6 @@ module Fission.CLI.Environment
 import           Fission.Prelude
 import           RIO.Directory
 import           RIO.FilePath
-
-import           Servant.API
 
 import qualified System.FilePath.Glob as Glob
 import qualified System.Console.ANSI as ANSI
@@ -32,9 +29,7 @@ import           Fission.CLI.Environment.Types
 import           Fission.CLI.Environment.Partial.Types as Env
 import qualified Fission.CLI.Environment.Partial as Env.Partial
 import           Fission.CLI.Environment.Partial (globalEnv)
-import qualified Fission.CLI.Environment.Error as Error
 
-import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 
 import qualified Network.IPFS.Types as IPFS
@@ -45,9 +40,8 @@ init ::
   , MonadLogger           m
   , MonadWebClient        m
   )
-  => BasicAuthData
-  -> m ()
-init auth = do
+  => m ()
+init = do
   logDebugN "Initializing config file"
   path <- globalEnv
 
@@ -58,8 +52,7 @@ init auth = do
     Right peers -> do
       let
         env = Env.Partial
-          { maybeUserAuth = Just auth
-          , maybePeers = Just peers
+          { maybePeers = Just peers
           , maybeIgnored = Just ignoreDefault
           , maybeBuildDir = Nothing
           }
@@ -67,7 +60,7 @@ init auth = do
       CLI.Success.putOk "Logged in"
 
 -- | Gets hierarchical environment by recursing through file system
-get :: MonadIO m => m (Either Error.Env Environment)
+get :: MonadIO m => m Environment
 get = do
   partial <- Env.Partial.get
   return <| Env.Partial.toFull partial
@@ -83,16 +76,12 @@ getPath ofLocal =
   then  getCurrentDirectory >>= \dir -> return <| dir </> ".fission.yaml"
   else globalEnv
 
--- | Locate current auth on the user's system
-findLocalAuth :: MonadIO m => m (Either Error.Env FilePath)
-findLocalAuth = do
-  currDir <- getCurrentDirectory
-  findRecurse (isJust . maybeUserAuth) currDir >>= \case
-    Nothing -> return <| Left Error.EnvNotFound
-    Just (path, _) -> return <| Right path
-
 -- | Recurses up to user root to find a env that satisfies function "f"
-findRecurse :: MonadIO m => (Env.Partial -> Bool) -> FilePath -> m (Maybe (FilePath, Env.Partial))
+findRecurse ::
+  MonadIO m
+  => (Env.Partial -> Bool)
+  -> FilePath
+  -> m (Maybe (FilePath, Env.Partial))
 findRecurse f path = do
   let filepath = path </> ".fission.yaml"
   partial <- Env.Partial.decode filepath

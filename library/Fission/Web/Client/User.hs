@@ -1,27 +1,31 @@
 module Fission.Web.Client.User
-  ( resetPassword
-  , register
+  ( register
   , verify
+  , getEmail
   ) where
 
 import Fission.Prelude
 
-import Servant
+import Servant hiding (addHeader)
 import Servant.Client
+import Servant.Client.Core
 
 import qualified Fission.User.Registration.Types as User
-import qualified Fission.User.Password.Types     as User
-import qualified Fission.Web.User.Password.Reset.Types as User.Password
+import qualified Fission.User.Username.Types     as User
+import qualified Fission.User.Email.Types        as User
+
+import           Fission.Web.Client
+import qualified Fission.Web.Client.JWT as JWT
+import qualified Fission.Web.Auth.Types as Auth
 
 import           Fission.Web.Routes              (UserRoute)
 
-import           Fission.Internal.Orphanage.BasicAuthData ()
+register :: User.Registration -> ClientM ()
+verify   :: ClientM User.Username
+getEmail :: User.Username -> ClientM User.Email
+register = withRegisterAuth register'
+verify = JWT.getSigAuth >>= verify'
 
-verify        :: BasicAuthData     -> ClientM Bool
-register      :: User.Registration -> ClientM ()
-resetPassword' :: BasicAuthData -> User.Password.Reset -> ClientM (User.Password)
-
-register :<|> verify :<|> resetPassword' = client (Proxy :: Proxy UserRoute)
-
-resetPassword :: BasicAuthData -> User.Password -> ClientM (User.Password)
-resetPassword auth pw = resetPassword' auth <| User.Password.Reset <| Just pw
+register'      :: AuthenticatedRequest (Auth.RegisterDid) -> User.Registration -> ClientM ()
+verify'        :: AuthenticatedRequest (Auth.HigherOrder) -> ClientM User.Username
+register' :<|> verify' :<|> getEmail :<|> _ = client (Proxy @UserRoute)

@@ -17,8 +17,8 @@ import           System.FSNotify as FS
 
 import qualified Fission.Internal.UTF8 as UTF8
 
-import           Fission.Web.Client.Auth  as Client
-import qualified Fission.Time             as Time
+import           Fission.Web.Client as Client
+import qualified Fission.Time       as Time
 
 import           Network.IPFS
 import qualified Network.IPFS.Add as IPFS
@@ -54,11 +54,11 @@ command cfg =
 
 -- | Continuously sync the current working directory to the server over IPFS
 watcher ::
-  ( MonadUnliftIO      m
-  , MonadLogger        m
-  , MonadLocalIPFS     m
-  , MonadEnvironment   m
-  , MonadAuthedClient  m
+  ( MonadUnliftIO    m
+  , MonadLogger      m
+  , MonadLocalIPFS   m
+  , MonadEnvironment m
+  , MonadWebClient   m
   )
   => Watch.Options
   -> BaseConfig
@@ -116,9 +116,9 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
             void <| pinAndUpdateDNS cid
 
 pinAndUpdateDNS ::
-  ( MonadUnliftIO      m
-  , MonadAuthedClient m
-  , MonadLogger        m
+  ( MonadUnliftIO  m
+  , MonadWebClient m
+  , MonadLogger    m
   )
   => CID
   -> m (Either ClientError URL.DomainName)

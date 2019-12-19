@@ -3,6 +3,7 @@ module Fission.CLI.Display.Success
   ( live
   , putOk
   , dnsUpdated
+  , loggedInAs
   ) where
 
 import Fission.Prelude
@@ -26,3 +27,11 @@ dnsUpdated :: MonadIO m => Text -> m ()
 dnsUpdated domain = do
   UTF8.putText "📝 DNS updated! Check out your site at: \n"
   UTF8.putText <| "🔗 " <> domain  <> "\n"
+
+loggedInAs :: MonadIO m => Text -> m ()
+loggedInAs username = do
+  UTF8.putText "💻 Currently logged in as: "
+  liftIO <| ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
+  UTF8.putTextLn username 
+  liftIO <| ANSI.setSGR [ANSI.Reset]
+

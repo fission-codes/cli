@@ -68,6 +68,7 @@ default-extensions:
   - ScopedTypeVariables
   - StandaloneDeriving
   - TupleSections
+  - TypeApplications
   - TypeFamilies
   - TypeSynonymInstances
   - TemplateHaskell
@@ -79,7 +80,9 @@ dependencies:
   - aeson-casing
   - ansi-terminal
   - base
+  - base64-bytestring
   - bcrypt
+  - binary
   - bytestring
   - cryptonite
   - data-default-class
@@ -95,6 +98,7 @@ dependencies:
   - http-types
   - ipfs
   - lens
+  - memory
   - monad-logger
   - mtl
   - network-uri

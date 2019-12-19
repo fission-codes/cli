@@ -1,5 +1,9 @@
 -- | File sync, IPFS-style
-module Fission.CLI.Display.Error (put, put') where
+module Fission.CLI.Display.Error
+  ( put
+  , put'
+  , notConnected
+  ) where
 
 import           Fission.Prelude
 
@@ -21,3 +25,6 @@ put' err = put err <| mconcat
   [ "Something went wrong. Please try again or file a bug report with "
   , "Fission support at https://github.com/fission-suite/web-api/issues/new"
   ]
+
+notConnected :: (MonadIO m, MonadLogger m, Show err) => err ->  m ()
+notConnected err = put err "Not logged in yet! Try running `fission setup`"
