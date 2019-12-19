@@ -2,6 +2,7 @@ module Fission.Web.Client
   ( request
   , withAuth
   , module Fission.Web.Client.Types
+  , module Fission.Web.Client.Class
   ) where
 
 import Fission.Prelude
@@ -10,6 +11,7 @@ import qualified Network.HTTP.Client as HTTP
 import           Servant
 import           Servant.Client
 import           Fission.Web.Client.Types
+import           Fission.Web.Client.Class
 
 withAuth ::
   ( HasClient ClientM api

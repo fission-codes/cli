@@ -5,10 +5,8 @@ import           Fission.Prelude
 import           Options.Applicative.Simple hiding (command)
 import           Servant
 
-import qualified Fission.Config as Config
-
+import           Fission.Web.Client       as Client
 import qualified Fission.Web.Client.User  as User.Client
-import qualified Fission.Web.Client.Types as Client
 
 import qualified Fission.User.Registration.Types as User
 
@@ -16,6 +14,7 @@ import qualified Fission.CLI.Environment               as Env
 import           Fission.CLI.Environment.Partial.Types as Env
 import qualified Fission.CLI.Environment.Partial       as Env.Partial
 
+import           Fission.CLI.Config.Base
 import           Fission.CLI.Config.Types
 
 import           Fission.CLI.Command.Register.Types as Register
@@ -26,24 +25,22 @@ import qualified Fission.CLI.Display.Wait    as CLI.Wait
 import qualified Fission.CLI.Prompt.Fields   as Fields
 
 -- | The command to attach to the CLI tree
-command :: MonadUnliftIO m
-        => HasLogFunc        cfg
-        => Has Client.Runner cfg
-        => cfg
-        -> CommandM (m ())
+command ::
+  MonadIO m
+  => BaseConfig
+  -> CommandM (m ())
 command cfg =
   addCommand
     "register"
     "Register for Fission and login"
-    (\options -> void <| runRIO cfg <| register options)
+    (\options -> void <| runBase cfg <| register options)
     parseOptions
 
 -- | Register and login (i.e. save credentials to disk)
 register ::
-  ( MonadReader       cfg m
-  , MonadUnliftIO         m
+  ( MonadUnliftIO         m
+  , MonadWebClient         m
   , MonadLogger           m
-  , Has Client.Runner cfg
   )
   => Register.Options
   -> m ()
@@ -59,10 +56,9 @@ register Register.Options {..} = do
         , " if you want to re-register"]
 
 register' ::
-  ( MonadReader       cfg m
-  , MonadUnliftIO         m
-  , MonadLogger           m
-  , Has Client.Runner cfg
+  ( MonadUnliftIO  m
+  , MonadWebClient m
+  , MonadLogger    m
   )
   => Bool
   -> m ()
@@ -74,18 +70,15 @@ register' local_auth = do
   rawEmail <- Fields.getRequired "Email"
 
   logDebugN "Attempting registration"
-  Client.Runner runner <- Config.get
 
-  registerResult <- Cursor.withHidden
-                  . liftIO
-                  . CLI.Wait.waitFor "Registering..."
-                  . runner
-                  . User.Client.register
-                  <| User.Registration
-                      { username = decodeUtf8Lenient username
-                      , password = decodeUtf8Lenient password
-                      , email    = decodeUtf8Lenient rawEmail
-                      }
+  let user = User.Registration
+              { username = decodeUtf8Lenient username
+              , password = decodeUtf8Lenient password
+              , email    = decodeUtf8Lenient rawEmail
+              }
+
+  registerResult <- Cursor.withHidden . CLI.Wait.waitFor "Registering..."
+                    <| Client.run <| User.Client.register user
 
   case registerResult of
     Left  err ->

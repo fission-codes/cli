@@ -1,41 +1,37 @@
 -- | Pin files via the CLI
-module Fission.CLI.IPFS.Pin
-  ( pin
-  , run
-  ) where
+module Fission.CLI.IPFS.Pin (add) where
 
 import Fission.Prelude
 
-import Servant
 import Servant.Client
-
-import qualified Fission.Config as Config
 
 import           Network.IPFS.CID.Types
 
 import qualified Fission.Web.Client      as Client
+import           Fission.Web.Client.Auth as Client
 import qualified Fission.Web.Client.IPFS as Fission
 
 import           Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Loader  as CLI
 import           Fission.CLI.Display.Success as CLI.Success
-import           Fission.CLI.Config.FissionConnected.Types
 
-run ::
-  ( MonadReader          cfg m
-  , MonadIO                  m
+add ::
+  ( MonadUnliftIO            m
   , MonadLogger              m
-  , HasFissionConnected  cfg
+  , MonadAuthedClient       m
   )
   => CID
   -> m (Either ClientError CID)
-run cid@(CID hash)  = do
+add cid@(CID hash)  = do
   logDebug <| "Remote pinning " <> display hash
 
-  Client.Runner runner <- Config.get
-  auth <- Config.get
+  auth <- getAuth
 
-  liftIO (pin runner auth cid) >>= \case
+  result <- CLI.withLoader 50000 
+            <| Client.run
+            <| Fission.pin (Fission.request auth) cid
+
+  case result of 
     Right _ -> do
       CLI.Success.live hash
       return <| Right cid
@@ -43,6 +39,3 @@ run cid@(CID hash)  = do
     Left err -> do
       CLI.Error.put' err
       return <| Left err
-
-pin :: MonadUnliftIO m => (ClientM NoContent -> m a) -> BasicAuthData -> CID -> m a
-pin runner auth cid = CLI.withLoader 50000 . runner <| Fission.pin (Fission.request auth) cid

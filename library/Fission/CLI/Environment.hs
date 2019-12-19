@@ -8,6 +8,7 @@ module Fission.CLI.Environment
   , couldNotRead
   , removeConfigFile
   , getOrRetrievePeer
+  , module Fission.CLI.Environment.Class
   ) where
 
 import           Fission.Prelude
@@ -20,12 +21,13 @@ import qualified System.FilePath.Glob as Glob
 import qualified System.Console.ANSI as ANSI
 import           Data.List.NonEmpty  as NonEmpty hiding (init, (<|))
 
+import           Fission.Web.Client
 import           Fission.Web.Client.Peers as Peers
-import qualified Fission.Web.Client.Types as Client
 
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 
+import           Fission.CLI.Environment.Class
 import           Fission.CLI.Environment.Types
 import           Fission.CLI.Environment.Partial.Types as Env
 import qualified Fission.CLI.Environment.Partial as Env.Partial
@@ -39,10 +41,9 @@ import qualified Network.IPFS.Types as IPFS
 
 -- | Initialize the Environment file
 init ::
-  ( MonadReader       cfg m
-  , MonadIO               m
+  ( MonadUnliftIO         m
   , MonadLogger           m
-  , Has Client.Runner cfg
+  , MonadWebClient        m
   )
   => BasicAuthData
   -> m ()
@@ -129,10 +130,9 @@ removeConfigFile = do
 -- | Retrieves a Fission Peer from local config
 --   If not found we retrive from the network and store
 getOrRetrievePeer ::
-  ( MonadReader       cfg m
-  , MonadIO               m
-  , MonadLogger           m
-  , Has Client.Runner cfg
+  ( MonadUnliftIO  m
+  , MonadLogger    m
+  , MonadWebClient m
   )
   => Environment
   -> m (Maybe IPFS.Peer)

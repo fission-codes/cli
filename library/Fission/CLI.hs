@@ -1,13 +1,10 @@
 module Fission.CLI (cli) where
 
 import           Fission.Prelude
-import           RIO.Process (HasProcessContext)
 
 import           Options.Applicative.Simple
 
-import qualified Fission.Web.Client   as Client
-
-import qualified Network.IPFS.Types   as IPFS
+import           Fission.CLI.Config.Base
 
 import qualified Fission.CLI.Command.Login         as Login
 import qualified Fission.CLI.Command.Logout        as Logout
@@ -20,17 +17,10 @@ import qualified Fission.CLI.Command.Whoami        as Whoami
 
 -- | Top-level CLI description
 cli ::
-  ( MonadReader       cfg m
-  , MonadUnliftIO         m
-  , HasLogFunc        cfg
-  , HasProcessContext cfg
-  , Has Client.Runner cfg
-  , Has IPFS.BinPath  cfg
-  , Has IPFS.Timeout  cfg
-  )
-  => m ()
-cli = do
-  cfg <- ask
+  MonadUnliftIO m
+  => BaseConfig
+  -> m ()
+cli cfg = do
   (_, runCLI) <- liftIO <| simpleOptions version description detail (pure ()) do
     Login.command         cfg
     Logout.command        cfg

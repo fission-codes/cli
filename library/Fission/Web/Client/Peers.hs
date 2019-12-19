@@ -7,11 +7,10 @@ import Servant
 import Servant.Client
 
 import qualified Fission.Web.IPFS.Peer as Peer
-import qualified Fission.Web.Client.Types as Client
+
+import           Fission.Web.Client
 
 import qualified Network.IPFS.Types as IPFS
-
-import qualified Fission.Config as Config
 
 import qualified Fission.CLI.Display.Cursor as Cursor
 import qualified Fission.CLI.Display.Wait as CLI.Wait
@@ -20,17 +19,14 @@ import qualified Fission.CLI.Display.Wait as CLI.Wait
 type API = "ipfs" :> "peers" :> Peer.API
 
 -- | Retrieves the Fission peer list from the server
-getPeers :: MonadReader cfg m
-  => Has Client.Runner cfg
-  => MonadIO m
+getPeers ::
+  ( MonadWebClient m
+  , MonadUnliftIO  m
+  )
   => m (Either ClientError (NonEmpty IPFS.Peer))
-getPeers = do
-  Client.Runner run <- Config.get
-  liftIO
-    <| Cursor.withHidden
-    <| CLI.Wait.waitFor "Retrieving Fission Peer List..."
-    <| run
-    <| get
+getPeers = 
+  Cursor.withHidden . CLI.Wait.waitFor "Retrieving Fission Peer List..."
+    <| run get
 
 -- | Retrieve a list of peers from the fission api
 get :: ClientM (NonEmpty IPFS.Peer)

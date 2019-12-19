@@ -97,18 +97,18 @@ packages:
     hackage: ipfs-1.0.1
 - completed:
     cabal-file:
-      size: 21505
-      sha256: b787be3ea8e789b652044cc8fb020337344243bc3c9ae262c7da95f45c3f4cac
+      size: 21598
+      sha256: d9596bcaece22e6a3f1073dc3fe46730331dceef0b010434687279daba7cf6af
     name: fission-web-api
-    version: 2.0.6
+    version: 2.0.7
     git: https://github.com/fission-suite/web-api.git
     pantry-tree:
-      size: 10445
-      sha256: bc0e8bc464a463334d0ce861396f48a67440e9f0c06ed90e9191343fc2e600ec
-    commit: 2590cd5f70dee1ab0eabcbbb992a04db0444654c
+      size: 10426
+      sha256: aa4a92094d5aa90db16ef168121993f8228539104b158e15e5a1af862555d8a0
+    commit: ffc6e4e67872444c45efb5bae60534272156660a
   original:
     git: https://github.com/fission-suite/web-api.git
-    commit: 2590cd5f70dee1ab0eabcbbb992a04db0444654c
+    commit: ffc6e4e67872444c45efb5bae60534272156660a
 snapshots:
 - completed:
     size: 525663

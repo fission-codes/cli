@@ -26,10 +26,10 @@ main = do
 
   logOptions  <- logOptionsHandle stderr isVerbose
 
-  _processCtx <- mkDefaultProcessContext
+  processCtx <- mkDefaultProcessContext
 
-  _ipfsPath    <- withEnv "IPFS_PATH" (IPFS.BinPath "/usr/local/bin/ipfs") IPFS.BinPath
-  _ipfsTimeout <- withEnv "IPFS_TIMEOUT" (IPFS.Timeout 3600) (IPFS.Timeout . Partial.read)
+  ipfsPath    <- withEnv "IPFS_PATH" (IPFS.BinPath "/usr/local/bin/ipfs") IPFS.BinPath
+  ipfsTimeout <- withEnv "IPFS_TIMEOUT" (IPFS.Timeout 3600) (IPFS.Timeout . Partial.read)
 
   isTLS <- getFlag "FISSION_TLS" .!~ True
   path  <- withEnv "FISSION_ROOT" "" identity
@@ -45,8 +45,6 @@ main = do
     { managerResponseTimeout = responseTimeoutMicro tOut }
 
   let url         = BaseUrl (if isTLS then Https else Http) host port path
-      _fissionAPI = Client.Runner (Client.request httpManager url)
+      fissionAPI = Client.Runner (Client.request httpManager url)
 
-  withLogFunc logOptions \_logFunc -> runRIO CLI.BaseConfig {..} do
-    logDebug <| "Requests will be made to " <> displayShow url
-    cli
+  withLogFunc logOptions \logFunc -> cli CLI.BaseConfig {..}

@@ -13,14 +13,16 @@ import qualified System.Console.ANSI as ANSI
 import qualified Fission.Internal.UTF8 as UTF8
 
 import qualified Fission.CLI.Environment as Environment
-import           Fission.CLI.Config.Types
 import           Fission.CLI.Environment.Types
 
+import           Fission.CLI.Config.Base
+import           Fission.CLI.Config.Types
+
 -- | The command to attach to the CLI tree
-command :: MonadIO m
-        => HasLogFunc cfg
-        => cfg
-        -> CommandM (m ())
+command ::
+  MonadIO m
+  => BaseConfig
+  -> CommandM (m ())
 command cfg =
   addCommand
     "whoami"
