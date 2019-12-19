@@ -19,8 +19,9 @@ import           Network.IPFS.CID.Types
 import qualified Fission.AWS.Types as AWS
 
 update ::
-  ( MonadRIO       cfg m
-  , HasLogFunc        cfg
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
   , Has Client.Runner cfg
   , Has BasicAuthData cfg
   )

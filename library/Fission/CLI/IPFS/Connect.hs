@@ -25,13 +25,14 @@ import qualified Network.IPFS.Types as IPFS
 
 -- | Connect to the Fission IPFS network with a set amount of retries
 swarmConnectWithRetry ::
-  ( MonadRIO cfg m
-  , MonadLocalIPFS m
-  , HasLogFunc        cfg
-  , HasProcessContext        cfg
-  , Has Client.Runner cfg
-  , Has IPFS.Timeout cfg
-  , Has IPFS.BinPath cfg
+  ( MonadReader        cfg m
+  , MonadIO                m
+  , MonadLogger            m
+  , MonadLocalIPFS         m
+  , HasProcessContext  cfg
+  , Has Client.Runner  cfg
+  , Has IPFS.Timeout   cfg
+  , Has IPFS.BinPath   cfg
   )
   => IPFS.Peer
   -> Int

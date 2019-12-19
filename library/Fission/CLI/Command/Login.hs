@@ -42,40 +42,49 @@ command cfg =
 
 
 -- | Get a users username, if not passed in via cli option prompt for input
-getUsername :: MonadRIO cfg m
-            => Maybe ByteString
-            -> m ByteString
+getUsername ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  )
+  => Maybe ByteString
+  -> m ByteString
 getUsername (Just username) = return username
 getUsername Nothing = do
   putStr "Username: "
   getLine
 
 -- | Get a users password, if not passed in via cli option prompt for input
-getUserPassword :: MonadRIO cfg m
-                => Maybe ByteString
-                -> m (Maybe ByteString)
+getUserPassword ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  )
+  => Maybe ByteString
+  -> m (Maybe ByteString)
 getUserPassword (Just option_password) = return (Just option_password)
 getUserPassword Nothing = do
   mayPassword <- liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ")
   return (fmap BS.pack mayPassword)
 
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
-login :: MonadRIO          cfg m
-      => MonadUnliftIO         m
-      => HasLogFunc        cfg
-      => Has Client.Runner cfg
-      => Login.Options
-      -> m ()
+login ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadUnliftIO         m
+  , MonadLogger           m
+  , Has Client.Runner cfg
+  )
+  => Login.Options
+  -> m ()
 login Login.Options {..} = do
-  logDebug "Starting login sequence"
+  logDebug <| show "Starting login sequence"
   username      <- getUsername username_option
   maybePassword <- getUserPassword password_option
   case maybePassword of
     Nothing ->
-      logError "Unable to read password"
+      logError <| show "Unable to read password"
 
     Just password -> do
-      logDebug "Attempting API verification"
+      logDebug <| show "Attempting API verification"
       Client.Runner run <- Config.get
       let auth = BasicAuthData username password
 
@@ -89,7 +98,7 @@ login Login.Options {..} = do
           CLI.Error.put err "Authorization failed"
 
         Right _ok -> do
-          logDebug "Auth Successful"
+          logDebug <| show "Auth Successful"
 
           envPath <- Env.getPath local_auth
 

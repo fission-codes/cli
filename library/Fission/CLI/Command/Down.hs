@@ -12,7 +12,7 @@ import           Network.IPFS
 import qualified Network.IPFS.Get as IPFS
 import qualified Network.IPFS.Types       as IPFS
 import           Network.IPFS.CID.Types
-import           Fission.Internal.Orphanage.RIO () 
+import           Fission.Internal.Orphanage.RIO ()
 
 import           Fission.CLI.Config.Types
 
@@ -52,10 +52,11 @@ handleIPNS identifier = case URI.parseURI (Text.unpack identifier) of
 
 -- | Sync the current working directory to the server over IPFS
 down ::
-  ( MonadRIO      cfg m
+  ( MonadReader   cfg m
+  , MonadIO           m
   , MonadUnliftIO     m
   , MonadLocalIPFS    m
-  , HasLogFunc    cfg
+  , MonadLogger       m
   )
   => IPFS.CID
   -> m ()

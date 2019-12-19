@@ -44,12 +44,15 @@ command cfg =
     parseOptions
 
 -- | Register and login (i.e. save credentials to disk)
-register :: MonadRIO       cfg m
-        => MonadUnliftIO         m
-        => HasLogFunc        cfg
-        => Has Client.Runner cfg
-        => Register.Options
-        -> m ()
+register ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadUnliftIO         m
+  , MonadLogger           m
+  , Has Client.Runner cfg
+  )
+  => Register.Options
+  -> m ()
 register Register.Options {..} = do
   envPath <- Env.getPath local_auth
   env <- Env.Partial.decode envPath
@@ -61,27 +64,30 @@ register Register.Options {..} = do
         ,  textShow envPath
         , " if you want to re-register"]
 
-register' :: MonadRIO cfg m
-          => MonadUnliftIO         m
-          => HasLogFunc        cfg
-          => Has Client.Runner cfg
-          => Bool
-          -> m ()
+register' ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadUnliftIO         m
+  , MonadLogger           m
+  , Has Client.Runner cfg
+  )
+  => Bool
+  -> m ()
 register' local_auth = do
-  logDebug "Starting registration sequence"
+  logDebug <| show "Starting registration sequence"
 
   putStr "Username: "
   username <- getLine
 
   liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ") >>= \case
     Nothing ->
-      logError "Unable to read password"
+      logError <| show "Unable to read password"
 
     Just password -> do
       putStr "Email: "
       rawEmail <- getLine
 
-      logDebug "Attempting registration"
+      logDebug <| show "Attempting registration"
       Client.Runner runner <- Config.get
 
       registerResult <- Cursor.withHidden
@@ -100,7 +106,7 @@ register' local_auth = do
           CLI.Error.put err "Authorization failed"
 
         Right _ok -> do
-          logDebug "Register Successful"
+          logDebug <| show "Register Successful"
 
           let auth = BasicAuthData username (BS.pack password)
           envPath <- Env.getPath local_auth

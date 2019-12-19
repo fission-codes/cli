@@ -24,7 +24,7 @@ import           Network.IPFS
 import qualified Network.IPFS.Add as IPFS
 import           Network.IPFS.CID.Types
 import qualified Network.IPFS.Types as IPFS
-import           Fission.Internal.Orphanage.RIO () 
+import           Fission.Internal.Orphanage.RIO ()
 
 import qualified Fission.AWS.Types  as AWS
 
@@ -62,7 +62,9 @@ command cfg =
 
 -- | Continuously sync the current working directory to the server over IPFS
 watcher ::
-  ( MonadRIO            cfg m
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
   , MonadLocalIPFS          m
   , HasFissionConnected cfg
   )
@@ -123,7 +125,9 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
             void <| pinAndUpdateDNS cid
 
 pinAndUpdateDNS ::
-  ( MonadRIO             cfg m
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
   , HasFissionConnected  cfg
   )
   => CID

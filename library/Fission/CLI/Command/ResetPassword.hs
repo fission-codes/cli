@@ -44,27 +44,35 @@ command cfg =
     (pure ())
 
 -- | Register and login (i.e. save credentials to disk)
-resetPassword :: MonadRIO       cfg m
-              => MonadUnliftIO      m
-              => HasLoggedIn    cfg
-              => m ()
+resetPassword ::
+  ( MonadReader    cfg m
+  , MonadIO            m
+  , MonadUnliftIO      m
+  , MonadLogger        m
+  , HasLoggedIn    cfg
+  )
+  => m ()
 resetPassword = do
   auth <- Config.get
   liftIO (runInputT defaultSettings <| getPassword (Just '•') "New Password: ") >>= \case
     Nothing ->
-      logError "Unable to read password"
+      logError <| show "Unable to read password"
 
     Just newPassword -> resetPassword' auth newPassword
-            
-resetPassword' :: MonadRIO          cfg m
-               => MonadUnliftIO         m
-               => HasLogFunc        cfg
-               => Has Client.Runner cfg
-               => BasicAuthData
-               -> String
-               -> m()
+
+resetPassword' ::
+  ( MonadReader    cfg m
+  , MonadIO            m
+  , MonadUnliftIO      m
+  , MonadLogger        m
+  , HasLogFunc    cfg
+  , Has Client.Runner cfg
+  )
+  => BasicAuthData
+  -> String
+  -> m()
 resetPassword' auth newPassword = do
-  logDebug "Attempting registration"
+  logDebug <| show "Attempting registration"
   Client.Runner runner <- Config.get
 
   resetResult <- Cursor.withHidden
@@ -78,7 +86,7 @@ resetPassword' auth newPassword = do
     Left  err ->
       CLI.Error.put err "Password Reset failed"
 
-    Right (User.Password updatedPass) -> do
+    Right (User.Password updatedPass) ->
       Environment.findLocalAuth >>= \case
         Left _ -> Environment.couldNotRead
         Right path -> do

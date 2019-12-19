@@ -19,11 +19,13 @@ import qualified Fission.CLI.Environment       as Environment
 --
 -- Takes a @LoggedIn@-dependant action, and lifts it into an environment that
 -- contains a superset of the environment
-ensure
-  :: ( MonadRIO          cfg m
-     , HasLogFunc        cfg
-     , Has Client.Runner cfg
-     )
+ensure ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
+  , HasLogFunc cfg
+  , Has Client.Runner cfg
+  )
   => RIO LoggedIn a
   -> m (Either Error a)
 ensure action = do
