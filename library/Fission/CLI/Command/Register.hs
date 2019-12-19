@@ -1,5 +1,6 @@
 -- | Register command
 module Fission.CLI.Command.Register (command, register) where
+import qualified Fission.Internal.UTF8 as UTF8
 
 import           Fission.Prelude
 import           RIO.ByteString
@@ -64,6 +65,22 @@ register Register.Options {..} = do
         ,  textShow envPath
         , " if you want to re-register"]
 
+getRequired ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
+  )
+  => ByteString
+  -> m ByteString
+getRequired fieldName = do
+  putStr (fieldName <> ": ")
+  fieldValue <- getLine
+  if BS.length fieldValue <= 0 then do
+    putStr (fieldName <> " is required\n ")
+    getRequired fieldName
+  else
+    return fieldValue
+
 register' ::
   ( MonadReader       cfg m
   , MonadIO               m
@@ -76,16 +93,14 @@ register' ::
 register' local_auth = do
   logDebug <| show "Starting registration sequence"
 
-  putStr "Username: "
-  username <- getLine
+  username <- getRequired "Username"
 
   liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ") >>= \case
     Nothing ->
       logError <| show "Unable to read password"
 
     Just password -> do
-      putStr "Email: "
-      rawEmail <- getLine
+      rawEmail <- getRequired "Email"
 
       logDebug <| show "Attempting registration"
       Client.Runner runner <- Config.get
