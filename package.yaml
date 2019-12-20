@@ -116,6 +116,7 @@ dependencies:
   - unliftio
   - uuid
   - uuid-types
+  - utf8-string
   - word8
   - yaml
 
