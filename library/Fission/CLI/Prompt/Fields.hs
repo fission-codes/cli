@@ -42,10 +42,10 @@ getRequiredSecret ::
   -> m ByteString
 getRequiredSecret fieldName = do
   let label = UTF8.toString (fieldName <> ": ")
-  liftIO (runInputT defaultSettings <| getPassword (Just '•') label) >>= \case
+  liftIO (runInputT defaultSettings <| getPassword (Just '•') label) >>= \case -- TODO: Make prettier
     Nothing -> do
       logError <| show "Unable to read password"
-      putStr (fieldName <> " is required\n ")
+      putStr (fieldName <> " is required\n ") -- TODO: Use error text and emoji
       getRequiredSecret fieldName
 
     Just password -> do
