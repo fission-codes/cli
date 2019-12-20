@@ -4,11 +4,11 @@ module Fission.CLI.Prompt.Fields
   , getRequiredSecret
   ) where
 
-import qualified Data.ByteString.UTF8 as UTF8
-
 import           Fission.Prelude
-import           RIO.ByteString
 
+import           RIO.ByteString
+import qualified Fission.Internal.UTF8 as UTF8
+import qualified Data.ByteString.UTF8 as UTF8
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
 
@@ -17,6 +17,9 @@ import           Servant
 import           System.Console.Haskeline
 
 import           Fission.CLI.Config.Types
+import qualified Fission.CLI.Display.Error   as CLI.Error
+import qualified Fission.CLI.Prompt.Error.Types as Prompt.Error
+
 
 -- | Prompt a user for a specific value
 getField ::
@@ -30,7 +33,6 @@ getField fieldName = do
   putStr (fieldName <> ": ")
   getLine
 
-
 -- | Prompt a user for a value and do not accept an empty value
 getRequired ::
   ( MonadReader       cfg m
@@ -42,7 +44,7 @@ getRequired ::
 getRequired fieldName = do
   fieldValue <- getField fieldName
   if BS.length fieldValue <= 0 then do
-    putStr (fieldName <> " is required\n ")
+    showRequiredError fieldName
     getRequired fieldName
   else
     return fieldValue
@@ -65,13 +67,22 @@ getRequiredSecret fieldName = do
   case mayPassword of
     Nothing -> do
       logError <| show "Unable to read password"
-      putStr (fieldName <> " is required\n ") -- TODO: Use error text and emoji
+      showRequiredError fieldName
       getRequiredSecret fieldName
 
     Just password -> do
       let bsPassword = BS.pack password
       if BS.length bsPassword <= 0 then do
-        putStr (fieldName <> " is required\n ")
+        showRequiredError fieldName
         getRequiredSecret fieldName
       else
         return bsPassword
+
+showRequiredError ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
+  )
+  => ByteString
+  -> m ()
+showRequiredError fieldName = CLI.Error.put Prompt.Error.RequiredField ((UTF8.textShow fieldName) <> " is required")

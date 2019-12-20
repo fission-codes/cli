@@ -28,7 +28,7 @@ checkBuildDir relPath = do
     Just (envPath, buildDir) ->
       return <| (takeDirectory envPath) </> buildDir
     Nothing -> guessBuildDir relPath >>= \case
-      Nothing -> return relPath 
+      Nothing -> return relPath
       Just guess -> do
         buildDir <- promptBuildDir guess >>= \case
           True -> return guess
@@ -38,7 +38,7 @@ checkBuildDir relPath = do
         Env.Partial.writeMerge (absPath </> ".fission.yaml") updated
         return buildDir
 
--- | Find the closests .fission.yaml that contains a build_dir in it, and return the location of the env & build_dir 
+-- | Find the closests .fission.yaml that contains a build_dir in it, and return the location of the env & build_dir
 findEnv :: ( MonadIO m ) => FilePath -> m (Maybe (FilePath, FilePath))
 findEnv path = Env.findRecurse (isJust . maybeBuildDir) path >>= \case
   Nothing -> return Nothing

@@ -4,7 +4,7 @@ module Fission.CLI.Command.Login (command, login) where
 import           Fission.Prelude
 import           RIO.ByteString
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Fission.Internal.UTF8 as UTF8
 
 import           Options.Applicative.Simple hiding (command)
 import           Servant
