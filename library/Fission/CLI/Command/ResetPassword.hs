@@ -25,6 +25,7 @@ import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
+import qualified Fission.CLI.Prompt.Fields   as Fields
 
 import qualified Fission.CLI.Environment               as Environment
 import qualified Fission.CLI.Environment.Partial       as Env.Partial
@@ -54,11 +55,8 @@ resetPassword ::
   => m ()
 resetPassword = do
   auth <- Config.get
-  liftIO (runInputT defaultSettings <| getPassword (Just '•') "New Password: ") >>= \case
-    Nothing ->
-      logError <| show "Unable to read password"
-
-    Just newPassword -> resetPassword' auth newPassword
+  newPassword <- Fields.getRequiredSecret "New Password"
+  resetPassword' auth newPassword
 
 resetPassword' ::
   ( MonadReader    cfg m
@@ -69,7 +67,7 @@ resetPassword' ::
   , Has Client.Runner cfg
   )
   => BasicAuthData
-  -> String
+  -> ByteString
   -> m()
 resetPassword' auth newPassword = do
   logDebug <| show "Attempting registration"
@@ -80,7 +78,8 @@ resetPassword' auth newPassword = do
                   . CLI.Wait.waitFor "Registering..."
                   . runner
                   . User.Client.resetPassword auth
-                  <| User.Password <| T.pack newPassword
+                  <| User.Password
+                  <| UTF8.textShow newPassword
 
   case resetResult of
     Left  err ->
