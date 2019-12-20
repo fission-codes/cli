@@ -1,16 +1,9 @@
 -- | Register command
 module Fission.CLI.Command.Register (command, register) where
-import qualified Data.ByteString.UTF8 as UTF8
-
 import           Fission.Prelude
-import           RIO.ByteString
-
-import qualified Data.ByteString.Char8 as BS
-import qualified Data.Text as T
 
 import           Options.Applicative.Simple hiding (command)
 import           Servant
-import           System.Console.Haskeline
 
 import qualified Fission.Config as Config
 
@@ -30,6 +23,7 @@ import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
+import qualified Fission.CLI.Prompt.Fields   as Fields
 
 -- | The command to attach to the CLI tree
 command :: MonadUnliftIO m
@@ -65,47 +59,6 @@ register Register.Options {..} = do
         ,  textShow envPath
         , " if you want to re-register"]
 
--- | Prompt a user for a value and do not accept an empty value
-getRequired ::
-  ( MonadReader       cfg m
-  , MonadIO               m
-  , MonadLogger           m
-  )
-  => ByteString
-  -> m ByteString
-getRequired fieldName = do
-  putStr (fieldName <> ": ")
-  fieldValue <- getLine
-  if BS.length fieldValue <= 0 then do
-    putStr (fieldName <> " is required\n ")
-    getRequired fieldName
-  else
-    return fieldValue
-
--- | Prompt a user for a secret and do not accept an empty value
-getRequiredSecret ::
-  ( MonadReader       cfg m
-  , MonadIO               m
-  , MonadLogger           m
-  )
-  => ByteString
-  -> m ByteString
-getRequiredSecret fieldName = do
-  let label = UTF8.toString (fieldName <> ": ")
-  liftIO (runInputT defaultSettings <| getPassword (Just '•') label) >>= \case
-    Nothing -> do
-      logError <| show "Unable to read password"
-      putStr (fieldName <> " is required\n ")
-      getRequiredSecret fieldName
-
-    Just password -> do
-      let bsPassword = BS.pack password
-      if BS.length bsPassword <= 0 then do
-        putStr (fieldName <> " is required\n ")
-        getRequiredSecret fieldName
-      else
-        return bsPassword
-
 register' ::
   ( MonadReader       cfg m
   , MonadIO               m
@@ -118,9 +71,9 @@ register' ::
 register' local_auth = do
   logDebug <| show "Starting registration sequence"
 
-  username <- getRequired "Username"
-  password <- getRequiredSecret "Password"
-  rawEmail <- getRequired "Email"
+  username <- Fields.getRequired "Username"
+  password <- Fields.getRequiredSecret "Password"
+  rawEmail <- Fields.getRequired "Email"
 
   logDebug <| show "Attempting registration"
   Client.Runner runner <- Config.get
