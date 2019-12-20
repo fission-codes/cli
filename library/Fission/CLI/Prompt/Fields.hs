@@ -57,9 +57,10 @@ getRequiredSecret ::
   -> m ByteString
 getRequiredSecret fieldName = do
   let label = UTF8.toString (fieldName <> ": ")
+  let hiddenCharacter = (Just '•')
   mayPassword <- liftIO
               <| runInputT defaultSettings
-              <| getPassword (Just '•') label
+              <| getPassword hiddenCharacter label
 
   case mayPassword of
     Nothing -> do
