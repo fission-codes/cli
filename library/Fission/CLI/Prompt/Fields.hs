@@ -10,22 +10,16 @@ import           RIO.ByteString
 import qualified Fission.Internal.UTF8 as UTF8
 import qualified Data.ByteString.UTF8 as UTF8
 import qualified Data.ByteString.Char8 as BS
-import qualified Data.Text as T
 
-import           Options.Applicative.Simple hiding (command)
-import           Servant
 import           System.Console.Haskeline
 
-import           Fission.CLI.Config.Types
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Prompt.Error.Types as Prompt.Error
-
 
 -- | Prompt a user for a specific value
 getField ::
   ( MonadReader       cfg m
   , MonadIO               m
-  , MonadLogger           m
   )
   => ByteString
   -> m ByteString

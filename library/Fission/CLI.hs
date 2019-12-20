@@ -21,7 +21,6 @@ import qualified Fission.CLI.Command.Whoami        as Whoami
 -- | Top-level CLI description
 cli ::
   ( MonadReader       cfg m
-  , MonadIO               m
   , MonadLogger           m
   , MonadUnliftIO         m
   , HasLogFunc        cfg

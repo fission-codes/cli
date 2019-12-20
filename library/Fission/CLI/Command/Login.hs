@@ -2,13 +2,9 @@
 module Fission.CLI.Command.Login (command, login) where
 
 import           Fission.Prelude
-import           RIO.ByteString
-
-import qualified Fission.Internal.UTF8 as UTF8
 
 import           Options.Applicative.Simple hiding (command)
 import           Servant
-import           System.Console.Haskeline
 
 import qualified Fission.Config as Config
 
@@ -67,7 +63,6 @@ getUserPassword Nothing = Fields.getRequiredSecret "Password"
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
 login ::
   ( MonadReader       cfg m
-  , MonadIO               m
   , MonadUnliftIO         m
   , MonadLogger           m
   , Has Client.Runner cfg

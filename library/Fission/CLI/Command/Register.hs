@@ -41,7 +41,6 @@ command cfg =
 -- | Register and login (i.e. save credentials to disk)
 register ::
   ( MonadReader       cfg m
-  , MonadIO               m
   , MonadUnliftIO         m
   , MonadLogger           m
   , Has Client.Runner cfg
@@ -61,7 +60,6 @@ register Register.Options {..} = do
 
 register' ::
   ( MonadReader       cfg m
-  , MonadIO               m
   , MonadUnliftIO         m
   , MonadLogger           m
   , Has Client.Runner cfg

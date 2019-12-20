@@ -5,10 +5,7 @@ import           Fission.Prelude
 
 import           Servant
 
-import qualified Data.Text as T
-
 import           Options.Applicative.Simple (addCommand)
-import           System.Console.Haskeline
 
 import qualified Fission.Config as Config
 import qualified Fission.Internal.UTF8 as UTF8
@@ -47,7 +44,6 @@ command cfg =
 -- | Register and login (i.e. save credentials to disk)
 resetPassword ::
   ( MonadReader    cfg m
-  , MonadIO            m
   , MonadUnliftIO      m
   , MonadLogger        m
   , HasLoggedIn    cfg
@@ -60,7 +56,6 @@ resetPassword = do
 
 resetPassword' ::
   ( MonadReader    cfg m
-  , MonadIO            m
   , MonadUnliftIO      m
   , MonadLogger        m
   , HasLogFunc    cfg
