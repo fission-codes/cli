@@ -60,7 +60,7 @@ getRequiredSecret fieldName = do
 
   case mayPassword of
     Nothing -> do
-      logError <| show "Unable to read password"
+      logErrorN "Unable to read password"
       showRequiredError fieldName
       getRequiredSecret fieldName
 
@@ -73,9 +73,8 @@ getRequiredSecret fieldName = do
         return bsPassword
 
 showRequiredError ::
-  ( MonadReader       cfg m
-  , MonadIO               m
-  , MonadLogger           m
+  ( MonadIO     m
+  , MonadLogger m
   )
   => ByteString
   -> m ()

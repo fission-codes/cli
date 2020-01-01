@@ -66,7 +66,7 @@ ensure action = do
               return <| Left CannotConnect
 
         Nothing -> do
-          logError <| show "Could not locate the Fission IPFS network"
+          logErrorN "Could not locate the Fission IPFS network"
           return <| Left PeersNotFound
 
     Left err -> do
