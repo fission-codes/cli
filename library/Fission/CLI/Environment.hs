@@ -47,7 +47,7 @@ init ::
   => BasicAuthData
   -> m ()
 init auth = do
-  logDebug <| show "Initializing config file"
+  logDebugN "Initializing config file"
   path <- globalEnv
 
   Peers.getPeers >>= \case
@@ -139,22 +139,22 @@ getOrRetrievePeer ::
 getOrRetrievePeer config =
   case peers config of
     Just prs -> do
-      logDebug <| show "Retrieved Peer from .fission.yaml"
+      logDebugN "Retrieved Peer from .fission.yaml"
       return <| Just <| head prs
 
     Nothing ->
       Peers.getPeers >>= \case
         Left err -> do
           logError <| displayShow err
-          logDebug <| show "Unable to retrieve peers from the network"
+          logDebugN "Unable to retrieve peers from the network"
           return Nothing
 
         Right [] -> do
-          logDebug <| show "Network request was successful, but response contained no peers"
+          logDebugN "Network request was successful, but response contained no peers"
           return Nothing
 
         Right peers@(peer : _) -> do
-          logDebug <| show "Retrieved Peer from API"
+          logDebugN "Retrieved Peer from API"
           path <- globalEnv
           write path <| config { peers = Just (NonEmpty.fromList peers) }
           return <| Just peer

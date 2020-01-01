@@ -70,11 +70,11 @@ login ::
   => Login.Options
   -> m ()
 login Login.Options {..} = do
-  logDebug <| show "Starting login sequence"
+  logDebugN "Starting login sequence"
   username <- getUsername username_option
   password <- getUserPassword password_option
 
-  logDebug <| show "Attempting API verification"
+  logDebugN "Attempting API verification"
   Client.Runner run <- Config.get
   let auth = BasicAuthData username password
 
@@ -88,7 +88,7 @@ login Login.Options {..} = do
       CLI.Error.put err "Authorization failed"
 
     Right _ok -> do
-      logDebug <| show "Auth Successful" -- TODO: FIgure out why the fudge I have to put show only for some
+      logDebugN "Auth Successful" -- TODO: FIgure out why the fudge I have to put show only for some
 
       envPath <- Env.getPath local_auth
 

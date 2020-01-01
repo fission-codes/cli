@@ -43,9 +43,9 @@ command cfg =
 -- | Return an IPNS address if the identifier is a URI
 handleIPNS :: Text -> CID
 handleIPNS identifier = case URI.parseURI (Text.unpack identifier) of
-  Just uri -> do
+  Just uri ->
     case uriAuthority uri of
-      Just auth -> do CID <| "/ipns/" <> (Text.pack <| uriRegName auth)
+      Just auth -> CID <| "/ipns/" <> (Text.pack <| uriRegName auth)
       Nothing -> CID identifier
   Nothing ->
     CID identifier
@@ -53,7 +53,6 @@ handleIPNS identifier = case URI.parseURI (Text.unpack identifier) of
 -- | Sync the current working directory to the server over IPFS
 down ::
   ( MonadReader   cfg m
-  , MonadIO           m
   , MonadUnliftIO     m
   , MonadLocalIPFS    m
   , MonadLogger       m

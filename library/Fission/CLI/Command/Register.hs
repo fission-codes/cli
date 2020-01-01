@@ -67,13 +67,13 @@ register' ::
   => Bool
   -> m ()
 register' local_auth = do
-  logDebug <| show "Starting registration sequence"
+  logDebugN "Starting registration sequence"
 
   username <- Fields.getRequired "Username"
   password <- Fields.getRequiredSecret "Password"
   rawEmail <- Fields.getRequired "Email"
 
-  logDebug <| show "Attempting registration"
+  logDebugN "Attempting registration"
   Client.Runner runner <- Config.get
 
   registerResult <- Cursor.withHidden
@@ -92,7 +92,7 @@ register' local_auth = do
       CLI.Error.put err "Authorization failed"
 
     Right _ok -> do
-      logDebug <| show "Register Successful"
+      logDebugN "Register Successful"
 
       let auth = BasicAuthData username password
       envPath <- Env.getPath local_auth

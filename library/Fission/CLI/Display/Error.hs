@@ -8,7 +8,7 @@ import qualified System.Console.ANSI as ANSI
 import qualified Fission.Internal.UTF8 as UTF8
 
 -- | Display a given error to the user and log an error to the debug log.
-put :: (MonadIO m, MonadReader cfg m, MonadLogger m, Show err) => err -> Text -> m ()
+put :: (MonadIO m, MonadLogger m, Show err) => err -> Text -> m ()
 put err msg = do
   logDebug <| displayShow err
   liftIO <| ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Red]

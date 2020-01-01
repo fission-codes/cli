@@ -13,10 +13,7 @@ import qualified Fission.CLI.Display.Error   as CLI.Error
 
 -- | The command to attach to the CLI tree
 command ::
-  ( MonadReader cfg m
-  , MonadIO         m
-  , MonadLogger     m
-  , MonadUnliftIO   m
+  ( MonadUnliftIO   m
   , HasLogFunc cfg
   )
   => cfg
@@ -31,14 +28,12 @@ command cfg =
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
 logout ::
   ( MonadReader cfg m
-  , MonadIO         m
   , MonadLogger     m
   , MonadUnliftIO   m
-  , HasLogFunc cfg
   )
   => m ()
 logout = do
-  logDebug <| show "Starting logout sequence"
+  logDebugN "Starting logout sequence"
 
   possibleSuccess <- Environment.removeConfigFile
 

@@ -51,7 +51,7 @@ extra-deps:
 - lzma-clib-5.2.2
 - text-time-0.2.0
 - git: https://github.com/fission-suite/web-api.git
-  commit: ef6d4d9e1d495f0343dc5e7d88d0451a61c69128
+  commit: a8147bcfeb84f64b97924825959b95773c2f3ab6
 - git: https://github.com/fission-suite/ipfs-haskell.git
   commit: c34151de90b76e16c9725ebc168489396de01948
 

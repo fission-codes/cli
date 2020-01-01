@@ -58,14 +58,13 @@ resetPassword' ::
   ( MonadReader    cfg m
   , MonadUnliftIO      m
   , MonadLogger        m
-  , HasLogFunc    cfg
   , Has Client.Runner cfg
   )
   => BasicAuthData
   -> ByteString
   -> m()
 resetPassword' auth newPassword = do
-  logDebug <| show "Attempting registration"
+  logDebugN "Attempting registration"
   Client.Runner runner <- Config.get
 
   resetResult <- Cursor.withHidden
