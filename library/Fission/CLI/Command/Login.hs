@@ -94,7 +94,8 @@ login Login.Options {..} = do
 
       if local_auth
         then
-          mempty { maybeUserAuth = Just auth }
+          mempty
+            |> mayUserAuthLens ?~ auth
             |> Env.Partial.writeMerge envPath
         else Env.init auth
 
