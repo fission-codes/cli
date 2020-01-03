@@ -1,5 +1,6 @@
 module Main (main) where
 
+import           Fission.Prelude
 import           RIO
 import qualified RIO.List as List
 
@@ -26,9 +27,7 @@ setup :: FilePath -> FilePath -> IO ()
 setup tmp src = do
   pwd    <- getCurrentDirectory
   hasTmp <- doesDirectoryExist tmp
-  if hasTmp
-     then removeDirectoryRecursive tmp
-     else return ()
+  when hasTmp do removeDirectoryRecursive tmp
 
   createDirectory tmp
   exts <- getExts
@@ -39,7 +38,7 @@ setup tmp src = do
     go :: FilePath -> ByteString -> DirTree ByteString -> IO ()
     go dirPath exts' = \case
       Failed { err } ->
-        error $ show err
+        error <| show err
 
       Dir { name, contents } -> do
         let path = dirPath <> "/" <> name
@@ -52,7 +51,7 @@ setup tmp src = do
 header :: [ByteString] -> ByteString
 header raw = mconcat
   [ "{-# LANGUAGE "
-  , mconcat $ List.intersperse ", " raw
+  , mconcat <| List.intersperse ", " raw
   , " #-}\n"
   ]
 
@@ -60,7 +59,7 @@ getExts :: IO [ByteString]
 getExts = do
   pkg <- decodeFileThrow "package.yaml" :: IO Value
   let exts = pkg ^. key "default-extensions" . _Array
-  return $ extract <$> toList exts
+  return <| extract <$> toList exts
   where
     extract (String txt) = encodeUtf8 txt
     extract _            = error "Malformed package.yaml"
