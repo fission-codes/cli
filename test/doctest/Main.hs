@@ -1,8 +1,8 @@
 module Main (main) where
 
 import           Fission.Prelude
-import           RIO
 import qualified RIO.List as List
+import           Control.Lens hiding ((<|))
 
 import Data.Aeson.Lens
 import Data.Yaml

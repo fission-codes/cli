@@ -93,8 +93,9 @@ login Login.Options {..} = do
       envPath <- Env.getPath local_auth
 
       if local_auth
-        then Env.Partial.writeMerge envPath
-          <| (mempty Env.Partial) { maybeUserAuth = Just auth }
+        then
+          mempty { maybeUserAuth = Just auth }
+            |> Env.Partial.writeMerge envPath
         else Env.init auth
 
       CLI.Success.putOk <| "Successfully logged in. Your credentials are in " <> textShow envPath
