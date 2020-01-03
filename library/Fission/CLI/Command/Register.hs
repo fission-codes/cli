@@ -98,9 +98,9 @@ register' local_auth = do
       envPath <- Env.getPath local_auth
 
       if local_auth
-      then Env.Partial.writeMerge envPath
-        <| (mempty Env.Partial) { maybeUserAuth = Just auth }
-      else Env.init auth
+        then Env.Partial.writeMerge envPath
+          <| (mempty Env.Partial) { maybeUserAuth = Just auth }
+        else Env.init auth
 
       CLI.Success.putOk <| "Registered & logged in. Your credentials are in " <> textShow envPath
 

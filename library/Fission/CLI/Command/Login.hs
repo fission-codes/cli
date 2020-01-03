@@ -88,14 +88,14 @@ login Login.Options {..} = do
       CLI.Error.put err "Authorization failed"
 
     Right _ok -> do
-      logDebugN "Auth Successful" -- TODO: FIgure out why the fudge I have to put show only for some
+      logDebugN "Auth Successful"
 
       envPath <- Env.getPath local_auth
 
       if local_auth
-      then Env.Partial.writeMerge envPath
-        <| (mempty Env.Partial) { maybeUserAuth = Just auth }
-      else Env.init auth
+        then Env.Partial.writeMerge envPath
+          <| (mempty Env.Partial) { maybeUserAuth = Just auth }
+        else Env.init auth
 
       CLI.Success.putOk <| "Successfully logged in. Your credentials are in " <> textShow envPath
 
