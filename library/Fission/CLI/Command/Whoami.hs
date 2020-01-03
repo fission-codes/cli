@@ -3,6 +3,7 @@ module Fission.CLI.Command.Whoami (command, whoami) where
 
 import           Fission.Prelude
 import           RIO.ByteString
+import           Data.Function
 
 import           Options.Applicative.Simple (addCommand)
 import           Servant

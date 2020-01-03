@@ -23,7 +23,7 @@ type API = "ipfs" :> "peers" :> Peer.API
 getPeers :: MonadReader cfg m
   => Has Client.Runner cfg
   => MonadIO m
-  => m (Either ClientError [IPFS.Peer])
+  => m (Either ClientError (NonEmpty IPFS.Peer))
 getPeers = do
   Client.Runner run <- Config.get
   liftIO
@@ -33,5 +33,5 @@ getPeers = do
     <| get
 
 -- | Retrieve a list of peers from the fission api
-get :: ClientM [IPFS.Peer]
+get :: ClientM (NonEmpty IPFS.Peer)
 get = client (Proxy :: Proxy API)

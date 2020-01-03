@@ -58,7 +58,7 @@ init auth = do
       let
         env = Env.Partial
           { maybeUserAuth = Just auth
-          , maybePeers = Just (NonEmpty.fromList peers)
+          , maybePeers = Just peers
           , maybeIgnored = Just ignoreDefault
           , maybeBuildDir = Nothing
           }
@@ -149,15 +149,11 @@ getOrRetrievePeer config =
           logDebugN "Unable to retrieve peers from the network"
           return Nothing
 
-        Right [] -> do
-          logDebugN "Network request was successful, but response contained no peers"
-          return Nothing
-
-        Right peers@(peer : _) -> do
+        Right peers -> do
           logDebugN "Retrieved Peer from API"
           path <- globalEnv
-          write path <| config { peers = Just (NonEmpty.fromList peers) }
-          return <| Just peer
+          write path <| config { peers = Just peers }
+          return <| Just <| head peers
 
 ignoreDefault :: IPFS.Ignored
 ignoreDefault =

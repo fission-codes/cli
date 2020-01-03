@@ -2,6 +2,7 @@
 module Fission.CLI.Command.Logout (command, logout) where
 
 import           Fission.Prelude
+import           Data.Function
 
 import           Options.Applicative.Simple (addCommand)
 

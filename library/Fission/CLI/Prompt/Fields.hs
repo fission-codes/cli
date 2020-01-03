@@ -17,12 +17,7 @@ import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Prompt.Error.Types as Prompt.Error
 
 -- | Prompt a user for a specific value
-getField ::
-  ( MonadReader       cfg m -- TODO remove Reader
-  , MonadIO               m
-  )
-  => ByteString
-  -> m ByteString
+getField :: MonadIO m => ByteString -> m ByteString
 getField fieldName = do
   putStr (fieldName <> ": ")
   getLine

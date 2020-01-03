@@ -2,6 +2,7 @@
 module Fission.CLI.Command.ResetPassword (command, resetPassword) where
 
 import           Fission.Prelude
+import           Data.Function
 
 import           Servant
 

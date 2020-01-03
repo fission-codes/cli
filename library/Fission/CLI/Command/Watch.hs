@@ -9,6 +9,7 @@ import           Fission.Prelude
 import           RIO.Directory
 import           RIO.Process (HasProcessContext)
 import qualified RIO.Text as Text
+import           Data.Function
 
 import Servant.Client
 
@@ -26,7 +27,7 @@ import           Network.IPFS.CID.Types
 import qualified Network.IPFS.Types as IPFS
 import           Fission.Internal.Orphanage.RIO ()
 
-import qualified Fission.AWS.Types  as AWS
+import qualified Fission.URL.DomainName.Types as URL
 
 import           Fission.Internal.Exception
 import           Fission.CLI.Display.Error as CLI.Error
@@ -131,7 +132,7 @@ pinAndUpdateDNS ::
   , HasFissionConnected  cfg
   )
   => CID
-  -> m (Either ClientError AWS.DomainName)
+  -> m (Either ClientError URL.DomainName)
 pinAndUpdateDNS cid =
   CLI.Pin.run cid >>= \case
     Left err -> do

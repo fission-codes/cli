@@ -49,7 +49,7 @@ swarmConnectWithRetry peer tries = IPFS.Peer.connect peer >>= \case
 
       Right peers -> do
         UTF8.putText "🛰 Unable to connect to the Fission IPFS peer, trying again...\n"
-        let peer' = head <| NonEmpty.fromList peers
+        let peer' = head peers
         swarmConnectWithRetry peer' (tries - 1)
 
 -- | Create a could not connect to Fission peer message for the terminal
