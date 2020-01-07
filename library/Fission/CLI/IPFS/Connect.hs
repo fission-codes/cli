@@ -31,8 +31,6 @@ swarmConnectWithRetry ::
   , MonadLocalIPFS         m
   , HasProcessContext  cfg
   , Has Client.Runner  cfg
-  , Has IPFS.Timeout   cfg
-  , Has IPFS.BinPath   cfg
   )
   => IPFS.Peer
   -> Int
