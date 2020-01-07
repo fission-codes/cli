@@ -95,8 +95,6 @@ watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
     forever <| liftIO <| threadDelay 1000000 -- Sleep main thread
 
 handleTreeChanges ::
-  -- ( MonadRIO cfg m
-  -- , MonadLocalIPFS m
   HasFissionConnected  cfg
   => MVar UTCTime
   -> MVar Text
