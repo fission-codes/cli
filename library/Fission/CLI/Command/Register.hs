@@ -78,7 +78,7 @@ register' local_auth = do
 
   registerResult <- Cursor.withHidden
                   . liftIO
-                  . CLI.Wait.waitFor2 "Registering..."
+                  . CLI.Wait.waitFor "Registering..."
                   . runner
                   . User.Client.register
                   <| User.Registration

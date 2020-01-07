@@ -78,8 +78,9 @@ login Login.Options {..} = do
   Client.Runner run <- Config.get
   let auth = BasicAuthData username password
 
-  -- TODO. Find out how to eliminate liftIO...
-  authResult <- liftIO . CLI.Wait.waitFor2 "Verifying your credentials"
+  authResult <- Cursor.withHidden
+              . liftIO
+              . CLI.Wait.waitFor "Verifying your credentials"
               . run <| User.Client.verify auth
 
   case authResult of
