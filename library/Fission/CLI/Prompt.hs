@@ -1,29 +1,42 @@
 module Fission.CLI.Prompt
   ( reask
   , reaskYN
+  , reaskWithError
   ) where
 
 import           Fission.Prelude
 import           RIO.ByteString as BS hiding (map, pack)
 import qualified Fission.Internal.UTF8 as UTF8
 import qualified Data.List as L
+import           Data.Function
 
--- | Continues prompting the user until they put in a valid response
-reask :: 
-  ( MonadIO m )
+reaskWithError ::
+  ( MonadIO m, MonadLogger m )
   => Text
   -> (ByteString -> Bool)
+  -> (() -> m ())
   -> m ByteString
-reask prompt check = do
+reaskWithError prompt check showError = do
   UTF8.putText prompt
   resp <- getLine
   if check resp
-    then return resp
-    else reask prompt check
+    then
+      return resp
+    else do
+      showError()
+      reaskWithError prompt check showError
+
+-- | Continues prompting the user until they put in a valid response
+reask ::
+  ( MonadIO m, MonadLogger m )
+  => Text
+  -> (ByteString -> Bool)
+  -> m ByteString
+reask prompt check = reaskWithError prompt check (const (return ()))
 
 -- | reask where valid responses are some form of yes/no
 reaskYN ::
-  ( MonadIO m )
+  ( MonadIO m, MonadLogger m )
   => Text
   -> m Bool
 reaskYN prompt = reask prompt ynTest

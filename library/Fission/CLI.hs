@@ -20,8 +20,8 @@ import qualified Fission.CLI.Command.Whoami        as Whoami
 
 -- | Top-level CLI description
 cli ::
-  ( MonadRIO    cfg m
-  , MonadUnliftIO m
+  ( MonadReader       cfg m
+  , MonadUnliftIO         m
   , HasLogFunc        cfg
   , HasProcessContext cfg
   , Has Client.Runner cfg
@@ -42,7 +42,7 @@ cli = do
     Whoami.command        cfg
   runCLI
   where
-    version     = "1.23.0"
+    version     = "1.23.1"
     description = "CLI to interact with Fission services"
     detail      = mconcat [ "Fission makes developing, deploying, updating "
                           , "and iterating on web applications quick and easy."

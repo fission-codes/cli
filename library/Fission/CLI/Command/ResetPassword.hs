@@ -2,13 +2,11 @@
 module Fission.CLI.Command.ResetPassword (command, resetPassword) where
 
 import           Fission.Prelude
+import           Data.Function
 
 import           Servant
 
-import qualified Data.Text as T
-
 import           Options.Applicative.Simple (addCommand)
-import           System.Console.Haskeline
 
 import qualified Fission.Config as Config
 import qualified Fission.Internal.UTF8 as UTF8
@@ -25,6 +23,7 @@ import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
+import qualified Fission.CLI.Prompt.Fields   as Fields
 
 import qualified Fission.CLI.Environment               as Environment
 import qualified Fission.CLI.Environment.Partial       as Env.Partial
@@ -44,27 +43,29 @@ command cfg =
     (pure ())
 
 -- | Register and login (i.e. save credentials to disk)
-resetPassword :: MonadRIO       cfg m
-              => MonadUnliftIO      m
-              => HasLoggedIn    cfg
-              => m ()
+resetPassword ::
+  ( MonadReader    cfg m
+  , MonadUnliftIO      m
+  , MonadLogger        m
+  , HasLoggedIn    cfg
+  )
+  => m ()
 resetPassword = do
   auth <- Config.get
-  liftIO (runInputT defaultSettings <| getPassword (Just '•') "New Password: ") >>= \case
-    Nothing ->
-      logError "Unable to read password"
+  newPassword <- Fields.getRequiredSecret "New Password"
+  resetPassword' auth newPassword
 
-    Just newPassword -> resetPassword' auth newPassword
-            
-resetPassword' :: MonadRIO          cfg m
-               => MonadUnliftIO         m
-               => HasLogFunc        cfg
-               => Has Client.Runner cfg
-               => BasicAuthData
-               -> String
-               -> m()
+resetPassword' ::
+  ( MonadReader    cfg m
+  , MonadUnliftIO      m
+  , MonadLogger        m
+  , Has Client.Runner cfg
+  )
+  => BasicAuthData
+  -> ByteString
+  -> m()
 resetPassword' auth newPassword = do
-  logDebug "Attempting registration"
+  logDebugN "Attempting registration"
   Client.Runner runner <- Config.get
 
   resetResult <- Cursor.withHidden
@@ -72,13 +73,14 @@ resetPassword' auth newPassword = do
                   . CLI.Wait.waitFor "Registering..."
                   . runner
                   . User.Client.resetPassword auth
-                  <| User.Password <| T.pack newPassword
+                  <| User.Password
+                  <| UTF8.textShow newPassword
 
   case resetResult of
     Left  err ->
       CLI.Error.put err "Password Reset failed"
 
-    Right (User.Password updatedPass) -> do
+    Right (User.Password updatedPass) ->
       Environment.findLocalAuth >>= \case
         Left _ -> Environment.couldNotRead
         Right path -> do

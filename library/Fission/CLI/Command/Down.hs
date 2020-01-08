@@ -12,7 +12,7 @@ import           Network.IPFS
 import qualified Network.IPFS.Get as IPFS
 import qualified Network.IPFS.Types       as IPFS
 import           Network.IPFS.CID.Types
-import           Fission.Internal.Orphanage.RIO () 
+import           Fission.Internal.Orphanage.RIO ()
 
 import           Fission.CLI.Config.Types
 
@@ -43,19 +43,19 @@ command cfg =
 -- | Return an IPNS address if the identifier is a URI
 handleIPNS :: Text -> CID
 handleIPNS identifier = case URI.parseURI (Text.unpack identifier) of
-  Just uri -> do
+  Just uri ->
     case uriAuthority uri of
-      Just auth -> do CID <| "/ipns/" <> (Text.pack <| uriRegName auth)
+      Just auth -> CID <| "/ipns/" <> (Text.pack <| uriRegName auth)
       Nothing -> CID identifier
   Nothing ->
     CID identifier
 
 -- | Sync the current working directory to the server over IPFS
 down ::
-  ( MonadRIO      cfg m
+  ( MonadReader   cfg m
   , MonadUnliftIO     m
   , MonadLocalIPFS    m
-  , HasLogFunc    cfg
+  , MonadLogger       m
   )
   => IPFS.CID
   -> m ()

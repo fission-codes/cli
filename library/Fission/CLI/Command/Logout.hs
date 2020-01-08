@@ -2,6 +2,7 @@
 module Fission.CLI.Command.Logout (command, logout) where
 
 import           Fission.Prelude
+import           Data.Function
 
 import           Options.Applicative.Simple (addCommand)
 
@@ -12,10 +13,12 @@ import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 
 -- | The command to attach to the CLI tree
-command :: MonadIO m
-        => HasLogFunc        cfg
-        => cfg
-        -> CommandM (m ())
+command ::
+  ( MonadUnliftIO   m
+  , HasLogFunc cfg
+  )
+  => cfg
+  -> CommandM (m ())
 command cfg =
   addCommand
     "logout"
@@ -24,12 +27,14 @@ command cfg =
     (pure ())
 
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
-logout :: MonadRIO          cfg m
-      => MonadUnliftIO         m
-      => HasLogFunc        cfg
-      => m ()
+logout ::
+  ( MonadReader cfg m
+  , MonadLogger     m
+  , MonadUnliftIO   m
+  )
+  => m ()
 logout = do
-  logDebug "Starting logout sequence"
+  logDebugN "Starting logout sequence"
 
   possibleSuccess <- Environment.removeConfigFile
 

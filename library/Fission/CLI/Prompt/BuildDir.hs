@@ -19,7 +19,7 @@ import           Fission.CLI.Environment.Partial.Types as Env
 --   * guessing a build dir from common static site generators
 --   * prompting the user with that build dir
 checkBuildDir ::
-  ( MonadIO m )
+  ( MonadIO m, MonadLogger m )
   => FilePath
   -> m FilePath
 checkBuildDir relPath = do
@@ -28,7 +28,7 @@ checkBuildDir relPath = do
     Just (envPath, buildDir) ->
       return <| (takeDirectory envPath) </> buildDir
     Nothing -> guessBuildDir relPath >>= \case
-      Nothing -> return relPath 
+      Nothing -> return relPath
       Just guess -> do
         buildDir <- promptBuildDir guess >>= \case
           True -> return guess
@@ -38,17 +38,17 @@ checkBuildDir relPath = do
         Env.Partial.writeMerge (absPath </> ".fission.yaml") updated
         return buildDir
 
--- | Find the closests .fission.yaml that contains a build_dir in it, and return the location of the env & build_dir 
+-- | Find the closests .fission.yaml that contains a build_dir in it, and return the location of the env & build_dir
 findEnv :: ( MonadIO m ) => FilePath -> m (Maybe (FilePath, FilePath))
 findEnv path = Env.findRecurse (isJust . maybeBuildDir) path >>= \case
   Nothing -> return Nothing
-  Just (envPath, env) -> do
+  Just (envPath, env) ->
     case maybeBuildDir env of
       Nothing -> return Nothing
       Just buildDir -> return <| Just (envPath, buildDir)
 
 -- | Prompt the user to see if they'd like to use a build folder instead of the root
-promptBuildDir :: ( MonadIO m ) => FilePath -> m Bool
+promptBuildDir :: ( MonadIO m, MonadLogger m ) => FilePath -> m Bool
 promptBuildDir path = do
   UTF8.putText <| "👷 We found a possible build dir: "
   liftIO <| ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]

@@ -22,7 +22,9 @@ import           Fission.CLI.Display.Success as CLI.Success
 import           Fission.CLI.Config.FissionConnected.Types
 
 run ::
-  ( MonadRIO             cfg m
+  ( MonadReader          cfg m
+  , MonadIO                  m
+  , MonadLogger              m
   , HasFissionConnected  cfg
   )
   => CID

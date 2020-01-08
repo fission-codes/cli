@@ -2,6 +2,7 @@ module Main (main) where
 
 import           Fission.Prelude
 import qualified RIO.List as List
+import           Control.Lens hiding ((<|))
 
 import Data.Aeson.Lens
 import Data.Yaml
@@ -26,9 +27,7 @@ setup :: FilePath -> FilePath -> IO ()
 setup tmp src = do
   pwd    <- getCurrentDirectory
   hasTmp <- doesDirectoryExist tmp
-  if hasTmp
-     then removeDirectoryRecursive tmp
-     else return ()
+  when hasTmp do removeDirectoryRecursive tmp
 
   createDirectory tmp
   exts <- getExts

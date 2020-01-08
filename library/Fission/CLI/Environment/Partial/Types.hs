@@ -1,4 +1,4 @@
-module Fission.CLI.Environment.Partial.Types (Partial (..)) where
+module Fission.CLI.Environment.Partial.Types (Partial (..), mayUserAuthLens) where
 
 import Fission.Prelude
 
@@ -13,7 +13,7 @@ data Partial = Partial
   , maybePeers    :: Maybe (NonEmpty IPFS.Peer)
   , maybeIgnored  :: Maybe (IPFS.Ignored)
   , maybeBuildDir :: Maybe (FilePath)
-  } 
+  }
 
 instance ToJSON Partial where
   toJSON Partial {..} = object <| catMaybes
@@ -48,3 +48,7 @@ instance Monoid Partial where
 
 getField :: (Partial -> Maybe field) -> Partial -> Partial -> Maybe field
 getField accessor a b = maybe (accessor a) Just (accessor b)
+
+mayUserAuthLens :: Functor f => (Maybe BasicAuthData -> f (Maybe BasicAuthData)) -> Partial -> f Partial
+mayUserAuthLens = lens maybeUserAuth \pEnv newAuth ->  pEnv { maybeUserAuth = newAuth }
+

@@ -38,13 +38,16 @@ import qualified Fission.Internal.UTF8 as UTF8
 import qualified Network.IPFS.Types as IPFS
 
 -- | Initialize the Environment file
-init :: MonadRIO cfg m
-     => HasLogFunc        cfg
-     => Has Client.Runner cfg
-     => BasicAuthData
-     -> m ()
+init ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
+  , Has Client.Runner cfg
+  )
+  => BasicAuthData
+  -> m ()
 init auth = do
-  logDebug "Initializing config file"
+  logDebugN "Initializing config file"
   path <- globalEnv
 
   Peers.getPeers >>= \case
@@ -55,7 +58,7 @@ init auth = do
       let
         env = Env.Partial
           { maybeUserAuth = Just auth
-          , maybePeers = Just (NonEmpty.fromList peers)
+          , maybePeers = Just peers
           , maybeIgnored = Just ignoreDefault
           , maybeBuildDir = Nothing
           }
@@ -125,33 +128,32 @@ removeConfigFile = do
 
 -- | Retrieves a Fission Peer from local config
 --   If not found we retrive from the network and store
-getOrRetrievePeer :: MonadRIO          cfg m
-                  => HasLogFunc        cfg
-                  => Has Client.Runner cfg
-                  => Environment
-                  -> m (Maybe IPFS.Peer)
+getOrRetrievePeer ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
+  , Has Client.Runner cfg
+  )
+  => Environment
+  -> m (Maybe IPFS.Peer)
 getOrRetrievePeer config =
   case peers config of
     Just prs -> do
-      logDebug "Retrieved Peer from .fission.yaml"
+      logDebugN "Retrieved Peer from .fission.yaml"
       return <| Just <| head prs
 
     Nothing ->
       Peers.getPeers >>= \case
         Left err -> do
           logError <| displayShow err
-          logDebug "Unable to retrieve peers from the network"
+          logDebugN "Unable to retrieve peers from the network"
           return Nothing
 
-        Right [] -> do
-          logDebug "Network request was successful, but response contained no peers"
-          return Nothing
-
-        Right peers@(peer : _) -> do
-          logDebug "Retrieved Peer from API"
+        Right peers -> do
+          logDebugN "Retrieved Peer from API"
           path <- globalEnv
-          write path <| config { peers = Just (NonEmpty.fromList peers) }
-          return <| Just peer
+          write path <| config { peers = Just peers }
+          return <| Just <| head peers
 
 ignoreDefault :: IPFS.Ignored
 ignoreDefault =

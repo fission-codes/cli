@@ -3,6 +3,7 @@ module Fission.CLI.Command.Whoami (command, whoami) where
 
 import           Fission.Prelude
 import           RIO.ByteString
+import           Data.Function
 
 import           Options.Applicative.Simple (addCommand)
 import           Servant
@@ -27,9 +28,12 @@ command cfg =
     (const <| runRIO cfg whoami)
     (pure ())
 
-whoami :: MonadRIO   cfg m
-       => HasLogFunc cfg
-       => m ()
+whoami ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
+  )
+  => m ()
 whoami =
   Environment.get >>= \case
     Left err -> do

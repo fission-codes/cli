@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-14.6
+resolver: lts-14.14
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -49,10 +49,10 @@ extra-deps:
 - raven-haskell-0.1.2.1
 - tasty-rerun-1.1.14
 - lzma-clib-5.2.2
+- text-time-0.2.0
+- ipfs-1.0.1
 - git: https://github.com/fission-suite/web-api.git
-  commit: 9b62ad6e806b30661280857685db215e68d72507
-- git: https://github.com/fission-suite/ipfs-haskell.git
-  commit: 2f704442f92eca6520e28e60ec1c85e23a387400
+  commit: 2590cd5f70dee1ab0eabcbbb992a04db0444654c
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

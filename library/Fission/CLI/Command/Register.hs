@@ -1,15 +1,9 @@
 -- | Register command
 module Fission.CLI.Command.Register (command, register) where
-
 import           Fission.Prelude
-import           RIO.ByteString
-
-import qualified Data.ByteString.Char8 as BS
-import qualified Data.Text as T
 
 import           Options.Applicative.Simple hiding (command)
 import           Servant
-import           System.Console.Haskeline
 
 import qualified Fission.Config as Config
 
@@ -29,6 +23,7 @@ import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
+import qualified Fission.CLI.Prompt.Fields   as Fields
 
 -- | The command to attach to the CLI tree
 command :: MonadUnliftIO m
@@ -44,75 +39,70 @@ command cfg =
     parseOptions
 
 -- | Register and login (i.e. save credentials to disk)
-register :: MonadRIO       cfg m
-        => MonadUnliftIO         m
-        => HasLogFunc        cfg
-        => Has Client.Runner cfg
-        => Register.Options
-        -> m ()
+register ::
+  ( MonadReader       cfg m
+  , MonadUnliftIO         m
+  , MonadLogger           m
+  , Has Client.Runner cfg
+  )
+  => Register.Options
+  -> m ()
 register Register.Options {..} = do
   envPath <- Env.getPath local_auth
   env <- Env.Partial.decode envPath
   case maybeUserAuth env of
     Nothing -> register' local_auth
-    Just _ -> 
+    Just _ ->
       CLI.Success.putOk <| mconcat
         [ "Already registered. Remove your credentials at "
-        ,  textShow envPath 
+        ,  textShow envPath
         , " if you want to re-register"]
 
-register' :: MonadRIO cfg m
-          => MonadUnliftIO         m
-          => HasLogFunc        cfg
-          => Has Client.Runner cfg
-          => Bool
-          -> m ()
+register' ::
+  ( MonadReader       cfg m
+  , MonadUnliftIO         m
+  , MonadLogger           m
+  , Has Client.Runner cfg
+  )
+  => Bool
+  -> m ()
 register' local_auth = do
-  logDebug "Starting registration sequence"
+  logDebugN "Starting registration sequence"
 
-  putStr "Username: "
-  username <- getLine
+  username <- Fields.getRequired "Username"
+  password <- Fields.getRequiredSecret "Password"
+  rawEmail <- Fields.getRequired "Email"
 
-  liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ") >>= \case
-    Nothing ->
-      logError "Unable to read password"
+  logDebugN "Attempting registration"
+  Client.Runner runner <- Config.get
 
-    Just password -> do
-      putStr "Email: "
-      rawEmail <- getLine
+  registerResult <- Cursor.withHidden
+                  . liftIO
+                  . CLI.Wait.waitFor "Registering..."
+                  . runner
+                  . User.Client.register
+                  <| User.Registration
+                      { username = decodeUtf8Lenient username
+                      , password = decodeUtf8Lenient password
+                      , email    = decodeUtf8Lenient rawEmail
+                      }
 
-      logDebug "Attempting registration"
-      Client.Runner runner <- Config.get
+  case registerResult of
+    Left  err ->
+      CLI.Error.put err "Authorization failed"
 
-      registerResult <- Cursor.withHidden
-                      . liftIO
-                      . CLI.Wait.waitFor "Registering..."
-                      . runner
-                      . User.Client.register
-                      <| User.Registration
-                          { username = decodeUtf8Lenient username
-                          , password = T.pack password
-                          , email    = if BS.null rawEmail
-                                          then Nothing
-                                          else Just <| decodeUtf8Lenient rawEmail
-                          }
+    Right _ok -> do
+      logDebugN "Register Successful"
 
-      case registerResult of
-        Left  err ->
-          CLI.Error.put err "Authorization failed"
+      let auth = BasicAuthData username password
+      envPath <- Env.getPath local_auth
 
-        Right _ok -> do
-          logDebug "Register Successful"
+      if local_auth
+        then Env.Partial.writeMerge envPath
+          <| (mempty Env.Partial) { maybeUserAuth = Just auth }
+        else Env.init auth
 
-          let auth = BasicAuthData username (BS.pack password)
-          envPath <- Env.getPath local_auth
-
-          if local_auth
-          then Env.Partial.writeMerge envPath
-            <| (mempty Env.Partial) { maybeUserAuth = Just auth }
-          else Env.init auth
-
-          CLI.Success.putOk <| "Registered & logged in. Your credentials are in " <> textShow envPath
+      CLI.Success.putOk <| "Registered & logged in. Your credentials are in " <> textShow envPath
 
 parseOptions :: Parser Register.Options
 parseOptions = do

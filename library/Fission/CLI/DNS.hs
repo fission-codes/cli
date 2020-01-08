@@ -16,16 +16,17 @@ import qualified Fission.CLI.Display.Loader  as CLI
 import           Fission.CLI.Display.Success as CLI.Success
 
 import           Network.IPFS.CID.Types
-import qualified Fission.AWS.Types as AWS
+import qualified Fission.URL.DomainName.Types as URL
 
 update ::
-  ( MonadRIO       cfg m
-  , HasLogFunc        cfg
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
   , Has Client.Runner cfg
   , Has BasicAuthData cfg
   )
   => CID
-  -> m (Either ClientError AWS.DomainName)
+  -> m (Either ClientError URL.DomainName)
 update cid@(CID hash) = do
   auth <- Config.get
   logDebug <| "Updating DNS to " <> display hash
@@ -33,7 +34,7 @@ update cid@(CID hash) = do
   Client.Runner runner <- Config.get
   update' runner auth cid >>= \case
     Right domain -> do
-      CLI.Success.dnsUpdated <| AWS.getDomainName domain
+      CLI.Success.dnsUpdated <| URL.getDomainName domain
       return <| Right domain
 
     Left err -> do
@@ -41,7 +42,7 @@ update cid@(CID hash) = do
       return <| Left err
 
 update' :: MonadIO m
-        => (ClientM AWS.DomainName -> IO a)
+        => (ClientM URL.DomainName -> IO a)
         -> BasicAuthData
         -> CID
         -> m a

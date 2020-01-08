@@ -2,13 +2,9 @@
 module Fission.CLI.Command.Login (command, login) where
 
 import           Fission.Prelude
-import           RIO.ByteString
-
-import qualified Data.ByteString.Char8 as BS
 
 import           Options.Applicative.Simple hiding (command)
 import           Servant
-import           System.Console.Haskeline
 
 import qualified Fission.Config as Config
 
@@ -26,6 +22,7 @@ import qualified Fission.CLI.Display.Cursor  as Cursor
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
+import qualified Fission.CLI.Prompt.Fields   as Fields
 
 -- | The command to attach to the CLI tree
 command :: MonadIO m
@@ -42,63 +39,67 @@ command cfg =
 
 
 -- | Get a users username, if not passed in via cli option prompt for input
-getUsername :: MonadRIO cfg m
-            => Maybe ByteString
-            -> m ByteString
+getUsername ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
+  )
+  => Maybe ByteString
+  -> m ByteString
 getUsername (Just username) = return username
-getUsername Nothing = do
-  putStr "Username: "
-  getLine
+getUsername Nothing = Fields.getRequired "Username"
 
 -- | Get a users password, if not passed in via cli option prompt for input
-getUserPassword :: MonadRIO cfg m
-                => Maybe ByteString
-                -> m (Maybe ByteString)
-getUserPassword (Just option_password) = return (Just option_password)
-getUserPassword Nothing = do
-  mayPassword <- liftIO (runInputT defaultSettings <| getPassword (Just '•') "Password: ")
-  return (fmap BS.pack mayPassword)
+getUserPassword ::
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
+  )
+  => Maybe ByteString
+  -> m ByteString
+getUserPassword (Just option_password) = return option_password
+getUserPassword Nothing = Fields.getRequiredSecret "Password"
 
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
-login :: MonadRIO          cfg m
-      => MonadUnliftIO         m
-      => HasLogFunc        cfg
-      => Has Client.Runner cfg
-      => Login.Options
-      -> m ()
+login ::
+  ( MonadReader       cfg m
+  , MonadUnliftIO         m
+  , MonadLogger           m
+  , Has Client.Runner cfg
+  )
+  => Login.Options
+  -> m ()
 login Login.Options {..} = do
-  logDebug "Starting login sequence"
-  username      <- getUsername username_option
-  maybePassword <- getUserPassword password_option
-  case maybePassword of
-    Nothing ->
-      logError "Unable to read password"
+  logDebugN "Starting login sequence"
+  username <- getUsername username_option
+  password <- getUserPassword password_option
 
-    Just password -> do
-      logDebug "Attempting API verification"
-      Client.Runner run <- Config.get
-      let auth = BasicAuthData username password
+  logDebugN "Attempting API verification"
+  Client.Runner run <- Config.get
+  let auth = BasicAuthData username password
 
-      authResult <- Cursor.withHidden
-                  . liftIO
-                  . CLI.Wait.waitFor "Verifying your credentials"
-                  . run <| User.Client.verify auth
+  authResult <- Cursor.withHidden
+              . liftIO
+              . CLI.Wait.waitFor "Verifying your credentials"
+              . run <| User.Client.verify auth
 
-      case authResult of
-        Left  err ->
-          CLI.Error.put err "Authorization failed"
+  case authResult of
+    Left  err ->
+      CLI.Error.put err "Authorization failed"
 
-        Right _ok -> do
-          logDebug "Auth Successful"
+    Right _ok -> do
+      logDebugN "Auth Successful"
 
-          envPath <- Env.getPath local_auth
+      envPath <- Env.getPath local_auth
 
-          if local_auth
-          then Env.Partial.writeMerge envPath
-            <| (mempty Env.Partial) { maybeUserAuth = Just auth }
-          else Env.init auth
+      if local_auth
+        then
+          mempty
+            |> mayUserAuthLens ?~ auth
+            |> Env.Partial.writeMerge envPath
+        else Env.init auth
 
-          CLI.Success.putOk <| "Successfully logged in. Your credentials are in " <> textShow envPath
+      CLI.Success.putOk <| "Successfully logged in. Your credentials are in " <> textShow envPath
 
 parseOptions :: Parser Login.Options
 parseOptions = do

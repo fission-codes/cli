@@ -11,9 +11,9 @@ import           Options.Applicative.Simple hiding (command)
 import           Fission.Internal.Exception
 
 import           Network.IPFS
-import qualified Network.IPFS.Add as IPFS
+import qualified Network.IPFS.Add         as IPFS
 import qualified Network.IPFS.Types       as IPFS
-import           Fission.Internal.Orphanage.RIO () 
+import           Fission.Internal.Orphanage.RIO ()
 
 import qualified Fission.Web.Client       as Client
 
@@ -29,12 +29,12 @@ import qualified Fission.Config           as Config
 
 -- | The command to attach to the CLI tree
 command ::
-  ( MonadIO m
+  ( MonadIO        m
   , HasLogFunc        cfg
   , HasProcessContext cfg
+  , Has Client.Runner cfg
   , Has IPFS.BinPath  cfg
   , Has IPFS.Timeout  cfg
-  , Has Client.Runner cfg
   )
   => cfg
   -> CommandM (m ())
@@ -47,7 +47,9 @@ command cfg =
 
 -- | Sync the current working directory to the server over IPFS
 up ::
-  ( MonadRIO            cfg m
+  ( MonadReader         cfg m
+  , MonadIO                 m
+  , MonadLogger             m
   , MonadLocalIPFS          m
   , HasFissionConnected cfg
   )
@@ -59,7 +61,7 @@ up Up.Options {..} = handleWith_ Error.put' do
   toAdd <- Prompt.checkBuildDir path
   absPath <- liftIO <| makeAbsolute toAdd
   logDebug <| "Starting single IPFS add locally of " <> displayShow absPath
-          
+
   cid     <- liftE <| IPFS.addDir ignoredFiles path
 
   unless dnsOnly do

@@ -7,6 +7,7 @@ module Fission.CLI.Display.Loader
   ) where
 
 import           Fission.Prelude
+import           Data.Function
 import qualified RIO.List as List
 
 import           Control.Concurrent hiding (threadDelay)

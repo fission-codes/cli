@@ -9,6 +9,7 @@ import           Fission.Prelude
 import           RIO.Directory
 import           RIO.Process (HasProcessContext)
 import qualified RIO.Text as Text
+import           Data.Function
 
 import Servant.Client
 
@@ -24,9 +25,9 @@ import           Network.IPFS
 import qualified Network.IPFS.Add as IPFS
 import           Network.IPFS.CID.Types
 import qualified Network.IPFS.Types as IPFS
-import           Fission.Internal.Orphanage.RIO () 
+import           Fission.Internal.Orphanage.RIO ()
 
-import qualified Fission.AWS.Types  as AWS
+import qualified Fission.URL.DomainName.Types as URL
 
 import           Fission.Internal.Exception
 import           Fission.CLI.Display.Error as CLI.Error
@@ -62,7 +63,9 @@ command cfg =
 
 -- | Continuously sync the current working directory to the server over IPFS
 watcher ::
-  ( MonadRIO            cfg m
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
   , MonadLocalIPFS          m
   , HasFissionConnected cfg
   )
@@ -92,8 +95,6 @@ watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
     forever <| liftIO <| threadDelay 1000000 -- Sleep main thread
 
 handleTreeChanges ::
-  -- ( MonadRIO cfg m
-  -- , MonadLocalIPFS m
   HasFissionConnected  cfg
   => MVar UTCTime
   -> MVar Text
@@ -123,11 +124,13 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
             void <| pinAndUpdateDNS cid
 
 pinAndUpdateDNS ::
-  ( MonadRIO             cfg m
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLogger           m
   , HasFissionConnected  cfg
   )
   => CID
-  -> m (Either ClientError AWS.DomainName)
+  -> m (Either ClientError URL.DomainName)
 pinAndUpdateDNS cid =
   CLI.Pin.run cid >>= \case
     Left err -> do

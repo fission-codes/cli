@@ -25,13 +25,12 @@ import qualified Network.IPFS.Types as IPFS
 
 -- | Connect to the Fission IPFS network with a set amount of retries
 swarmConnectWithRetry ::
-  ( MonadRIO cfg m
-  , MonadLocalIPFS m
-  , HasLogFunc        cfg
-  , HasProcessContext        cfg
-  , Has Client.Runner cfg
-  , Has IPFS.Timeout cfg
-  , Has IPFS.BinPath cfg
+  ( MonadReader        cfg m
+  , MonadIO                m
+  , MonadLogger            m
+  , MonadLocalIPFS         m
+  , HasProcessContext  cfg
+  , Has Client.Runner  cfg
   )
   => IPFS.Peer
   -> Int
@@ -48,7 +47,7 @@ swarmConnectWithRetry peer tries = IPFS.Peer.connect peer >>= \case
 
       Right peers -> do
         UTF8.putText "🛰 Unable to connect to the Fission IPFS peer, trying again...\n"
-        let peer' = head <| NonEmpty.fromList peers
+        let peer' = head peers
         swarmConnectWithRetry peer' (tries - 1)
 
 -- | Create a could not connect to Fission peer message for the terminal

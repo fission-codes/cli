@@ -82,33 +82,33 @@ packages:
   original:
     hackage: lzma-clib-5.2.2
 - completed:
-    cabal-file:
-      size: 19952
-      sha256: 940ea7c6e5e260a4d648d915e0245f89562fcf1b1b10f18896ef2903c2d89ac0
-    name: fission-web-api
-    version: 2.0.1
-    git: https://github.com/fission-suite/web-api.git
+    hackage: text-time-0.2.0@sha256:ae94071e29a5265f60de19c054a5308cee54a849678fbb8ea8d9657510c87b4c,1757
     pantry-tree:
-      size: 9631
-      sha256: 97583ba1870b30505778c6fe1e0d0d9215ed34ac5581ae91bde5c7ca30f96173
-    commit: 9b62ad6e806b30661280857685db215e68d72507
+      size: 637
+      sha256: 086572dbcc5663ab43f658634dcb3b08cc595690fba0a92387eeb7aa72651d6f
   original:
-    git: https://github.com/fission-suite/web-api.git
-    commit: 9b62ad6e806b30661280857685db215e68d72507
+    hackage: text-time-0.2.0
+- completed:
+    hackage: ipfs-1.0.1@sha256:2230e2a781b6dfb66f054ae384527e85031ed401deb70fca3db7b7e22ecaaceb,5363
+    pantry-tree:
+      size: 3558
+      sha256: f01edc360223143d3a861ef2787840c0672371807df84e8164c632791f0c5f02
+  original:
+    hackage: ipfs-1.0.1
 - completed:
     cabal-file:
-      size: 5025
-      sha256: c41389ecbce8472cacebe180f29b572013013a76e7adead1505bad377e769ed7
-    name: ipfs
-    version: 1.0.0
-    git: https://github.com/fission-suite/ipfs-haskell.git
+      size: 21505
+      sha256: b787be3ea8e789b652044cc8fb020337344243bc3c9ae262c7da95f45c3f4cac
+    name: fission-web-api
+    version: 2.0.6
+    git: https://github.com/fission-suite/web-api.git
     pantry-tree:
-      size: 4662
-      sha256: 360de0ebb61340ee6b6cce63e667f0f7ec5b99a3cb9ba479b54cd79e95682bb2
-    commit: 2f704442f92eca6520e28e60ec1c85e23a387400
+      size: 10445
+      sha256: bc0e8bc464a463334d0ce861396f48a67440e9f0c06ed90e9191343fc2e600ec
+    commit: 2590cd5f70dee1ab0eabcbbb992a04db0444654c
   original:
-    git: https://github.com/fission-suite/ipfs-haskell.git
-    commit: 2f704442f92eca6520e28e60ec1c85e23a387400
+    git: https://github.com/fission-suite/web-api.git
+    commit: 2590cd5f70dee1ab0eabcbbb992a04db0444654c
 snapshots:
 - completed:
     size: 525663

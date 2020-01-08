@@ -25,8 +25,10 @@ import qualified Fission.CLI.IPFS.Connect      as Connect
 -- Takes a @FissionConnected@-dependant action, and lifts it into an environment that
 -- contains a superset of the environment
 ensure ::
-  ( MonadRIO          cfg m
-  , MonadLocalIPFS m
+  ( MonadReader       cfg m
+  , MonadIO               m
+  , MonadLocalIPFS        m
+  , MonadLogger           m
   , HasLogFunc        cfg
   , HasProcessContext cfg
   , Has IPFS.BinPath  cfg
@@ -44,7 +46,7 @@ ensure action = do
 
   -- Get our stored user config
   Environment.get >>= \case
-    Right config -> do
+    Right config ->
       Environment.getOrRetrievePeer config >>= \case
         Just _peer -> do
           let _userAuth     = Environment.userAuth config
@@ -64,7 +66,7 @@ ensure action = do
               return <| Left CannotConnect
 
         Nothing -> do
-          logError "Could not locate the Fission IPFS network"
+          logErrorN "Could not locate the Fission IPFS network"
           return <| Left PeersNotFound
 
     Left err -> do
