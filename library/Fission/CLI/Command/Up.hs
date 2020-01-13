@@ -49,8 +49,6 @@ up ::
   => Up.Options
   -> m ()
 up Up.Options {..} = handleWith_ Error.put' do
-  -- @@TODO: Fix this error
-  -- let ignoredFiles = []
   ignoredFiles <- getIgnoredFiles
 
   toAdd <- Prompt.checkBuildDir path

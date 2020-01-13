@@ -25,7 +25,6 @@ import qualified Fission.CLI.IPFS.Connect      as Connect
 --
 -- Takes a @Connected@-dependant action, and lifts it into an environment that
 -- contains a superset of the environment
-
 runConnected ::
   MonadIO m
   => BaseConfig
@@ -87,59 +86,3 @@ liftConfig BaseConfig {..} =
       logDebug <| displayShow err
       Environment.couldNotRead
       return <| Left NotFissionConnected
-
-
-
-
-
-
--- ensure ::
---   ( MonadReader       cfg m
---   , MonadIO               m
---   , MonadLocalIPFS        m
---   , MonadLogger           m
---   , HasLogFunc        cfg
---   , HasProcessContext cfg
---   , Has IPFS.BinPath  cfg
---   , Has IPFS.Timeout  cfg
---   , Has Client.Runner cfg
---   )
---   => RIO FissionConnected a
---   -> m (Either Error a)
--- ensure action = do
---   _logFunc     :: LogFunc        <- view logFuncL
---   _processCtx  :: ProcessContext <- view processContextL
---   _fissionAPI  :: Client.Runner  <- Config.get
---   _ipfsPath    :: IPFS.BinPath   <- Config.get
---   _ipfsTimeout :: IPFS.Timeout   <- Config.get
-
---   -- Get our stored user config
---   Environment.get >>= \case
---     Right config ->
---       Environment.getOrRetrievePeer config >>= \case
---         Just _peer -> do
---           let _userAuth     = Environment.userAuth config
---           let _ignoredFiles = Environment.ignored config
-
---           -- Connect the local IPFS node to the Fission network
---           Connect.swarmConnectWithRetry _peer 1 >>= \case
---             Right _ -> do
---               -- All setup and ready to run!
---               result <- liftIO <| runRIO FissionConnected {..} action
---               return <| Right result
-
---             Left err -> do
---               -- We were unable to connect!
---               logError <| displayShow err
---               Connect.couldNotSwarmConnect
---               return <| Left CannotConnect
-
---         Nothing -> do
---           logErrorN "Could not locate the Fission IPFS network"
---           return <| Left PeersNotFound
-
---     Left err -> do
---       -- We were unable to read the users config
---       logDebug <| displayShow err
---       Environment.couldNotRead
---       return <| Left NotFissionConnected
