@@ -3,12 +3,9 @@ module Fission.CLI.DNS (update) where
 
 import Fission.Prelude
 
-import Servant
 import Servant.Client
 
-import qualified Fission.Config as Config
-
-import qualified Fission.Web.Client      as Client
+import           Fission.Web.Client.Auth
 import qualified Fission.Web.DNS.Client  as DNS.Client
 
 import           Fission.CLI.Display.Error   as CLI.Error
@@ -19,20 +16,22 @@ import           Network.IPFS.CID.Types
 import qualified Fission.URL.DomainName.Types as URL
 
 update ::
-  ( MonadReader       cfg m
-  , MonadIO               m
+  ( MonadUnliftIO         m
+  , MonadAuthedClient    m
   , MonadLogger           m
-  , Has Client.Runner cfg
-  , Has BasicAuthData cfg
   )
   => CID
   -> m (Either ClientError URL.DomainName)
 update cid@(CID hash) = do
-  auth <- Config.get
   logDebug <| "Updating DNS to " <> display hash
 
-  Client.Runner runner <- Config.get
-  update' runner auth cid >>= \case
+  auth <- getAuth
+
+  result <- CLI.withLoader 50000
+            <| run
+            <| DNS.Client.update auth cid
+
+  case result of
     Right domain -> do
       CLI.Success.dnsUpdated <| URL.getDomainName domain
       return <| Right domain
@@ -40,13 +39,3 @@ update cid@(CID hash) = do
     Left err -> do
       CLI.Error.put' err
       return <| Left err
-
-update' :: MonadIO m
-        => (ClientM URL.DomainName -> IO a)
-        -> BasicAuthData
-        -> CID
-        -> m a
-update' runner auth cid =
-  liftIO . CLI.withLoader 50000
-         . runner
-         <| DNS.Client.update auth cid

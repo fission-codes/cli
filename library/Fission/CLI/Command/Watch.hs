@@ -7,7 +7,6 @@ module Fission.CLI.Command.Watch
 
 import           Fission.Prelude
 import           RIO.Directory
-import           RIO.Process (HasProcessContext)
 import qualified RIO.Text as Text
 import           Data.Function
 
@@ -18,21 +17,20 @@ import           System.FSNotify as FS
 
 import qualified Fission.Internal.UTF8 as UTF8
 
-import qualified Fission.Web.Client       as Client
+import           Fission.Web.Client.Auth  as Client
 import qualified Fission.Time             as Time
 
 import           Network.IPFS
 import qualified Network.IPFS.Add as IPFS
 import           Network.IPFS.CID.Types
-import qualified Network.IPFS.Types as IPFS
-import           Fission.Internal.Orphanage.RIO ()
 
 import qualified Fission.URL.DomainName.Types as URL
 
 import           Fission.Internal.Exception
 import           Fission.CLI.Display.Error as CLI.Error
 
-import qualified Fission.CLI.Config.FissionConnected as FissionConnected
+import           Fission.CLI.Config.Base
+import           Fission.CLI.Config.Connected
 
 import           Fission.CLI.Command.Watch.Types as Watch
 import qualified Fission.CLI.Prompt.BuildDir  as Prompt
@@ -40,40 +38,33 @@ import           Fission.CLI.Config.Types
 import qualified Fission.CLI.IPFS.Pin            as CLI.Pin
 import qualified Fission.CLI.DNS                 as CLI.DNS
 
-import           Fission.CLI.Config.FissionConnected
-import qualified Fission.Config           as Config
+import           Fission.CLI.Environment
 
 -- | The command to attach to the CLI tree
 command ::
-  ( MonadIO m
-  , HasLogFunc        cfg
-  , Has Client.Runner cfg
-  , HasProcessContext cfg
-  , Has IPFS.BinPath  cfg
-  , Has IPFS.Timeout  cfg
-  )
-  => cfg
+  MonadIO m
+  => BaseConfig
   -> CommandM (m ())
 command cfg =
   addCommand
     "watch"
     "Keep your working directory in sync with the IPFS network"
-    (\options -> void <| runRIO cfg <| FissionConnected.ensure <| watcher options)
+    (\options -> void <| runConnected cfg <| watcher options cfg)
     parseOptions
 
 -- | Continuously sync the current working directory to the server over IPFS
 watcher ::
-  ( MonadReader       cfg m
-  , MonadIO               m
-  , MonadLogger           m
-  , MonadLocalIPFS          m
-  , HasFissionConnected cfg
+  ( MonadUnliftIO      m
+  , MonadLogger        m
+  , MonadLocalIPFS     m
+  , MonadEnvironment   m
+  , MonadAuthedClient  m
   )
   => Watch.Options
+  -> BaseConfig
   -> m ()
-watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
-  cfg            <- ask
-  ignoredFiles :: IPFS.Ignored <- Config.get
+watcher Watch.Options {..} cfg = handleWith_ CLI.Error.put' do
+  ignoredFiles <- getIgnoredFiles
 
   toAdd <- Prompt.checkBuildDir path
   absPath        <- makeAbsolute toAdd
@@ -84,26 +75,27 @@ watcher Watch.Options {..} = handleWith_ CLI.Error.put' do
   UTF8.putText <| "👀 Watching " <> Text.pack absPath <> " for changes...\n"
 
   when (not dnsOnly) do
-    void . liftE <| CLI.Pin.run cid
+    void . liftE <| CLI.Pin.add cid
 
   liftE <| CLI.DNS.update cid
+
+  cfg' <- liftE <| liftConfig cfg
 
   liftIO <| FS.withManager \watchMgr -> do
     hashCache <- newMVar hash
     timeCache <- newMVar =<< getCurrentTime
-    void <| handleTreeChanges timeCache hashCache watchMgr cfg absPath
+    void <| handleTreeChanges timeCache hashCache watchMgr cfg' absPath
     forever <| liftIO <| threadDelay 1000000 -- Sleep main thread
 
 handleTreeChanges ::
-  HasFissionConnected  cfg
-  => MVar UTCTime
+     MVar UTCTime
   -> MVar Text
   -> WatchManager
-  -> cfg
+  -> ConnectedConfig
   -> FilePath
   -> IO StopListening
 handleTreeChanges timeCache hashCache watchMgr cfg dir =
-  FS.watchTree watchMgr dir (const True) \_ -> runRIO cfg do
+  FS.watchTree watchMgr dir (const True) \_ -> runConnected' cfg do
     now     <- getCurrentTime
     oldTime <- readMVar timeCache
 
@@ -124,15 +116,14 @@ handleTreeChanges timeCache hashCache watchMgr cfg dir =
             void <| pinAndUpdateDNS cid
 
 pinAndUpdateDNS ::
-  ( MonadReader       cfg m
-  , MonadIO               m
-  , MonadLogger           m
-  , HasFissionConnected  cfg
+  ( MonadUnliftIO      m
+  , MonadAuthedClient m
+  , MonadLogger        m
   )
   => CID
   -> m (Either ClientError URL.DomainName)
 pinAndUpdateDNS cid =
-  CLI.Pin.run cid >>= \case
+  CLI.Pin.add cid >>= \case
     Left err -> do
       logError <| displayShow err
       return <| Left err

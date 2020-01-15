@@ -5,13 +5,12 @@ module Fission.CLI.IPFS.Connect
   ) where
 
 import           Fission.Prelude
-import           RIO.Process (HasProcessContext)
 
 import qualified System.Console.ANSI as ANSI
 import           Data.List.NonEmpty as NonEmpty hiding ((<|))
 
+import           Fission.Web.Client
 import           Fission.Web.Client.Peers as Peers
-import qualified Fission.Web.Client.Types as Client
 
 import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
@@ -25,12 +24,10 @@ import qualified Network.IPFS.Types as IPFS
 
 -- | Connect to the Fission IPFS network with a set amount of retries
 swarmConnectWithRetry ::
-  ( MonadReader        cfg m
-  , MonadIO                m
-  , MonadLogger            m
-  , MonadLocalIPFS         m
-  , HasProcessContext  cfg
-  , Has Client.Runner  cfg
+  ( MonadUnliftIO  m
+  , MonadLogger    m
+  , MonadWebClient m
+  , MonadLocalIPFS m
   )
   => IPFS.Peer
   -> Int

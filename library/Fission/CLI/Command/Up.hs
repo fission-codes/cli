@@ -4,7 +4,6 @@ module Fission.CLI.Command.Up (command, up) where
 import           Fission.Prelude
 
 import           RIO.Directory
-import           RIO.Process (HasProcessContext)
 
 import           Options.Applicative.Simple hiding (command)
 
@@ -12,10 +11,8 @@ import           Fission.Internal.Exception
 
 import           Network.IPFS
 import qualified Network.IPFS.Add         as IPFS
-import qualified Network.IPFS.Types       as IPFS
-import           Fission.Internal.Orphanage.RIO ()
 
-import qualified Fission.Web.Client       as Client
+import           Fission.Web.Client.Auth
 
 import           Fission.CLI.Command.Up.Types as Up
 import qualified Fission.CLI.Display.Error    as Error
@@ -24,39 +21,35 @@ import qualified Fission.CLI.IPFS.Pin         as CLI.Pin
 import qualified Fission.CLI.DNS              as CLI.DNS
 
 import           Fission.CLI.Config.Types
-import           Fission.CLI.Config.FissionConnected  as FissionConnected
-import qualified Fission.Config           as Config
+import           Fission.CLI.Config.Base
+import           Fission.CLI.Config.Connected
+
+import           Fission.CLI.Environment
 
 -- | The command to attach to the CLI tree
 command ::
-  ( MonadIO        m
-  , HasLogFunc        cfg
-  , HasProcessContext cfg
-  , Has Client.Runner cfg
-  , Has IPFS.BinPath  cfg
-  , Has IPFS.Timeout  cfg
-  )
-  => cfg
+  MonadIO m
+  => BaseConfig
   -> CommandM (m ())
 command cfg =
   addCommand
     "up"
     "Keep your current working directory up"
-    (\options -> void <| runRIO cfg <| FissionConnected.ensure <| up options)
+    (\options -> void <| runConnected cfg <| up options)
     parseOptions
 
 -- | Sync the current working directory to the server over IPFS
 up ::
-  ( MonadReader         cfg m
-  , MonadIO                 m
-  , MonadLogger             m
-  , MonadLocalIPFS          m
-  , HasFissionConnected cfg
+  ( MonadUnliftIO      m
+  , MonadLogger        m
+  , MonadLocalIPFS     m
+  , MonadEnvironment   m
+  , MonadAuthedClient  m
   )
   => Up.Options
   -> m ()
 up Up.Options {..} = handleWith_ Error.put' do
-  ignoredFiles :: IPFS.Ignored <- Config.get
+  ignoredFiles <- getIgnoredFiles
 
   toAdd <- Prompt.checkBuildDir path
   absPath <- liftIO <| makeAbsolute toAdd
@@ -65,7 +58,7 @@ up Up.Options {..} = handleWith_ Error.put' do
   cid     <- liftE <| IPFS.addDir ignoredFiles path
 
   unless dnsOnly do
-    void . liftE <| CLI.Pin.run cid
+    void . liftE <| CLI.Pin.add cid
 
   liftE <| CLI.DNS.update cid
 

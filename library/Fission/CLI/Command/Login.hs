@@ -6,15 +6,14 @@ import           Fission.Prelude
 import           Options.Applicative.Simple hiding (command)
 import           Servant
 
-import qualified Fission.Config as Config
-
+import           Fission.Web.Client
 import           Fission.Web.Client.User as User.Client
-import qualified Fission.Web.Client.Types as Client
 
 import qualified Fission.CLI.Environment               as Env
 import           Fission.CLI.Environment.Partial.Types as Env
 import qualified Fission.CLI.Environment.Partial       as Env.Partial
 
+import           Fission.CLI.Config.Base
 import           Fission.CLI.Config.Types
 
 import           Fission.CLI.Command.Login.Types as Login
@@ -25,47 +24,22 @@ import qualified Fission.CLI.Display.Wait    as CLI.Wait
 import qualified Fission.CLI.Prompt.Fields   as Fields
 
 -- | The command to attach to the CLI tree
-command :: MonadIO m
-        => HasLogFunc        cfg
-        => Has Client.Runner cfg
-        => cfg
-        -> CommandM (m ())
+command ::
+  MonadIO m
+  => BaseConfig
+  -> CommandM (m ())
 command cfg =
   addCommand
     "login"
     "Add your Fission credentials"
-    (\options -> void <| runRIO cfg <| login options)
+    (\options -> void <| runBase cfg <| login options)
     parseOptions
-
-
--- | Get a users username, if not passed in via cli option prompt for input
-getUsername ::
-  ( MonadReader       cfg m
-  , MonadIO               m
-  , MonadLogger           m
-  )
-  => Maybe ByteString
-  -> m ByteString
-getUsername (Just username) = return username
-getUsername Nothing = Fields.getRequired "Username"
-
--- | Get a users password, if not passed in via cli option prompt for input
-getUserPassword ::
-  ( MonadReader       cfg m
-  , MonadIO               m
-  , MonadLogger           m
-  )
-  => Maybe ByteString
-  -> m ByteString
-getUserPassword (Just option_password) = return option_password
-getUserPassword Nothing = Fields.getRequiredSecret "Password"
 
 -- | Login (i.e. save credentials to disk). Validates credentials agianst the server.
 login ::
-  ( MonadReader       cfg m
-  , MonadUnliftIO         m
+  ( MonadUnliftIO         m
+  , MonadWebClient        m
   , MonadLogger           m
-  , Has Client.Runner cfg
   )
   => Login.Options
   -> m ()
@@ -75,11 +49,10 @@ login Login.Options {..} = do
   password <- getUserPassword password_option
 
   logDebugN "Attempting API verification"
-  Client.Runner run <- Config.get
+
   let auth = BasicAuthData username password
 
   authResult <- Cursor.withHidden
-              . liftIO
               . CLI.Wait.waitFor "Verifying your credentials"
               . run <| User.Client.verify auth
 
@@ -100,6 +73,26 @@ login Login.Options {..} = do
         else Env.init auth
 
       CLI.Success.putOk <| "Successfully logged in. Your credentials are in " <> textShow envPath
+
+-- | Get a users username, if not passed in via cli option prompt for input
+getUsername ::
+  ( MonadIO               m
+  , MonadLogger           m
+  )
+  => Maybe ByteString
+  -> m ByteString
+getUsername (Just username) = return username
+getUsername Nothing = Fields.getRequired "Username"
+
+-- | Get a users password, if not passed in via cli option prompt for input
+getUserPassword ::
+  ( MonadIO               m
+  , MonadLogger           m
+  )
+  => Maybe ByteString
+  -> m ByteString
+getUserPassword (Just option_password) = return option_password
+getUserPassword Nothing = Fields.getRequiredSecret "Password"
 
 parseOptions :: Parser Login.Options
 parseOptions = do

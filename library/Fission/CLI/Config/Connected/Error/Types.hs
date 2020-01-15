@@ -1,4 +1,4 @@
-module Fission.CLI.Config.FissionConnected.Error.Types (Error (..)) where
+module Fission.CLI.Config.Connected.Error.Types (Error (..)) where
 
 import           Fission.Prelude
 

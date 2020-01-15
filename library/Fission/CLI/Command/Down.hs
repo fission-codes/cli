@@ -2,7 +2,6 @@
 module Fission.CLI.Command.Down (command, down) where
 
 import           Fission.Prelude
-import           RIO.Process (HasProcessContext)
 import           Network.URI as URI
 import           Options.Applicative.Simple (addCommand)
 import           Options.Applicative (strArgument, metavar, help)
@@ -12,8 +11,8 @@ import           Network.IPFS
 import qualified Network.IPFS.Get as IPFS
 import qualified Network.IPFS.Types       as IPFS
 import           Network.IPFS.CID.Types
-import           Fission.Internal.Orphanage.RIO ()
 
+import           Fission.CLI.Config.Base
 import           Fission.CLI.Config.Types
 
 import qualified Fission.CLI.Display.Success as CLI.Success
@@ -22,19 +21,14 @@ import qualified Fission.CLI.Display.Wait    as CLI.Wait
 
 -- | The command to attach to the CLI tree
 command ::
-  ( MonadIO m
-  , HasLogFunc        cfg
-  , HasProcessContext cfg
-  , Has IPFS.BinPath  cfg
-  , Has IPFS.Timeout  cfg
-  )
-  => cfg
+  MonadIO m
+  => BaseConfig
   -> CommandM (m ())
 command cfg =
   addCommand
     "down"
     "Pull a ipfs or ipns object down to your system"
-    (\cid -> runRIO cfg <| down cid)
+    (\cid -> runBase cfg <| down cid)
     (strArgument <| mconcat
       [ metavar "ContentID"
       , help "The CID of the IPFS object you want to download"
@@ -52,8 +46,7 @@ handleIPNS identifier = case URI.parseURI (Text.unpack identifier) of
 
 -- | Sync the current working directory to the server over IPFS
 down ::
-  ( MonadReader   cfg m
-  , MonadUnliftIO     m
+  ( MonadUnliftIO     m
   , MonadLocalIPFS    m
   , MonadLogger       m
   )
