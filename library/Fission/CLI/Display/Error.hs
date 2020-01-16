@@ -27,6 +27,8 @@ put' err = put err <| mconcat
   , "Fission support at https://github.com/fission-suite/web-api/issues/new"
   ]
 
+-- | Display an error message to a user encouraging them to run `fission setup`
+--   Error depends on if they have basic auth saved somewhere (ie if they are an existing user)
 notConnected :: (MonadIO m, MonadLogger m, Show err) => err ->  m ()
 notConnected err = 
   Env.Partial.findBasicAuth >>= \case
