@@ -6,14 +6,15 @@ module Fission.Web.Client.JWT
 
 import Fission.Prelude
 
-import Servant hiding (addHeader)
 import Servant.Client.Core
 
 import qualified Data.ByteString.Lazy   as BS.Lazy
 import qualified Data.ByteString.Base64 as Base64
 
 import           Fission.Web.Auth.JWT.Types  as JWT
-import qualified Fission.Web.Auth.Types      as Auth
+import           Fission.Web.Auth.Types      as Auth
+
+import qualified Fission.User.DID as DID
 
 import qualified Fission.Key.Store as Key
 import qualified Fission.Key.Error as Key
@@ -23,29 +24,42 @@ import           Fission.Time
 import qualified Crypto.PubKey.Ed25519   as Ed
 import qualified Fission.Internal.Crypto as Crypto
 
-type instance AuthClientData (AuthProtect "higher-order") = ()
-type instance AuthClientData (AuthProtect "register-did") = ()
+import qualified Fission.Internal.Orphanage.ClientM ()
 
-getSigAuth :: MonadIO m => MonadThrow m => m (AuthenticatedRequest (Auth.HigherOrder))
+getSigAuth ::
+  ( MonadIO m
+  , MonadTime m
+  , MonadThrow m
+  )
+  => m (AuthenticatedRequest (Auth.HigherOrder))
 getSigAuth = mkAuthReq >>= \case
   Left err -> throwM err
-  Right authReq -> return (mkAuthenticatedRequest () authReq)
+  Right authReq -> return (mkAuthenticatedRequest (Nothing) \_ -> authReq)
 
-getRegisterAuth :: MonadIO m => MonadThrow m => m (AuthenticatedRequest (Auth.RegisterDid))
+getRegisterAuth :: 
+  ( MonadIO m
+  , MonadTime m
+  , MonadThrow m
+  )
+  => m (AuthenticatedRequest (Auth.RegisterDid))
 getRegisterAuth = mkAuthReq >>= \case
   Left err -> throwM err
-  Right authReq -> return (mkAuthenticatedRequest () authReq)
+  Right authReq -> return (mkAuthenticatedRequest () \_ -> authReq)
 
-mkAuthReq :: MonadIO m => m (Either Key.Error (() -> Request -> Request))
+mkAuthReq ::
+  ( MonadIO m
+  , MonadTime m
+  )
+  => m (Either Key.Error (Request -> Request))
 mkAuthReq = do
   time <- getCurrentPOSIXTime
   Key.readEd >>= \case
     Left err -> return <| Left err
-    Right sk -> return <| Right <| \_t req -> do
+    Right sk -> return <| Right <| \req -> do
       let
         pubkey = Ed.toPublic sk
         payload = JWT.Payload
-          { iss = "did:nacl:" <> Crypto.toBase64 pubkey
+          { iss = DID.fromPubkey pubkey
           , nbf = time
           , exp = time + 300
           } 

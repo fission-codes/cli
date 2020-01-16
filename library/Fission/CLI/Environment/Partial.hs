@@ -69,7 +69,8 @@ toFull partial =
 
 fromFull :: Environment -> Env.Partial
 fromFull env = Env.Partial
-  { maybePeers = peers env
+  { maybeUserAuth = Nothing
+  , maybePeers = peers env
   , maybeIgnored = Just <| ignored env
   , maybeBuildDir = buildDir env
   }

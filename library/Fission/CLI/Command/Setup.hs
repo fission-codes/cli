@@ -4,10 +4,13 @@ module Fission.CLI.Command.Setup (command, setup) where
 import           Fission.Prelude
 
 import           Options.Applicative.Simple (addCommand)
+import           Servant.API
 
 import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Prompt          as Prompt
+
+import qualified Fission.CLI.Environment as Env
 
 import qualified Fission.Internal.UTF8 as UTF8
 
@@ -17,6 +20,8 @@ import qualified Fission.Web.Client.User  as User.Client
 import qualified Fission.User.Username.Types     as User
 import qualified Fission.User.Email.Types        as User
 import qualified Fission.User.Registration.Types as User
+
+import qualified Fission.User.DID as DID
 
 import           Fission.CLI.Config.Types
 import           Fission.CLI.Config.Base
@@ -41,7 +46,7 @@ setup ::
   , MonadWebClient m
   )
   => m ()
-setup = do
+setup =
   Key.exists >>= \case
     True -> do 
       authResult <- Client.run <| User.Client.verify
@@ -51,12 +56,14 @@ setup = do
         Right (User.Username username) ->
           CLI.Success.loggedInAs <| username
 
-    False -> do
-      username <- Prompt.reaskNotEmpty' "Username: "
-      email <- Prompt.reaskNotEmpty' "Email: "
-      createAccount username email
-
-  return ()
+    False ->
+      Env.findBasicAuth >>= \case
+        Nothing -> do
+          username <- Prompt.reaskNotEmpty' "Username: "
+          email <- Prompt.reaskNotEmpty' "Email: "
+          createAccount username email
+        Just auth -> 
+          updateDID auth 
 
 createAccount ::
   ( MonadIO        m
@@ -87,11 +94,45 @@ createAccount username email = do
           CLI.Error.put err "Could not reach Fission Server"
         True -> do
           -- If 404, user does not exist yet
-          UTF8.putText "🔑 Creating your key at ~/.ssh/fission... "
-          Key.forceCreate
-          UTF8.putTextLn "done"
+          createKey
           UTF8.putText "📝 Registering your new account... "
           register username email
+
+updateDID ::
+  ( MonadIO        m
+  , MonadLogger    m
+  , MonadWebClient m
+  )
+  => BasicAuthData
+  -> m ()
+updateDID auth = do
+  shouldUpgrade <- Prompt.reaskYN <| mconcat 
+                [ "Upgrade account "
+                , decodeUtf8Lenient (basicAuthUsername auth)
+                , "? (y/n)"
+                ]
+  case shouldUpgrade of
+    False -> return ()
+    True -> do
+      createKey
+      UTF8.putText "📝 Upgrading your account... "
+      Key.publicKeyEd >>= \case
+        Left err ->
+          CLI.Error.put err "Could not read key file"
+        Right pubkey -> do
+          let did = DID.fromPubkey pubkey
+          updateResult <- Client.run <| User.Client.updateDID auth did
+          case updateResult of
+            Left err ->
+              CLI.Error.put err "Could not upgrade account"
+            Right _ok -> 
+              CLI.Success.putOk "Upgrade successful!"
+
+createKey :: MonadIO m => m ()
+createKey = do
+  UTF8.putText "🔑 Creating your key at ~/.ssh/fission... "
+  Key.forceCreate
+  UTF8.putTextLn "done"
 
 register ::
   ( MonadIO        m
@@ -109,6 +150,3 @@ register username email = do
       CLI.Error.put err "Could not register account"
     Right _ok -> 
       CLI.Success.putOk "Registration successful!"
-
-
-

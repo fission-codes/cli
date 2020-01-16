@@ -3,6 +3,7 @@ module Fission.CLI.Environment
   ( init
   , get
   , getPath
+  , findBasicAuth
   , findRecurse
   , couldNotRead
   , removeConfigFile
@@ -13,6 +14,8 @@ module Fission.CLI.Environment
 import           Fission.Prelude
 import           RIO.Directory
 import           RIO.FilePath
+
+import           Servant.API
 
 import qualified System.FilePath.Glob as Glob
 import qualified System.Console.ANSI as ANSI
@@ -52,7 +55,8 @@ init = do
     Right peers -> do
       let
         env = Env.Partial
-          { maybePeers = Just peers
+          { maybeUserAuth = Nothing
+          , maybePeers = Just peers
           , maybeIgnored = Just ignoreDefault
           , maybeBuildDir = Nothing
           }
@@ -75,6 +79,13 @@ getPath ofLocal =
   if ofLocal
   then  getCurrentDirectory >>= \dir -> return <| dir </> ".fission.yaml"
   else globalEnv
+
+findBasicAuth :: MonadIO m => m (Maybe BasicAuthData)
+findBasicAuth = do
+  currDir <- getCurrentDirectory
+  findRecurse (isJust . maybeUserAuth) currDir >>= \case
+    Nothing -> return Nothing
+    Just (_, env) -> return <| maybeUserAuth env
 
 -- | Recurses up to user root to find a env that satisfies function "f"
 findRecurse ::
