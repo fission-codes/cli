@@ -3,8 +3,6 @@ module Fission.CLI.Environment
   ( init
   , get
   , getPath
-  , findBasicAuth
-  , findRecurse
   , couldNotRead
   , removeConfigFile
   , getOrRetrievePeer
@@ -12,10 +10,9 @@ module Fission.CLI.Environment
   ) where
 
 import           Fission.Prelude
+
 import           RIO.Directory
 import           RIO.FilePath
-
-import           Servant.API
 
 import qualified System.FilePath.Glob as Glob
 import qualified System.Console.ANSI as ANSI
@@ -79,36 +76,6 @@ getPath ofLocal =
   if ofLocal
   then  getCurrentDirectory >>= \dir -> return <| dir </> ".fission.yaml"
   else globalEnv
-
-findBasicAuth :: MonadIO m => m (Maybe BasicAuthData)
-findBasicAuth = do
-  currDir <- getCurrentDirectory
-  findRecurse (isJust . maybeUserAuth) currDir >>= \case
-    Nothing -> return Nothing
-    Just (_, env) -> return <| maybeUserAuth env
-
--- | Recurses up to user root to find a env that satisfies function "f"
-findRecurse ::
-  MonadIO m
-  => (Env.Partial -> Bool)
-  -> FilePath
-  -> m (Maybe (FilePath, Env.Partial))
-findRecurse f path = do
-  let filepath = path </> ".fission.yaml"
-  partial <- Env.Partial.decode filepath
-  case (f partial, path) of
-    -- if found, return
-    (True, _) -> return <| Just (filepath, partial)
-    -- if at root, check globalEnv (home dir)
-    -- necessary for WSL
-    (_, "/")  -> do
-      globalPath <- globalEnv
-      global <- Env.Partial.decode globalPath
-      if f global
-        then return <| Just (globalPath, global)
-        else return Nothing
-    -- else recurse
-    _         -> findRecurse f <| takeDirectory path
 
 -- | Create a could not read message for the terminal
 couldNotRead :: MonadIO m => m ()

@@ -10,7 +10,7 @@ import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Success as CLI.Success
 import qualified Fission.CLI.Prompt          as Prompt
 
-import qualified Fission.CLI.Environment as Env
+import qualified Fission.CLI.Environment.Partial as Env.Partial
 
 import qualified Fission.Internal.UTF8 as UTF8
 
@@ -57,7 +57,7 @@ setup =
           CLI.Success.loggedInAs <| username
 
     False ->
-      Env.findBasicAuth >>= \case
+      Env.Partial.findBasicAuth >>= \case
         Nothing -> do
           username <- Prompt.reaskNotEmpty' "Username: "
           email <- Prompt.reaskNotEmpty' "Email: "

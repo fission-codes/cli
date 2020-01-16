@@ -8,8 +8,9 @@ module Fission.CLI.Display.Error
 import           Fission.Prelude
 
 import qualified System.Console.ANSI as ANSI
-
 import qualified Fission.Internal.UTF8 as UTF8
+
+import qualified Fission.CLI.Environment.Partial as Env.Partial
 
 -- | Display a given error to the user and log an error to the debug log.
 put :: (MonadIO m, MonadLogger m, Show err) => err -> Text -> m ()
@@ -27,4 +28,12 @@ put' err = put err <| mconcat
   ]
 
 notConnected :: (MonadIO m, MonadLogger m, Show err) => err ->  m ()
-notConnected err = put err "Not logged in yet! Try running `fission setup`"
+notConnected err = 
+  Env.Partial.findBasicAuth >>= \case
+    Nothing -> 
+      put err "Not logged in yet! Try running `fission setup`"
+    Just _auth -> 
+      put err <| mconcat
+        [ "Thanks for updating fission! The cli now uses private key authentication."
+        , "Upgrade by running `fission setup`"
+        ]
