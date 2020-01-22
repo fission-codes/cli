@@ -36,6 +36,6 @@ notConnected err =
       put err "Not logged in yet! Try running `fission setup`"
     Just _auth -> 
       put err <| mconcat
-        [ "Thanks for updating fission! The cli now uses private key authentication."
+        [ "Thanks for updating fission! The cli now uses private key authentication.\n"
         , "Upgrade by running `fission setup`"
         ]

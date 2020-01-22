@@ -107,9 +107,9 @@ updateDID ::
   -> m ()
 updateDID auth = do
   shouldUpgrade <- Prompt.reaskYN <| mconcat 
-                [ "Upgrade account "
+                [ "Upgrade account \"" 
                 , decodeUtf8Lenient (basicAuthUsername auth)
-                , "? (y/n)"
+                , "\"? (y/n) "
                 ]
   case shouldUpgrade of
     False -> return ()
@@ -125,7 +125,8 @@ updateDID auth = do
           case updateResult of
             Left err ->
               CLI.Error.put err "Could not upgrade account"
-            Right _ok -> 
+            Right _ok -> do
+              _ <- Env.Partial.deleteHomeAuth
               CLI.Success.putOk "Upgrade successful!"
 
 createKey :: MonadIO m => m ()

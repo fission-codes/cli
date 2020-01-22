@@ -9,6 +9,7 @@ module Fission.CLI.Environment.Partial
   , toFull
   , fromFull
   , updatePeers
+  , deleteHomeAuth
   ) where
 
 import           Fission.Prelude hiding (decode)
@@ -113,4 +114,11 @@ fromFull env = Env.Partial
 
 updatePeers :: Env.Partial -> [IPFS.Peer] -> Env.Partial
 updatePeers env peers = env
-  { maybePeers    = Just (NonEmpty.fromList peers) }
+  { maybePeers = Just (NonEmpty.fromList peers) }
+
+-- | Deletes user_auth from env at ~/.fission.yaml
+deleteHomeAuth :: MonadIO m => m ()
+deleteHomeAuth = do
+  path <- globalEnv
+  currEnv <- decode path
+  write path <| currEnv { maybeUserAuth = Nothing }
