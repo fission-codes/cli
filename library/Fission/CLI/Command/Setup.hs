@@ -22,6 +22,7 @@ import qualified Fission.User.Email.Types        as User
 import qualified Fission.User.Registration.Types as User
 
 import qualified Fission.User.DID as DID
+import           Fission.User.DID.Types
 
 import           Fission.CLI.Config.Types
 import           Fission.CLI.Config.Base
@@ -63,7 +64,7 @@ setup =
           email <- Prompt.reaskNotEmpty' "Email: "
           createAccount username email
         Just auth -> 
-          updateDID auth 
+          upgradeAccount auth 
 
 createAccount ::
   ( MonadIO        m
@@ -82,6 +83,7 @@ createAccount username email = do
       then do
         -- @@TODO: recover flow
         UTF8.putTextLn "😕 Looks like that account already exists. Please pick another username or contact fission support for account recovery."
+        return ()
       else do
         UTF8.putTextLn "😕 That username's already taken. Try again?"
         username' <- Prompt.reaskNotEmpty' "Username: "
@@ -97,14 +99,14 @@ createAccount username email = do
           UTF8.putText "📝 Registering your new account... "
           register username email
 
-updateDID ::
+upgradeAccount ::
   ( MonadIO        m
   , MonadLogger    m
   , MonadWebClient m
   )
   => BasicAuthData
   -> m ()
-updateDID auth = do
+upgradeAccount auth = do
   shouldUpgrade <- Prompt.reaskYN <| mconcat 
                 [ "Upgrade account \"" 
                 , decodeUtf8Lenient (basicAuthUsername auth)
@@ -118,15 +120,10 @@ updateDID auth = do
       Key.publicKeyEd >>= \case
         Left err ->
           CLI.Error.put err "Could not read key file"
-        Right pubkey -> do
-          let did = DID.fromPubkey pubkey
-          updateResult <- Client.run <| User.Client.updateDID auth did
-          case updateResult of
-            Left err ->
-              CLI.Error.put err "Could not upgrade account"
-            Right _ok -> do
-              _ <- Env.Partial.deleteHomeAuth
-              CLI.Success.putOk "Upgrade successful!"
+        Right pubkey ->
+          pubkey
+            |> DID.fromPubkey
+            |> updateDID auth
 
 createKey :: MonadIO m => m ()
 createKey = do
@@ -150,3 +147,22 @@ register username email = do
       CLI.Error.put err "Could not register account"
     Right _ok -> 
       CLI.Success.putOk "Registration successful!"
+
+updateDID ::
+  ( MonadIO        m
+  , MonadLogger    m
+  , MonadWebClient m
+  )
+  => BasicAuthData
+  -> DID
+  -> m ()
+updateDID auth did = 
+  did
+    |> User.Client.updateDID auth
+    |> Client.run
+    |> bind \case
+      Left err -> 
+        CLI.Error.put err "Could not upgrade account"
+      Right _ok -> do
+        _ <- Env.Partial.deleteHomeAuth
+        CLI.Success.putOk "Upgrade successful!"
