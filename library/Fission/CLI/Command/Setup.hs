@@ -81,8 +81,7 @@ createAccount username email = do
       if email == email'
       then do
         -- @@TODO: recover flow
-        UTF8.putTextLn ""
-        return ()
+        UTF8.putTextLn "😕 Looks like that account already exists. Please pick another username or contact fission support for account recovery."
       else do
         UTF8.putTextLn "😕 That username's already taken. Try again?"
         username' <- Prompt.reaskNotEmpty' "Username: "
