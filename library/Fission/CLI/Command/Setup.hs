@@ -30,14 +30,11 @@ import           Fission.CLI.Config.Base
 import qualified Fission.Key.Store as Key
 
 -- | The command to attach to the CLI tree
-command ::
-  MonadIO m
-  => BaseConfig
-  -> CommandM (m ())
+command :: MonadIO m => BaseConfig -> CommandM (m ())
 command cfg =
   addCommand
     "setup"
-    "Setup fission on your machine"
+    "Setup Fission on your machine"
     (\_ -> runBase cfg setup)
     (pure ())
 
@@ -50,10 +47,9 @@ setup ::
 setup =
   Key.exists >>= \case
     True -> do 
-      authResult <- Client.run <| User.Client.verify
-      case authResult of
+      Client.run User.Client.verify >>= \case
         Left err -> CLI.Error.put err
-          "We don't recognize your key! Please contact fission support or delete `~/.ssh/fission` and try again."
+          "We don't recognize your key! Please contact Fission support or delete `~/.ssh/fission` and try again."
         Right (User.Username username) ->
           CLI.Success.loggedInAs <| username
 
@@ -82,7 +78,7 @@ createAccount username email = do
       if email == email'
       then do
         -- @@TODO: recover flow
-        UTF8.putTextLn "😕 Looks like that account already exists. Please pick another username or contact fission support for account recovery."
+        UTF8.putTextLn "😕 Looks like that account already exists. Please pick another username or contact Fission support for account recovery."
         return ()
       else do
         UTF8.putTextLn "😕 That username's already taken. Try again?"
@@ -140,13 +136,14 @@ register ::
   -> Text
   -> m ()
 register username email = do
-  registerResult <- Client.run <| User.Client.register User.Registration {..}
-  
-  case registerResult of
-    Left err ->
-      CLI.Error.put err "Could not register account"
-    Right _ok -> 
-      CLI.Success.putOk "Registration successful!"
+  User.Registration {..}
+    |> User.Client.register
+    |> Client.run
+    |> bind \case
+      Left err ->
+        CLI.Error.put err "Could not register account"
+      Right _ok -> 
+        CLI.Success.putOk "Registration successful!"
 
 updateDID ::
   ( MonadIO        m

@@ -27,10 +27,7 @@ import           Fission.CLI.Config.Connected
 import           Fission.CLI.Environment
 
 -- | The command to attach to the CLI tree
-command ::
-  MonadIO m
-  => BaseConfig
-  -> CommandM (m ())
+command :: MonadIO m => BaseConfig -> CommandM (m ())
 command cfg =
   addCommand
     "up"

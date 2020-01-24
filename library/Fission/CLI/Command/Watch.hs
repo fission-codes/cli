@@ -41,10 +41,7 @@ import qualified Fission.CLI.DNS                 as CLI.DNS
 import           Fission.CLI.Environment
 
 -- | The command to attach to the CLI tree
-command ::
-  MonadIO m
-  => BaseConfig
-  -> CommandM (m ())
+command :: MonadIO m => BaseConfig -> CommandM (m ())
 command cfg =
   addCommand
     "watch"

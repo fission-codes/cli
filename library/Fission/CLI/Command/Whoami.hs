@@ -20,10 +20,7 @@ import qualified Fission.Key.Store as Key
 import qualified Fission.CLI.Config.Connected.Error.Types as Error
 
 -- | The command to attach to the CLI tree
-command ::
-  MonadIO m
-  => BaseConfig
-  -> CommandM (m ())
+command :: MonadIO m => BaseConfig -> CommandM (m ())
 command cfg =
   addCommand
     "whoami"
@@ -41,9 +38,8 @@ whoami =
   Key.exists >>= \case
     False -> do
       CLI.Error.notConnected Error.NoKeyFile
-    True -> do
-      authResult <- Client.run <| User.verify
-      case authResult of
+    True ->
+      Client.run User.verify >>= \case
         Left err -> 
           CLI.Error.notConnected err
         Right (User.Username username) -> 

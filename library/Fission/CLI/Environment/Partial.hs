@@ -57,10 +57,10 @@ findRecurse ::
   => (Env.Partial -> Bool)
   -> FilePath
   -> m (Maybe (FilePath, Env.Partial))
-findRecurse f path = do
-  let filepath = path </> ".fission.yaml"
+findRecurse f p = do
+  let filepath = p </> ".fission.yaml"
   partial <- decode filepath
-  case (f partial, path) of
+  case (f partial, p) of
     -- if found, return
     (True, _) -> return <| Just (filepath, partial)
     -- if at root, check globalEnv (home dir)
@@ -72,7 +72,7 @@ findRecurse f path = do
         then return <| Just (globalPath, global)
         else return Nothing
     -- else recurse
-    _         -> findRecurse f <| takeDirectory path
+    _         -> findRecurse f <| takeDirectory p
 
 -- | Decodes file to partial environment
 decode :: MonadIO m => FilePath -> m Env.Partial

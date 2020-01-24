@@ -53,9 +53,9 @@ mkAuthReq ::
   => m (Either Key.Error (Request -> Request))
 mkAuthReq = do
   time <- getCurrentPOSIXTime
-  Key.readEd >>= \case
-    Left err -> return <| Left err
-    Right sk -> return <| Right <| \req -> do
+  Key.readEd >>= return . \case
+    Left err -> Left err
+    Right sk -> Right <| \req -> do
       let
         pubkey = Ed.toPublic sk
         payload = JWT.Payload
@@ -64,7 +64,7 @@ mkAuthReq = do
           , exp = time + 300
           } 
         token = create payload <| Key.signWith sk
-      let encoded = decodeUtf8Lenient <| encodeToken token
+        encoded = decodeUtf8Lenient <| encodeToken token
       addHeader "Authorization" encoded req
 
 create ::

@@ -18,10 +18,10 @@ live hash = do
   UTF8.putText <| "👌 " <> hash  <> "\n"
 
 putOk :: MonadIO m => Text -> m ()
-putOk msg = do
-  liftIO <| ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Green]
+putOk msg = liftIO do
+  ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Green]
   UTF8.putText <| "✅ " <> msg <> "\n"
-  liftIO <| ANSI.setSGR [ANSI.Reset]
+  ANSI.setSGR [ANSI.Reset]
 
 dnsUpdated :: MonadIO m => Text -> m ()
 dnsUpdated domain = do
@@ -29,9 +29,9 @@ dnsUpdated domain = do
   UTF8.putText <| "🔗 " <> domain  <> "\n"
 
 loggedInAs :: MonadIO m => Text -> m ()
-loggedInAs username = do
+loggedInAs username = liftIO do
   UTF8.putText "💻 Currently logged in as: "
-  liftIO <| ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
+  ANSI.setSGR [ANSI.SetColor ANSI.Foreground ANSI.Vivid ANSI.Blue]
   UTF8.putTextLn username 
-  liftIO <| ANSI.setSGR [ANSI.Reset]
+  ANSI.setSGR [ANSI.Reset]
 
