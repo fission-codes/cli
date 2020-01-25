@@ -24,17 +24,19 @@ import qualified Fission.Web.IPFS.Upload.Simple as Upload.Simple
 import qualified Fission.Web.IPFS.Pin           as Pin
 import qualified Fission.Web.IPFS.DAG           as DAG
 
+type AuthedIPFS more = IPFS.Auth :> IPFSPrefix :> more
+
 dagput :: File.Serialized -> ClientM CID
-dagput = sigClient <| Proxy @(IPFS.Auth :> IPFSPrefix :> "dag" :> DAG.API)
+dagput = sigClient <| Proxy @(AuthedIPFS ("dag" :> DAG.API))
 
 unpin :: CID -> ClientM NoContent
-unpin = sigClient <| Proxy @(IPFS.Auth :> IPFSPrefix :> Pin.UnpinAPI)
+unpin = sigClient <| Proxy @(AuthedIPFS Pin.UnpinAPI)
 
 pin :: CID -> ClientM NoContent
-pin = sigClient <| Proxy @(IPFS.Auth :> IPFSPrefix :> Pin.PinAPI)
+pin = sigClient <| Proxy @(AuthedIPFS Pin.PinAPI)
 
 upload :: File.Serialized -> ClientM CID
-upload = sigClient <| Proxy @(IPFS.Auth :> IPFSPrefix :> Upload.Simple.API)
+upload = sigClient <| Proxy @(AuthedIPFS Upload.Simple.API)
 
 cids :: ClientM [CID]
-cids = sigClient' <| Proxy @(IPFS.Auth :> IPFSPrefix :> "cids" :> CID.API)
+cids = sigClient' <| Proxy @(AuthedIPFS ("cids" :> CID.API))
