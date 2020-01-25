@@ -12,4 +12,4 @@ import           Fission.Web.Client
 import qualified Fission.URL.DomainName.Types as URL
 
 update :: CID -> ClientM URL.DomainName
-update = withSigAuth <| client <| Proxy @Routes.DNSRoute
+update = sigClient <| Proxy @Routes.DNSRoute

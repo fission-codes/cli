@@ -25,16 +25,16 @@ import qualified Fission.Web.IPFS.Pin           as Pin
 import qualified Fission.Web.IPFS.DAG           as DAG
 
 dagput :: File.Serialized -> ClientM CID
-dagput = withSigAuth <| client <| Proxy @(IPFS.Auth :> IPFSPrefix :> "dag" :> DAG.API)
+dagput = sigClient <| Proxy @(IPFS.Auth :> IPFSPrefix :> "dag" :> DAG.API)
 
 unpin :: CID -> ClientM NoContent
-unpin = withSigAuth <| client <| Proxy @(IPFS.Auth :> IPFSPrefix :> Pin.UnpinAPI)
+unpin = sigClient <| Proxy @(IPFS.Auth :> IPFSPrefix :> Pin.UnpinAPI)
 
 pin :: CID -> ClientM NoContent
-pin = withSigAuth <| client <| Proxy @(IPFS.Auth :> IPFSPrefix :> Pin.PinAPI)
+pin = sigClient <| Proxy @(IPFS.Auth :> IPFSPrefix :> Pin.PinAPI)
 
 upload :: File.Serialized -> ClientM CID
-upload = withSigAuth <| client <| Proxy @(IPFS.Auth :> IPFSPrefix :> Upload.Simple.API)
+upload = sigClient <| Proxy @(IPFS.Auth :> IPFSPrefix :> Upload.Simple.API)
 
 cids :: ClientM [CID]
-cids = withSigAuth' <| client <| Proxy @(IPFS.Auth :> IPFSPrefix :> "cids" :> CID.API)
+cids = sigClient' <| Proxy @(IPFS.Auth :> IPFSPrefix :> "cids" :> CID.API)

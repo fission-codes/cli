@@ -1,9 +1,9 @@
 module Fission.Web.Client
   ( request
-  , withSigAuth
-  , withSigAuth'
-  , withBasicAuth
-  , withRegisterAuth
+  , sigClient
+  , sigClient'
+  , basicClient
+  , registerClient
   , is404
   , module Fission.Web.Client.Types
   , module Fission.Web.Client.Class
@@ -28,25 +28,33 @@ import           Fission.Web.Auth.Types as Auth
 request :: HTTP.Manager -> BaseUrl -> ClientM a -> IO (Either ClientError a)
 request manager url query = runClientM query <| mkClientEnv manager url
 
-withSigAuth ::
-  (AuthenticatedRequest (Auth.HigherOrder) -> a -> ClientM b)
-  -> (a -> ClientM b)
-withSigAuth f x  = JWT.getSigAuth >>= flip f x
+sigClient ::
+  ( HasClient ClientM api
+  , Client ClientM api ~ (AuthenticatedRequest Auth.HigherOrder -> a -> ClientM b)
+  )
+  => Proxy api -> a -> ClientM b
+sigClient p x = JWT.getSigAuth >>= flip (client p) x
 
-withSigAuth' ::
-  (AuthenticatedRequest (Auth.HigherOrder) -> ClientM b)
-  -> ClientM b
-withSigAuth' f = JWT.getSigAuth >>= f
+sigClient' ::
+  ( HasClient ClientM api
+  , Client ClientM api ~ (AuthenticatedRequest Auth.HigherOrder -> ClientM b)
+  )
+  => Proxy api -> ClientM b
+sigClient' p = JWT.getSigAuth >>= client p
 
-withBasicAuth ::
-  (AuthenticatedRequest (Auth.HigherOrder) -> a -> ClientM b)
-  -> (BasicAuthData -> a -> ClientM b)
-withBasicAuth f auth x = f (Auth.getBasicAuth auth) x
+basicClient ::
+  ( HasClient ClientM api
+  , Client ClientM api ~ (AuthenticatedRequest Auth.HigherOrder -> a -> ClientM b)
+  )
+  => Proxy api -> BasicAuthData -> a -> ClientM b
+basicClient p auth x = (client p) (Auth.getBasicAuth auth) x
 
-withRegisterAuth ::
-  (AuthenticatedRequest (Auth.RegisterDid) -> a -> ClientM b)
-  -> (a -> ClientM b)
-withRegisterAuth f x = JWT.getRegisterAuth >>= flip f x
+registerClient ::
+  ( HasClient ClientM api
+  , Client ClientM api ~ (AuthenticatedRequest Auth.RegisterDid -> a -> ClientM b)
+  )
+  => Proxy api -> a -> ClientM b
+registerClient p x = JWT.getRegisterAuth >>= flip (client p) x
 
 is404 :: ClientError -> Bool
 is404 (FailureResponse _ resp) = responseStatusCode resp == status404
