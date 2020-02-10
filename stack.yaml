@@ -52,7 +52,7 @@ extra-deps:
 - text-time-0.2.0
 - ipfs-1.0.1
 - git: https://github.com/fission-suite/web-api.git
-  commit: d8a9132437239b9b9a00b944132d1b437028277d
+  commit: ad73f6cfbb6f1a1b197218b278bf1c43b5f39882
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
