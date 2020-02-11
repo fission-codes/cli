@@ -6,10 +6,9 @@ import           Fission.Prelude
 import           Options.Applicative.Simple (addCommand)
 import           Servant.API
 
-import qualified Fission.CLI.Display.Error   as CLI.Error
-import qualified Fission.CLI.Display.Success as CLI.Success
-import qualified Fission.CLI.Prompt          as Prompt
-
+import qualified Fission.CLI.Display.Error       as CLI.Error
+import qualified Fission.CLI.Display.Success     as CLI.Success
+import qualified Fission.CLI.Prompt              as Prompt
 import qualified Fission.CLI.Environment.Partial as Env.Partial
 
 import qualified Fission.Internal.UTF8 as UTF8
@@ -44,9 +43,12 @@ setup ::
   , MonadWebClient m
   )
   => m ()
-setup =
-  Key.exists >>= \case
-    True -> do
+setup = do
+  logDebugN "Setting up..."
+  doesExist <- Key.exists
+  if doesExist
+    then do
+      logDebugN "Exists"
       Client.run User.Client.verify >>= \case
         Left err -> CLI.Error.put err
           "We don't recognize your key! Please contact Fission support or delete `~/.ssh/fission` and try again."
@@ -54,7 +56,9 @@ setup =
         Right (User.Username username) ->
           CLI.Success.loggedInAs username
 
-    False ->
+    else do
+      logDebugN "Mkae new"
+      createKey
       maybe createAccount upgradeAccount =<< Env.Partial.findBasicAuth
 
 createAccount ::
@@ -65,28 +69,15 @@ createAccount ::
   => m ()
 createAccount = do
   username <- User.Username <$> Prompt.reaskNotEmpty' "Username: "
-  email    <- User.Email <$> Prompt.reaskNotEmpty' "Email: "
-  register username email
+  email    <- User.Email    <$> Prompt.reaskNotEmpty' "Email: "
 
-register ::
-  ( MonadIO        m
-  , MonadLogger    m
-  , MonadWebClient m
-  )
-  => User.Username
-  -> User.Email
-  -> m ()
-register username email =
-  User.Registration {..}
-    |> User.Client.register
-    |> Client.run
-    |> bind \case
-      Left err  -> do
-        CLI.Error.put err "It looks like that account already exists. Please pick another username or contact Fission support for account recovery."
-        createAccount
+  Client.run (User.Client.register User.Registration {..}) >>= \case
+    Left err -> do
+      CLI.Error.put err "It looks like that account already exists. Please pick another username or contact Fission support for account recovery."
+      createAccount
 
-      Right _ok ->
-        CLI.Success.putOk "Registration successful!"
+    Right _ok ->
+      CLI.Success.putOk "Registration successful!"
 
 upgradeAccount ::
   ( MonadIO        m
@@ -102,18 +93,17 @@ upgradeAccount auth = do
                 , "\"? (y/n) "
                 ]
 
-  case shouldUpgrade of
-    False -> return ()
-    True -> do
-      createKey
-      UTF8.putText "📝 Upgrading your account... "
-      Key.publicKeyEd >>= \case
-        Left err ->
-          CLI.Error.put err "Could not read key file"
-        Right pubkey ->
-          pubkey
-            |> DID.fromPubkey
-            |> updateDID auth
+  when shouldUpgrade do
+    createKey
+    UTF8.putText "📝 Upgrading your account... "
+    Key.publicKeyEd >>= \case
+      Left err ->
+        CLI.Error.put err "Could not read key file"
+
+      Right pubkey ->
+        pubkey
+          |> DID.fromPubkey
+          |> updateDID auth
 
 createKey :: MonadIO m => m ()
 createKey = do
@@ -136,6 +126,7 @@ updateDID auth did =
     |> bind \case
       Left err ->
         CLI.Error.put err "Could not upgrade account"
+
       Right _ok -> do
         _ <- Env.Partial.deleteHomeAuth
         CLI.Success.putOk "Upgrade successful!"

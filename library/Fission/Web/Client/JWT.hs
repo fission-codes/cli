@@ -31,12 +31,12 @@ getSigAuth ::
   , MonadTime m
   , MonadThrow m
   )
-  => m (AuthenticatedRequest (Auth.HigherOrder))
+  => m (AuthenticatedRequest Auth.HigherOrder)
 getSigAuth = mkAuthReq >>= \case
   Left err -> throwM err
-  Right authReq -> return (mkAuthenticatedRequest (Nothing) \_ -> authReq)
+  Right authReq -> return (mkAuthenticatedRequest Nothing \_ -> authReq)
 
-getRegisterAuth :: 
+getRegisterAuth ::
   ( MonadIO m
   , MonadTime m
   , MonadThrow m
@@ -62,31 +62,23 @@ mkAuthReq = do
           { iss = DID.fromPubkey pubkey
           , nbf = time
           , exp = time + 300
-          } 
+          }
         token = create payload <| Key.signWith sk
         encoded = decodeUtf8Lenient <| encodeToken token
       addHeader "Authorization" encoded req
 
-create ::
-  JWT.Payload
-  -> (ByteString -> Ed.Signature)
-  -> JWT.Token
-create payload signF = do
-  let
-    header = defaultHeader
-    headerRaw = encodePart header
+create :: JWT.Payload -> (ByteString -> Ed.Signature) -> JWT.Token
+create payload signF = JWT.Token {..}
+  where
+    header     = defaultHeader
+    headerRaw  = encodePart header
     payloadRaw = encodePart payload
-    toSign = headerRaw <> "." <> payloadRaw
-    sig = signF toSign 
-  JWT.Token
-    { header = header
-    , payload = payload
-    , sig = sig
-    }
+    toSign     = headerRaw <> "." <> payloadRaw
+    sig        = signF toSign
 
 defaultHeader :: JWT.Header
 defaultHeader =
-  JWT.Header 
+  JWT.Header
     { typ = "JWT"
     , alg = "Ed25519"
     }
