@@ -9,7 +9,7 @@ module Fission.Web.Client
   , module Fission.Web.Client.Class
   ) where
 
-import Fission.Prelude
+import           Fission.Prelude
 
 import           Servant
 import           Servant.Client

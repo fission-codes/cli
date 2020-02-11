@@ -6,6 +6,9 @@ import           Fission.Prelude
 import           Options.Applicative.Simple (addCommand)
 import           Servant.API
 
+import Servant.Client.Core
+import           Network.HTTP.Types.Status
+
 import qualified Fission.CLI.Display.Error       as CLI.Error
 import qualified Fission.CLI.Display.Success     as CLI.Success
 import qualified Fission.CLI.Prompt              as Prompt
@@ -44,20 +47,30 @@ setup ::
   )
   => m ()
 setup = do
-  logDebugN "Setting up..."
   doesExist <- Key.exists
-  if doesExist
-    then do
-      logDebugN "Exists"
-      Client.run User.Client.verify >>= \case
-        Left err -> CLI.Error.put err
-          "We don't recognize your key! Please contact Fission support or delete `~/.ssh/fission` and try again."
 
+  if doesExist
+    then
+      Client.run User.Client.verify >>= \case
         Right (User.Username username) ->
           CLI.Success.loggedInAs username
 
+        Left err ->
+          let
+            commonErrMsg = "Please contact Fission support or delete `~/.ssh/fission` and try again."
+            specific = case err of
+              FailureResponse _ (responseStatusCode -> status) ->
+                if | status == status404        -> "We don't recognize your key!"
+                   | statusIsClientError status -> "There was a problem with your request."
+                   | otherwise                  -> "There was a server error."
+
+              ConnectionError _ -> "Trouble contacting the server."
+              DecodeFailure _ _ -> "Trouble decoding the registration response."
+              _                 -> "Invalid content type."
+          in
+            CLI.Error.put err (specific <> " " <> commonErrMsg)
+
     else do
-      logDebugN "Mkae new"
       createKey
       maybe createAccount upgradeAccount =<< Env.Partial.findBasicAuth
 
