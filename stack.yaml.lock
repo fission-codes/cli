@@ -84,17 +84,17 @@ packages:
 - completed:
     cabal-file:
       size: 27116
-      sha256: 746da91fa3afb9b6f96067ac2e7826c47d43c3f6b1330335a1374842f6acadc9
+      sha256: 48b552d086fb673c0058947b6835bfee03eb1053119466999ea1f1a353afdfaa
     name: fission-web-api
-    version: 2.0.8
+    version: 2.1.1
     git: https://github.com/fission-suite/web-api.git
     pantry-tree:
       size: 15358
-      sha256: c0b84707388104dd2db1b8c67c61e424504bd824c307c8b6a0ef7de9f917b2af
-    commit: 3a20c5546afa86a0ea1b7920c18a4098727142cb
+      sha256: 1294af635dba43f423202dc660f1bb1a6a770ab4e6a9ad6c8ff659188651af22
+    commit: 77ba41d909c3bf1e7ba317d7b0cc9eee9758ccfc
   original:
     git: https://github.com/fission-suite/web-api.git
-    commit: 3a20c5546afa86a0ea1b7920c18a4098727142cb
+    commit: 77ba41d909c3bf1e7ba317d7b0cc9eee9758ccfc
 snapshots:
 - completed:
     size: 524163

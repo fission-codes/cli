@@ -50,7 +50,7 @@ extra-deps:
 - lzma-clib-5.2.2
 - text-time-0.2.0
 - git: https://github.com/fission-suite/web-api.git
-  commit: 3a20c5546afa86a0ea1b7920c18a4098727142cb
+  commit: 77ba41d909c3bf1e7ba317d7b0cc9eee9758ccfc
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
