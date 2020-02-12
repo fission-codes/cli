@@ -1,5 +1,7 @@
 module Fission.CLI.Prompt
   ( reask
+  , reaskNotEmpty
+  , reaskNotEmpty'
   , reaskYN
   , reaskWithError
   ) where
@@ -33,6 +35,26 @@ reask ::
   -> (ByteString -> Bool)
   -> m ByteString
 reask prompt check = reaskWithError prompt check (const (return ()))
+
+-- | reask where valid responses are at least 1 character long
+reaskNotEmpty ::
+  ( MonadIO m, MonadLogger m )
+  => Text
+  -> m ByteString
+reaskNotEmpty prompt = reask prompt \resp -> BS.length resp > 0
+
+-- | reask where valid responses are at least 1 character long
+reaskNotEmpty' ::
+  ( MonadIO m, MonadLogger m )
+  => Text
+  -> m Text
+reaskNotEmpty' prompt = do
+  resp <- reaskNotEmpty prompt
+  case decodeUtf8' resp of
+    Right txt -> return txt
+    Left _ -> do 
+      UTF8.putTextLn "🔣 Oops, we couldn't read your input. Try again!"
+      reaskNotEmpty' prompt
 
 -- | reask where valid responses are some form of yes/no
 reaskYN ::

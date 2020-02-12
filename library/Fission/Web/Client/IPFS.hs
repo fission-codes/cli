@@ -1,20 +1,22 @@
 module Fission.Web.Client.IPFS
-  ( API
-  , Request (..)
-  , SimpleAPI
-  , request
+  ( dagput
+  , unpin
+  , pin
+  , upload
+  , cids
   ) where
 
-import Fission.Prelude
+import           Fission.Prelude
 
-import Servant
-import Servant.Client
+import           Servant
+import           Servant.Client
 
 import qualified Network.IPFS.File.Types as File
 import           Network.IPFS.CID.Types
 
-import qualified Fission.Web.Client as Client
 import           Fission.Web.Routes (IPFSPrefix)
+
+import           Fission.Web.Client
 
 import qualified Fission.Web.IPFS               as IPFS
 import qualified Fission.Web.IPFS.CID           as CID
@@ -22,23 +24,19 @@ import qualified Fission.Web.IPFS.Upload.Simple as Upload.Simple
 import qualified Fission.Web.IPFS.Pin           as Pin
 import qualified Fission.Web.IPFS.DAG           as DAG
 
-type API = IPFSPrefix :> IPFS.Auth :> SimpleAPI
+type AuthedIPFS more = IPFS.Auth :> IPFSPrefix :> more
 
-type SimpleAPI = "cids" :> CID.API
-            :<|> Upload.Simple.API
-            :<|> Pin.API
-            :<|> "dag" :> DAG.API
+dagput :: File.Serialized -> ClientM CID
+dagput = sigClient <| Proxy @(AuthedIPFS ("dag" :> DAG.API))
 
-data Request = Request
-  { dagput :: File.Serialized -> ClientM CID
-  , unpin  :: CID             -> ClientM NoContent
-  , pin    :: CID             -> ClientM NoContent
-  , upload :: File.Serialized -> ClientM CID
-  , cids   :: ClientM [CID]
-  }
+unpin :: CID -> ClientM NoContent
+unpin = sigClient <| Proxy @(AuthedIPFS Pin.UnpinAPI)
 
--- | Generate authenticate client functions
-request :: BasicAuthData -> Request
-request ba = Request {..}
-  where
-    cids :<|> upload :<|> (pin :<|> unpin) :<|> dagput = Client.withAuth ba (Proxy :: Proxy API)
+pin :: CID -> ClientM NoContent
+pin = sigClient <| Proxy @(AuthedIPFS Pin.PinAPI)
+
+upload :: File.Serialized -> ClientM CID
+upload = sigClient <| Proxy @(AuthedIPFS Upload.Simple.API)
+
+cids :: ClientM [CID]
+cids = sigClient' <| Proxy @(AuthedIPFS ("cids" :> CID.API))

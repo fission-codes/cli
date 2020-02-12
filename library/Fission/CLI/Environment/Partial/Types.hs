@@ -1,4 +1,4 @@
-module Fission.CLI.Environment.Partial.Types (Partial (..), mayUserAuthLens) where
+module Fission.CLI.Environment.Partial.Types (Partial (..)) where
 
 import Fission.Prelude
 
@@ -48,7 +48,3 @@ instance Monoid Partial where
 
 getField :: (Partial -> Maybe field) -> Partial -> Partial -> Maybe field
 getField accessor a b = maybe (accessor a) Just (accessor b)
-
-mayUserAuthLens :: Functor f => (Maybe BasicAuthData -> f (Maybe BasicAuthData)) -> Partial -> f Partial
-mayUserAuthLens = lens maybeUserAuth \pEnv newAuth ->  pEnv { maybeUserAuth = newAuth }
-

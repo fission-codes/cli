@@ -10,7 +10,6 @@ import qualified System.Console.ANSI   as ANSI
 import qualified Fission.Internal.UTF8 as UTF8
 
 import qualified Fission.CLI.Prompt      as Prompt
-import qualified Fission.CLI.Environment as Env
 import qualified Fission.CLI.Environment.Partial as Env.Partial
 import           Fission.CLI.Environment.Partial.Types as Env
 
@@ -40,7 +39,7 @@ checkBuildDir relPath = do
 
 -- | Find the closests .fission.yaml that contains a build_dir in it, and return the location of the env & build_dir
 findEnv :: ( MonadIO m ) => FilePath -> m (Maybe (FilePath, FilePath))
-findEnv path = Env.findRecurse (isJust . maybeBuildDir) path >>= \case
+findEnv path = Env.Partial.findRecurse (isJust . maybeBuildDir) path >>= \case
   Nothing -> return Nothing
   Just (envPath, env) ->
     case maybeBuildDir env of

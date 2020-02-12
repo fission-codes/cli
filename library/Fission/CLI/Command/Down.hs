@@ -20,10 +20,7 @@ import qualified Fission.CLI.Display.Error   as CLI.Error
 import qualified Fission.CLI.Display.Wait    as CLI.Wait
 
 -- | The command to attach to the CLI tree
-command ::
-  MonadIO m
-  => BaseConfig
-  -> CommandM (m ())
+command :: MonadIO m => BaseConfig -> CommandM (m ())
 command cfg =
   addCommand
     "down"

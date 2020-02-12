@@ -12,7 +12,7 @@ import           Fission.Internal.Exception
 import           Network.IPFS
 import qualified Network.IPFS.Add         as IPFS
 
-import           Fission.Web.Client.Auth
+import           Fission.Web.Client as Client
 
 import           Fission.CLI.Command.Up.Types as Up
 import qualified Fission.CLI.Display.Error    as Error
@@ -27,10 +27,7 @@ import           Fission.CLI.Config.Connected
 import           Fission.CLI.Environment
 
 -- | The command to attach to the CLI tree
-command ::
-  MonadIO m
-  => BaseConfig
-  -> CommandM (m ())
+command :: MonadIO m => BaseConfig -> CommandM (m ())
 command cfg =
   addCommand
     "up"
@@ -40,11 +37,11 @@ command cfg =
 
 -- | Sync the current working directory to the server over IPFS
 up ::
-  ( MonadUnliftIO      m
-  , MonadLogger        m
-  , MonadLocalIPFS     m
-  , MonadEnvironment   m
-  , MonadAuthedClient  m
+  ( MonadUnliftIO    m
+  , MonadLogger      m
+  , MonadLocalIPFS   m
+  , MonadEnvironment m
+  , MonadWebClient   m
   )
   => Up.Options
   -> m ()

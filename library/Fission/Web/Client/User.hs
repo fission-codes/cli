@@ -1,27 +1,27 @@
 module Fission.Web.Client.User
-  ( resetPassword
-  , register
+  ( register
   , verify
+  , updateDID
   ) where
 
 import Fission.Prelude
 
-import Servant
+import Servant hiding (addHeader)
 import Servant.Client
 
 import qualified Fission.User.Registration.Types as User
-import qualified Fission.User.Password.Types     as User
-import qualified Fission.Web.User.Password.Reset.Types as User.Password
+import qualified Fission.User.Username.Types     as User
+import qualified Fission.User.DID.Types          as User
 
-import           Fission.Web.Routes              (UserRoute)
+import           Fission.Web.Client
+import qualified Fission.Web.User   as User
+import           Fission.Web.Routes (UserPrefix)
 
-import           Fission.Internal.Orphanage.BasicAuthData ()
+register  :: User.Registration -> ClientM NoContent
+register = registerClient <| Proxy @(UserPrefix :> User.RegisterRoute)
 
-verify        :: BasicAuthData     -> ClientM Bool
-register      :: User.Registration -> ClientM ()
-resetPassword' :: BasicAuthData -> User.Password.Reset -> ClientM (User.Password)
+verify :: ClientM User.Username
+verify = sigClient' <| Proxy @(UserPrefix :> User.VerifyRoute)
 
-register :<|> verify :<|> resetPassword' = client (Proxy :: Proxy UserRoute)
-
-resetPassword :: BasicAuthData -> User.Password -> ClientM (User.Password)
-resetPassword auth pw = resetPassword' auth <| User.Password.Reset <| Just pw
+updateDID :: BasicAuthData -> User.DID -> ClientM User.DID
+updateDID = basicClient <| Proxy @(UserPrefix :> User.UpdateDIDRoute)

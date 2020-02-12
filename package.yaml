@@ -1,5 +1,5 @@
 name: fission-cli
-version: '1.23.1'
+version: '1.24.0'
 category: API
 author:
   - Brooklyn Zelenka
@@ -8,7 +8,6 @@ author:
 maintainer:
   - brooklyn@fission.codes
   - daniel@fission.codes
-  - ben@fission.codes
 copyright: © 2019 Fission Internet Software Services for Open Networks Inc.
 license: AGPL-3.0-or-later
 license-file: LICENSE
@@ -68,6 +67,7 @@ default-extensions:
   - ScopedTypeVariables
   - StandaloneDeriving
   - TupleSections
+  - TypeApplications
   - TypeFamilies
   - TypeSynonymInstances
   - TemplateHaskell
@@ -79,7 +79,9 @@ dependencies:
   - aeson-casing
   - ansi-terminal
   - base
+  - base64-bytestring
   - bcrypt
+  - binary
   - bytestring
   - cryptonite
   - data-default-class
@@ -95,6 +97,7 @@ dependencies:
   - http-types
   - ipfs
   - lens
+  - memory
   - monad-logger
   - mtl
   - network-uri

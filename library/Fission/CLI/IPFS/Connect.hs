@@ -12,7 +12,6 @@ import           Data.List.NonEmpty as NonEmpty hiding ((<|))
 import           Fission.Web.Client
 import           Fission.Web.Client.Peers as Peers
 
-import           Fission.Internal.Orphanage.BasicAuthData ()
 import qualified Fission.Internal.UTF8 as UTF8
 
 import           Fission.CLI.IPFS.Error.Types

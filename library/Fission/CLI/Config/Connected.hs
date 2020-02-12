@@ -10,16 +10,20 @@ import           Fission.Prelude
 
 import           Network.IPFS
 
-import           Fission.Web.Client
+import           Fission.Web.Client      as Client
+import qualified Fission.Web.Client.User as User
 
 import           Fission.CLI.Config.Base
-
 import           Fission.CLI.Config.Connected.Types
 import           Fission.CLI.Config.Connected.Error.Types
+
+import qualified Fission.CLI.Display.Error as CLI.Error
 
 import           Fission.CLI.Environment.Types as Environment
 import qualified Fission.CLI.Environment       as Environment
 import qualified Fission.CLI.IPFS.Connect      as Connect
+
+import qualified Fission.Key.Store as Key
 
 -- | Ensure we have a local config file with the appropriate data
 --
@@ -56,33 +60,38 @@ liftConfig ::
   )
   => BaseConfig
   -> m (Either Error ConnectedConfig)
-liftConfig BaseConfig {..} =
-  -- Get our stored user config
-  Environment.get >>= \case
-    Right config ->
-      Environment.getOrRetrievePeer config >>= \case
-        Just peer -> do
-          let userAuth     = Environment.userAuth config
-          let ignoredFiles = Environment.ignored config
+liftConfig BaseConfig {..} = 
+  -- Ensure user's key exists
+  Key.exists >>= \case
+    False -> do
+      CLI.Error.notConnected NoKeyFile
+      return <| Left NoKeyFile
+    True -> do
+      -- Ensure user's key is registered with server
+      authResult <- Client.run <| User.verify
+      case authResult of
+        Left err -> do
+          CLI.Error.notConnected err
+          return <| Left NotRegistered
+        Right _ -> do
+          -- Get our stored user config
+          config <- Environment.get
+          Environment.getOrRetrievePeer config >>= \case
+            Just peer -> do
+              let ignoredFiles = Environment.ignored config
 
-          -- Connect the local IPFS node to the Fission network
-          Connect.swarmConnectWithRetry peer 1 >>= \case
-            Right _ -> do
-              -- All setup and ready to run!
-              return <| Right ConnectedConfig {..}
+              -- Connect the local IPFS node to the Fission network
+              Connect.swarmConnectWithRetry peer 1 >>= \case
+                Right _ -> do
+                  -- All setup and ready to run!
+                  return <| Right ConnectedConfig {..}
 
-            Left err -> do
-              -- We were unable to connect!
-              logError <| displayShow err
-              Connect.couldNotSwarmConnect
-              return <| Left CannotConnect
+                Left err -> do
+                  -- We were unable to connect!
+                  logError <| displayShow err
+                  Connect.couldNotSwarmConnect
+                  return <| Left CannotConnect
 
-        Nothing -> do
-          logErrorN "Could not locate the Fission IPFS network"
-          return <| Left PeersNotFound
-
-    Left err -> do
-      -- We were unable to read the users config
-      logDebug <| displayShow err
-      Environment.couldNotRead
-      return <| Left NotFissionConnected
+            Nothing -> do
+              logErrorN "Could not locate the Fission IPFS network"
+              return <| Left PeersNotFound
