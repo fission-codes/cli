@@ -1,5 +1,5 @@
 name: fission-cli
-version: '1.24.0'
+version: '1.24.1'
 category: API
 author:
   - Brooklyn Zelenka
@@ -87,6 +87,7 @@ dependencies:
   - data-default-class
   - data-has
   - envy
+  - file-embed
   - filepath
   - fission-web-api
   - fsnotify

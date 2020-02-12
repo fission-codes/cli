@@ -1,8 +1,10 @@
 module Fission.CLI (cli) where
 
-import           Fission.Prelude
-
 import           Options.Applicative.Simple
+import qualified RIO.Text as Text
+
+import           Fission.Prelude
+import qualified Fission.Internal.CLI.Meta as Meta
 
 import           Fission.CLI.Config.Base
 
@@ -13,10 +15,7 @@ import qualified Fission.CLI.Command.Watch         as Watch
 import qualified Fission.CLI.Command.Whoami        as Whoami
 
 -- | Top-level CLI description
-cli ::
-  MonadUnliftIO m
-  => BaseConfig
-  -> m ()
+cli :: MonadUnliftIO m => BaseConfig -> m ()
 cli cfg = do
   (_, runCLI) <- liftIO <| simpleOptions version description detail (pure ()) do
     Setup.command         cfg
@@ -26,8 +25,12 @@ cli cfg = do
     Whoami.command        cfg
   runCLI
   where
-    version     = "1.24.0"
     description = "CLI to interact with Fission services"
-    detail      = mconcat [ "Fission makes developing, deploying, updating "
-                          , "and iterating on web applications quick and easy."
-                          ]
+    detail = mconcat [ "Fission makes developing, deploying, updating "
+                     , "and iterating on web applications quick and easy."
+                     ]
+    version =
+      Meta.package
+        |> bind Meta.version
+        |> maybe "unknown" identity
+        |> Text.unpack
