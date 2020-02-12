@@ -85,12 +85,24 @@ createAccount = do
   email    <- User.Email    <$> Prompt.reaskNotEmpty' "Email: "
 
   Client.run (User.Client.register User.Registration {..}) >>= \case
-    Left err -> do
-      CLI.Error.put err "It looks like that account already exists. Please pick another username or contact Fission support for account recovery."
-      createAccount
-
     Right _ok ->
       CLI.Success.putOk "Registration successful!"
+
+    Left err ->
+      let
+        errMsg = case err of
+          FailureResponse _ (responseStatusCode -> status) ->
+            if | status == status409        -> "It looks like that account already exists. Please pick another username or contact Fission support for account recovery."
+               | statusIsClientError status -> "There was a problem with your request. Please try again or contact Fission support."
+               | otherwise                  -> "There was a server error. Please try again or contact Fission support."
+
+          ConnectionError _ -> "Trouble contacting the server. Please try again or contact Fission support."
+          DecodeFailure _ _ -> "Trouble decoding the registration response. Please try again or contact Fission support."
+          _                 -> "Invalid content type. Please try again or contact Fission support."
+
+      in do
+        CLI.Error.put err errMsg
+        createAccount
 
 upgradeAccount ::
   ( MonadIO        m

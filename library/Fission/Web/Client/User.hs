@@ -17,7 +17,7 @@ import           Fission.Web.Client
 import qualified Fission.Web.User   as User
 import           Fission.Web.Routes (UserPrefix)
 
-register  :: User.Registration -> ClientM ()
+register  :: User.Registration -> ClientM NoContent
 register = registerClient <| Proxy @(UserPrefix :> User.RegisterRoute)
 
 verify :: ClientM User.Username

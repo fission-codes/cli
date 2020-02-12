@@ -33,8 +33,8 @@ create = exists >>= \case
   False -> return . Right =<< forceCreate
 
 forceCreate :: MonadIO m => m ()
-forceCreate = do 
-  privkey <- liftIO <| X.generateSecretKey
+forceCreate = do
+  privkey <- liftIO X.generateSecretKey
   writeKey privkey
 
 delete :: MonadIO m => m ()

@@ -26,7 +26,7 @@ cli cfg = do
     Whoami.command        cfg
   runCLI
   where
-    version     = "1.23.1"
+    version     = "1.24.0"
     description = "CLI to interact with Fission services"
     detail      = mconcat [ "Fission makes developing, deploying, updating "
                           , "and iterating on web applications quick and easy."
