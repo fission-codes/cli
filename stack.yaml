@@ -44,7 +44,6 @@ extra-deps:
 - amazonka-route53-1.6.1
 - ekg-wai-0.1.0.3
 - happy-1.19.12
-# - http-client-0.5.14 # Peer dependency of amazonka
 - ipfs-1.0.1
 - raven-haskell-0.1.4.0
 - tasty-rerun-1.1.17
