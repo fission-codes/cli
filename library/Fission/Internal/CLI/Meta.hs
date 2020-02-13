@@ -3,6 +3,8 @@ module Fission.Internal.CLI.Meta
   , package
   ) where
 
+import Data.FileEmbed
+
 import Fission.Prelude
 import Fission.Internal.Meta.Package hiding (package)
 
