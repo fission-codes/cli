@@ -90,11 +90,11 @@ packages:
     git: https://github.com/fission-suite/web-api.git
     pantry-tree:
       size: 15596
-      sha256: f820db5ee594587b791ebc51c49f7ce91966fe4d377250b85accde038cfe8414
-    commit: 10cf6e6885c7381dc6b78cf9ead365da95ca671e
+      sha256: 8a04372bede7759fe9e252ef4b57e137d4539b590fd32156562683ef8f0b6814
+    commit: bb77d83ac65c610f29b61cde0025d22ef1ef3738
   original:
     git: https://github.com/fission-suite/web-api.git
-    commit: 10cf6e6885c7381dc6b78cf9ead365da95ca671e
+    commit: bb77d83ac65c610f29b61cde0025d22ef1ef3738
 snapshots:
 - completed:
     size: 524163
