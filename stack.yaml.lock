@@ -83,18 +83,18 @@ packages:
     hackage: text-time-0.2.0
 - completed:
     cabal-file:
-      size: 27211
-      sha256: f144df6990f5f6baeaa67bebf3bae6996eab3beee2b13b4cafbe108be1affb02
+      size: 27367
+      sha256: f178a84fd5aab15217b2da01027cede46d63e875de44b9755a037c3e3b39ca66
     name: fission-web-api
     version: 2.1.2
     git: https://github.com/fission-suite/web-api.git
     pantry-tree:
-      size: 15430
-      sha256: cea36e2d899ee5c632b8a56501b3799715806629686b3ed01b11c800f9a5e0c3
-    commit: eaeaa4e9df7d7cd7641974b6326af595133b0f05
+      size: 15596
+      sha256: f820db5ee594587b791ebc51c49f7ce91966fe4d377250b85accde038cfe8414
+    commit: 10cf6e6885c7381dc6b78cf9ead365da95ca671e
   original:
     git: https://github.com/fission-suite/web-api.git
-    commit: eaeaa4e9df7d7cd7641974b6326af595133b0f05
+    commit: 10cf6e6885c7381dc6b78cf9ead365da95ca671e
 snapshots:
 - completed:
     size: 524163

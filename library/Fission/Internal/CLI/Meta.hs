@@ -9,7 +9,4 @@ import Fission.Prelude
 import Fission.Internal.Meta.Package hiding (package)
 
 package :: Maybe Package
-package =
-  case Yaml.decodeEither' $(embedFile "./package.yaml") of
-    Left  _err -> Nothing
-    Right val  -> Just val
+package = fromContents $(embedFile "./package.yaml")
