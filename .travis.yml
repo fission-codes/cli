@@ -22,7 +22,7 @@ install:
   - stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks
 
 script:
-  - stack test --system-ghc
+  - make alltests
 
 notifications:
   email: false
