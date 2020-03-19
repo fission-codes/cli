@@ -40,6 +40,7 @@ packages:
 extra-deps:
 - alex-3.2.5
 - happy-1.19.12
+- hspec-wai-json-0.10.1
 - ipfs-1.0.2
 - raven-haskell-0.1.4.0
 - tasty-rerun-1.1.17
