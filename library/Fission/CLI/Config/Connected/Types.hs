@@ -3,7 +3,7 @@ module Fission.CLI.Config.Connected.Types
   , FissionConnected (..)
   ) where
 
-import           Fission.Prelude
+import           Control.Monad.Catch
 
 import qualified RIO.ByteString.Lazy as Lazy
 
@@ -11,6 +11,8 @@ import           Network.IPFS
 import           Network.IPFS.Types         as IPFS
 import qualified Network.IPFS.Process.Error as Process
 import           Network.IPFS.Process
+
+import           Fission.Prelude
 
 import           Fission.Web.Client
 import qualified Fission.Web.Client.Types as Client
@@ -44,6 +46,7 @@ newtype FissionConnected a = FissionConnected { unwrapFissionConnected :: RIO Co
                    , MonadUnliftIO
                    , MonadReader ConnectedConfig
                    , MonadThrow
+                   , MonadCatch
                    )
 
 instance MonadLogger FissionConnected where

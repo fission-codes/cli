@@ -1,24 +1,20 @@
 -- | File sync, IPFS-style
 module Fission.CLI.Command.Up (command, up) where
 
-import           Fission.Prelude
-
-import           RIO.Directory
-
 import           Options.Applicative.Simple hiding (command)
-
-import           Fission.Internal.Exception
+import           RIO.Directory
 
 import           Network.IPFS
 import qualified Network.IPFS.Add         as IPFS
 
+import           Fission.Prelude
 import           Fission.Web.Client as Client
 
 import           Fission.CLI.Command.Up.Types as Up
-import qualified Fission.CLI.Display.Error    as Error
 import qualified Fission.CLI.Prompt.BuildDir  as Prompt
 import qualified Fission.CLI.IPFS.Pin         as CLI.Pin
 import qualified Fission.CLI.DNS              as CLI.DNS
+import           Fission.CLI.Display.Error
 
 import           Fission.CLI.Config.Types
 import           Fission.CLI.Config.Base
@@ -45,19 +41,17 @@ up ::
   )
   => Up.Options
   -> m ()
-up Up.Options {..} = handleWith_ Error.put' do
+up Up.Options {..} = do
   ignoredFiles <- getIgnoredFiles
+  toAdd        <- Prompt.checkBuildDir path
+  absPath      <- liftIO (makeAbsolute toAdd)
 
-  toAdd <- Prompt.checkBuildDir path
-  absPath <- liftIO <| makeAbsolute toAdd
   logDebug <| "Starting single IPFS add locally of " <> displayShow absPath
+  IPFS.addDir ignoredFiles absPath >>= putErrOr \cid -> do
+    unless dnsOnly do
+      CLI.Pin.add cid >>= putErrOr \_ -> noop
 
-  cid     <- liftE <| IPFS.addDir ignoredFiles path
-
-  unless dnsOnly do
-    void . liftE <| CLI.Pin.add cid
-
-  liftE <| CLI.DNS.update cid
+    CLI.DNS.update cid >>= putErrOr \_ -> noop
 
 parseOptions :: Parser Up.Options
 parseOptions = do

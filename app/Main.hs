@@ -8,7 +8,7 @@ import           Network.HTTP.Client.TLS as HTTP
 import           Servant.Client
 
 import           Fission.Environment
-import           Fission.App (isDebugEnabled, setRioVerbose)
+import           Fission.Internal.App (isDebugEnabled, setRioVerbose)
 import qualified Fission.Web.Client as Client
 
 import qualified Network.IPFS.BinPath.Types as IPFS
@@ -19,13 +19,10 @@ import qualified Fission.CLI.Config.Base.Types as CLI
 
 main :: IO ()
 main = do
-  isVerbose     <- isDebugEnabled
-
-  -- Set env var RIO_VERBOSE to True if DEBUG enabled
+  isVerbose <- isDebugEnabled
   setRioVerbose isVerbose
 
-  logOptions  <- logOptionsHandle stderr isVerbose
-
+  logOptions <- logOptionsHandle stderr isVerbose
   processCtx <- mkDefaultProcessContext
 
   ipfsPath    <- withEnv "IPFS_PATH" (IPFS.BinPath "/usr/local/bin/ipfs") IPFS.BinPath
@@ -37,14 +34,17 @@ main = do
   port  <- withEnv "FISSION_PORT" (if isTLS then 443 else 80) Partial.read
   tOut  <- withEnv "FISSION_TIMEOUT" 1800000000 Partial.read
 
-  let rawHTTPSettings = if isTLS
-                           then tlsManagerSettings
-                           else defaultManagerSettings
+  let
+    rawHTTPSettings =
+      if isTLS
+        then tlsManagerSettings
+        else defaultManagerSettings
 
   httpManager <- HTTP.newManager <| rawHTTPSettings
     { managerResponseTimeout = responseTimeoutMicro tOut }
 
-  let url         = BaseUrl (if isTLS then Https else Http) host port path
-      fissionAPI = Client.Runner (Client.request httpManager url)
+  let
+    url        = BaseUrl (if isTLS then Https else Http) host port path
+    fissionAPI = Client.Runner (Client.request httpManager url)
 
   withLogFunc logOptions \logFunc -> cli CLI.BaseConfig {..}

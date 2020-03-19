@@ -18,11 +18,11 @@ import qualified Fission.CLI.Command.Whoami        as Whoami
 cli :: MonadUnliftIO m => BaseConfig -> m ()
 cli cfg = do
   (_, runCLI) <- liftIO <| simpleOptions version description detail (pure ()) do
-    Setup.command         cfg
-    Up.command            cfg
-    Down.command          cfg
-    Watch.command         cfg
-    Whoami.command        cfg
+    Setup.command  cfg
+    Up.command     cfg
+    Down.command   cfg
+    Watch.command  cfg
+    Whoami.command cfg
   runCLI
   where
     description = "CLI to interact with Fission services"

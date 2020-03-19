@@ -18,11 +18,11 @@ import           Fission.Web.Routes (IPFSPrefix)
 
 import           Fission.Web.Client
 
-import qualified Fission.Web.IPFS               as IPFS
-import qualified Fission.Web.IPFS.CID           as CID
-import qualified Fission.Web.IPFS.Upload.Simple as Upload.Simple
-import qualified Fission.Web.IPFS.Pin           as Pin
-import qualified Fission.Web.IPFS.DAG           as DAG
+import qualified Fission.Web.IPFS        as IPFS
+import qualified Fission.Web.IPFS.CID    as CID
+import qualified Fission.Web.IPFS.Upload as Upload
+import qualified Fission.Web.IPFS.Pin    as Pin
+import qualified Fission.Web.IPFS.DAG    as DAG
 
 type AuthedIPFS more = IPFS.Auth :> IPFSPrefix :> more
 
@@ -36,7 +36,7 @@ pin :: CID -> ClientM NoContent
 pin = sigClient <| Proxy @(AuthedIPFS Pin.PinAPI)
 
 upload :: File.Serialized -> ClientM CID
-upload = sigClient <| Proxy @(AuthedIPFS Upload.Simple.API)
+upload = sigClient <| Proxy @(AuthedIPFS Upload.API)
 
 cids :: ClientM [CID]
 cids = sigClient' <| Proxy @(AuthedIPFS ("cids" :> CID.API))
