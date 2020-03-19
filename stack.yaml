@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-14.25
+resolver: lts-15.4
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -39,18 +39,15 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - alex-3.2.5
-- amazonka-1.6.1
-- amazonka-core-1.6.1
-- amazonka-route53-1.6.1
-- ekg-wai-0.1.0.3
 - happy-1.19.12
-- ipfs-1.0.1
+- hspec-wai-json-0.10.1
+- ipfs-1.0.2
 - raven-haskell-0.1.4.0
 - tasty-rerun-1.1.17
 - lzma-clib-5.2.2
 - text-time-0.2.0
 - git: https://github.com/fission-suite/web-api.git
-  commit: 77ba41d909c3bf1e7ba317d7b0cc9eee9758ccfc
+  commit: 28b2409f1e66e5b8b99a6f44e544f3779dbadef5
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

@@ -4,10 +4,10 @@ module Fission.Web.Client.User
   , updateDID
   ) where
 
-import Fission.Prelude
+import           Servant hiding (addHeader)
+import           Servant.Client
 
-import Servant hiding (addHeader)
-import Servant.Client
+import           Fission.Prelude
 
 import qualified Fission.User.Registration.Types as User
 import qualified Fission.User.Username.Types     as User
@@ -23,5 +23,5 @@ register = registerClient <| Proxy @(UserPrefix :> User.RegisterRoute)
 verify :: ClientM User.Username
 verify = sigClient' <| Proxy @(UserPrefix :> User.VerifyRoute)
 
-updateDID :: BasicAuthData -> User.DID -> ClientM User.DID
+updateDID :: BasicAuthData -> User.DID -> ClientM NoContent
 updateDID = basicClient <| Proxy @(UserPrefix :> User.UpdateDIDRoute)

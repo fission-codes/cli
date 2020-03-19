@@ -32,28 +32,36 @@ sigClient ::
   ( HasClient ClientM api
   , Client ClientM api ~ (AuthenticatedRequest Auth.HigherOrder -> a -> ClientM b)
   )
-  => Proxy api -> a -> ClientM b
+  => Proxy api
+  -> a
+  -> ClientM b
 sigClient p x = JWT.getSigAuth >>= flip (client p) x
 
 sigClient' ::
   ( HasClient ClientM api
   , Client ClientM api ~ (AuthenticatedRequest Auth.HigherOrder -> ClientM b)
   )
-  => Proxy api -> ClientM b
+  => Proxy api
+  -> ClientM b
 sigClient' p = JWT.getSigAuth >>= client p
 
 basicClient ::
   ( HasClient ClientM api
   , Client ClientM api ~ (AuthenticatedRequest Auth.HigherOrder -> a -> ClientM b)
   )
-  => Proxy api -> BasicAuthData -> a -> ClientM b
+  => Proxy api
+  -> BasicAuthData
+  -> a
+  -> ClientM b
 basicClient p auth x = (client p) (Auth.getBasicAuth auth) x
 
 registerClient ::
   ( HasClient ClientM api
   , Client ClientM api ~ (AuthenticatedRequest Auth.RegisterDid -> a -> ClientM b)
   )
-  => Proxy api -> a -> ClientM b
+  => Proxy api
+  -> a
+  -> ClientM b
 registerClient p x = JWT.getRegisterAuth >>= flip (client p) x
 
 is404 :: ClientError -> Bool

@@ -1,5 +1,5 @@
 name: fission-cli
-version: '1.24.0'
+version: '1.24.1'
 category: API
 author:
   - Brooklyn Zelenka
@@ -12,7 +12,7 @@ copyright: © 2019 Fission Internet Software Services for Open Networks Inc.
 license: AGPL-3.0-or-later
 license-file: LICENSE
 github: fission-suite/cli
-tested-with: GHC==8.6.5
+tested-with: GHC==8.8.3
 extra-source-files:
   - README.md
 
@@ -87,6 +87,8 @@ dependencies:
   - data-default-class
   - data-has
   - envy
+  - exceptions
+  - file-embed
   - filepath
   - fission-web-api
   - fsnotify
@@ -148,7 +150,7 @@ executables:
 tests:
   fission-doctest:
     main: Main.hs
-    source-dirs: test/doctest
+    source-dirs: doctest
     ghc-options:
       - -threaded
       - -rtsopts
@@ -167,9 +169,7 @@ tests:
     source-dirs:
       - library
       - test
-      - test/testsuite
     ghc-options:
-      - -fhpc
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
@@ -186,29 +186,9 @@ tests:
       - tasty-rerun
       - transformers
 
-  # fission-coverage-code:
-  #   main: Main.hs
-  #   source-dirs: test/code-coverage
-  #   ghc-options:
-  #     - -fhpc
-  #   dependencies:
-  #     - base
-  #     - fission-web-api
-  #     - process
-  #     - regex-compat
-
-  # fission-coverage-docs:
-  #   main: Main.hs
-  #   source-dirs: test/doc-coverage
-  #   dependencies:
-  #     - doctest
-  #     - fission-web-api
-  #     - process
-  #     - regex-compat
-
   fission-lint:
     main: Main.hs
-    source-dirs: test/lint
+    source-dirs: lint
     dependencies:
       - base
       - hlint
