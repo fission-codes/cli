@@ -21,8 +21,24 @@ install:
 ghci:
 	$(stack) repl $(package):lib --no-build --no-load --ghci-options='-j6 +RTS -A128m'
 
-test:
+linter:
+	$(stack) test :fission-lint --fast
+
+docs:
+	$(stack) haddock $(package) --open
+
+docserver:
+	http-server ./.stack-work/dist/x86_64-osx/Cabal-3.0.1.0/doc/html/$(package) -p 1313 & \
+    open http://localhost:1313
+
+quality:
 	$(stack) build --test --fast $(package)
+
+doctest:
+	$(stack) test :fission-doctest --fast
+
+testsuite:
+	$(stack) test :fission-test --fast
 
 test-ghci:
 	$(stack) ghci $(package):test:$(package)-tests --ghci-options='-j6 +RTS -A128m'
