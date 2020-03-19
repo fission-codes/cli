@@ -34,11 +34,14 @@ docserver:
 quality:
 	$(stack) build --test --fast $(package)
 
-doctest:
+doctests:
 	$(stack) test :fission-doctest --fast
 
 testsuite:
 	$(stack) test :fission-test --fast
+
+alltests:
+	make testsuite && make doctests
 
 test-ghci:
 	$(stack) ghci $(package):test:$(package)-tests --ghci-options='-j6 +RTS -A128m'
